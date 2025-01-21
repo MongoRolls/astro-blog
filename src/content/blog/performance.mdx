@@ -1,0 +1,84 @@
+---
+title: 前端性能优化
+excerpt: 前端性能优化是开发过程中至关重要的一环，它不仅能显著提升网站的加载速度，减少资源消耗，还能改善用户体验。同时，优化性能也有助于增强用户粘性，提高转化率。
+publishDate: '2024-12-08'
+tags:
+  - performance
+  - frontend
+seo:
+  image:
+    src: '/blog-cover-1.png'
+    alt: '前端性能优化'
+---
+
+## 参考资料
+
+- [Google官方性能指标介绍](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint?hl=zh-cn)
+
+## 前情提要
+
+在面试中被问到性能优化时，最好从架构层面细分区域进行回答。以下是一些关键点：
+
+深度考察你是否深入了解，去亲自解决细致的问题，广度关注的是整个需求流程，可以用 5W2H 进行拆解
+比如：
+
+- **优化目标(What)**：明确优化目标，即前端首屏加载速度。
+- **需求价值(Why)**：关注需求收益，从技术指标(FMP、TTI)和业务指标(跳失率、DAU、LT)进行分析。
+- **研发周期(When)**：从开发前到上线后，各个环节都需要介入。
+- **项目协作(Who)**：确定优化专项的主导方和协作方。
+- **优化范围(Where)**：关注核心业务链路，识别性能瓶颈。
+- **技术方案(How)**：制定具体的优化策略和行动计划。
+- **成本评估(How much)**：评估优化方案的成本和效益，确保方案的可行性和可持续性。
+
+![性能优化示意图](https://www.gahing.top/assets/img/image-3.1e3d4bed.png)
+
+## 性能优化技巧
+
+以下是一些提升性能指标的方法：
+
+### 文本压缩
+
+> 提高 FCP, SI, LCP
+
+在前端打包配置(如 webpack)中开启 gzip 压缩，同时后端(如 nginx)也应开启 gzip 压缩。主要通过 gzip 原理(LZ77、Huffman 编码)来压缩源码。
+
+### 优化图片偏移
+
+> 提高 CLS(累积布局偏移)
+
+常见导致布局偏移的原因及解决方案：
+
+- **图片没有指定尺寸**：在 `<img>` 标签中明确指定 `width` 和 `height` 属性。
+- **动态加载的内容**：为广告、动态内容等预留固定的占位元素。
+- **字体加载**：使用 `font-display: swap` 避免字体加载时的布局抖动。
+
+### 延迟加载 JS 脚本
+
+> 提高 FCP, LCP
+
+JS 有 `defer` 和 `async` 两种属性：
+
+- **defer**：延迟加载，等 HTML 解析完再执行 JS 脚本。
+- **async**：异步加载，加载完 JS 脚本立即执行，可能会阻塞渲染线程。
+
+![async 和 defer](https://html.spec.whatwg.org/images/asyncdefer.svg)
+
+### 减少 JS 执行时间
+
+- 使用节流和防抖
+- 使用 `useCallback` 和 `useMemo`
+
+### 缩减资源体积
+
+- 将图片格式压缩为 WebP
+
+### 预加载 LCP 图片
+
+- 按需导入
+- 使用 preload
+
+### 延迟加载部分资源
+
+- 图片懒加载
+- 组件懒加载
+- 路由懒加载

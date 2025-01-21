@@ -1,77 +1,55 @@
 ---
-import BaseHead from "../components/BaseHead.astro";
-import { ClientRouter } from 'astro:transitions';
-
-
-const head = {
-    title: "Welcome to MongoRolls's Blog",
-    description: "A personal tech blog by MongoRolls"
-};
 ---
-
-<!doctype html>
-<html lang="zh-CN" class="antialiased break-words">
-    <head>
-        <BaseHead {...head} />
-        <script>
-            // 暗色模式初始化
-            if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-        </script>
-        <ClientRouter />
-    </head>
-    <body class="bg-white dark:bg-gray-900 relative">
-        <div class="min-h-screen overflow-hidden">
-            <!-- Emoji 墙背景 -->
-            <div id="emoji-wall" class="fixed inset-0 pointer-events-none select-none opacity-50 dark:opacity-40"></div>
+<div class="bg-white dark:bg-gray-900 relative">
+    <div class="min-h-screen overflow-hidden">
+    <!-- Emoji 墙背景 -->
+    <div id="emoji-wall" class="fixed inset-0 pointer-events-none select-none opacity-50 dark:opacity-40"></div>
+    
+    <!-- 主要内容 -->
+    <main class="relative z-10 flex flex-col min-h-screen items-center justify-center p-4">
+        <div class="w-full max-w-[620px] rounded-2xl  !bg-white/20 dark:bg-gray-800/30 p-8 md:p-8 shadow-lg backdrop-blur-md card-content">
             
-            <!-- 主要内容 -->
-            <main class="relative z-10 flex flex-col min-h-screen items-center justify-center p-4">
-                <div class="w-full max-w-[620px] rounded-2xl  !bg-white/20 dark:bg-gray-800/30 p-8 md:p-8 shadow-lg backdrop-blur-md card-content">
-                    
-                    <!-- 头像区域 -->
-                    <div class="absolute -top-[60%] md:-top-[100%] md:left-[calc(50%-96px)] left-[calc(50%-64px)] md:w-48 md:h-48 w-32 h-32 animate-float">
-                        <div class="absolute inset-0 animate-spin-slow rounded-full bg-gradient-to-r from-pink-500 to-violet-500 blur-sm"></div>
-                        <img
-                            src="/music.png"
-                            alt="Avatar"
-                            class="relative h-full w-full rounded-full border-2 border-white object-cover dark:border-gray-700 shadow-lg"
-                        />
-                    </div>
-                    <!-- 文字内容 -->
-                    <div class="text-center">
-                        <h1 class="font-serif mb-2 flex items-center justify-center gap-2 md:text-3xl text-2xl font-bold text-gray-900 dark:text-white">
-                            👋 Hi, I am <span class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">MongoRolls</span>
-                        </h1>
-                        <p class="font-serif mb-1 text-gray-600 dark:text-gray-300 md:text-xl text-lg">
-                            MongoRolls's Tech Blog / Front-End Developer
-                        </p>
-                        <p class="mb-8 md:text-sm text-xs text-gray-500 dark:text-gray-400">
-                            "You can call me MongoRolls. A Front-End engineer. A lifelong learner. A dreamer."
-                        </p>
+            <!-- 头像区域 -->
+            <div class="absolute -top-[60%] md:-top-[100%] md:left-[calc(50%-96px)] left-[calc(50%-64px)] md:w-48 md:h-48 w-32 h-32 animate-float">
+                <div class="absolute inset-0 animate-spin-slow rounded-full bg-gradient-to-r from-pink-500 to-violet-500 blur-sm"></div>
+                <img
+                    src="/music.png"
+                    alt="Avatar"
+                    class="relative h-full w-full rounded-full border-2 border-white object-cover dark:border-gray-700 shadow-lg"
+                />
+            </div>
+            <!-- 文字内容 -->
+            <div class="text-center">
+                <h1 class="font-serif mb-2 flex items-center justify-center gap-2 md:text-3xl text-2xl font-bold text-gray-900 dark:text-white">
+                    👋 Hi, I am <span class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">MongoRolls</span>
+                </h1>
+                <p class="font-serif mb-1 text-gray-600 dark:text-gray-300 md:text-xl text-lg">
+                    MongoRolls's Tech Blog / Front-End Developer
+                </p>
+                <p class="mb-8 md:text-sm text-xs text-gray-500 dark:text-gray-400">
+                    "You can call me MongoRolls. A Front-End engineer. A lifelong learner. A dreamer."
+                </p>
 
-                        <!-- 按钮组 -->
-                        <div class="flex justify-center md:gap-4 gap-2 flex-wrap">
-                            <a
-                                href="/about"
-                                class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r font-semibold from-pink-500 to-violet-500 md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg"
-                            >
-                                <span class="text-lg">🎉</span>
-                                Welcome
-                            </a>
-                            <a
-                                href="https://github.com/MongoRolls"
-                                class="inline-flex items-center gap-2 rounded-full bg-gray-900 font-semibold md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg dark:bg-gray-700"
-                            >
-                                <span class="text-lg ">👨‍💻</span>
-                                Github
-                            </a>
-                        </div>
-                    </div>
+                <!-- 按钮组 -->
+                <div class="flex justify-center md:gap-4 gap-2 flex-wrap">
+                    <span
+                        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r font-semibold from-pink-500 to-violet-500 md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg cursor-pointer"
+                    >
+                        <span class="text-lg">🎉</span>
+                        Welcome
+                    </span>
+                    <a
+                        href="https://github.com/MongoRolls"
+                        class="inline-flex items-center gap-2 rounded-full bg-gray-900 font-semibold md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg dark:bg-gray-700"
+                    >
+                        <span class="text-lg ">👨‍💻</span>
+                        Github
+                    </a>
                 </div>
-            </main>
+            </div>
         </div>
+    </main>
+</div>
 
         <style is:global lang="scss">
             @keyframes spin-slow {
@@ -159,7 +137,7 @@ const head = {
 
             /* Emoji样式设置 */
             .emoji-item {
-                font-size: 2.25rem;
+                font-size: 1.75rem;
                 line-height: 1;
                 transform: scale(1);
                 transition: transform 0.2s ease;
@@ -173,7 +151,7 @@ const head = {
             /* 移动端优化 */
             @media (max-width: 768px) {
                 .emoji-item {
-                    font-size: 1.75rem;
+                    font-size: 1.5rem;
                 }
                 
                 /* 移动端动画优化 */
@@ -241,7 +219,7 @@ const head = {
                 }
                 
                 wall.innerHTML = '';
-                const rowCount = Math.floor(window.innerHeight / 55);
+                const rowCount = Math.floor(window.innerHeight / 40);
 
                 for (let i = 0; i < rowCount; i++) {
                     const row = document.createElement('div');
@@ -262,10 +240,10 @@ const head = {
                     row.style.animation = `scroll-${direction} ${speed}s linear infinite`;
 
                     // 确保每行有足够的emoji
-                    const emojiCount = Math.ceil(window.innerWidth / 35) + 4; // 添加额外的emoji防止间隙
+                    const emojiCount = Math.ceil(window.innerWidth / 30) + 4; // 添加额外的emoji防止间隙
                     const emojis = Array.from({ length: emojiCount }, () => getRandomEmoji());
                     const content = document.createElement('div');
-                    content.className = 'flex gap-[2px] px-2 py-1   ';
+                    content.className = 'flex gap-[2px] px-2';
                     content.innerHTML = [...emojis, ...emojis]
                         .map(emoji => `<span class="emoji-item select-none opacity-60">${emoji}</span>`)
                         .join('');
@@ -285,5 +263,5 @@ const head = {
             document.addEventListener('astro:page-load', initEmojiWall);
             document.addEventListener('astro:after-swap', initEmojiWall);
         </script>
-    </body>
+    </div>
 </html>

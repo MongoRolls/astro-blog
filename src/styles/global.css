@@ -8,15 +8,23 @@
 
 @layer base {
     :root {
+        /* 默认文本颜色 */
         --color-text-main: 23 23 23; /* #171717 */
-        --color-bg-main: 242 241 236; /* #F2F1EC */
-        --color-bg-muted: 234 233 225; /* #EAE9E1 */
+        /* 默认背景颜色 */
+        --color-bg-main: 255 255 255; /* 修改为白色 #FFFFFF */
+        /* 默认背景颜色（浅色） */
+        --color-bg-muted: 240 240 240; /* 修改为更浅的颜色 #F0F0F0 */
+        /* 默认边框颜色 */
         --color-border-main: 23 23 23; /* #171717 */
     }
     html.dark {
+        /* 深色模式文本颜色 */
         --color-text-main: 242 241 236; /* #F2F1EC */
+        /* 深色模式背景颜色 */
         --color-bg-main: 23 23 23; /* #171717 */
+        /* 深色模式背景颜色（浅色） */
         --color-bg-muted: 36 36 36; /* #242424 */
+        /* 深色模式边框颜色 */
         --color-border-main: 242 241 236; /* #F2F1EC */
     }
 

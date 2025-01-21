@@ -7,6 +7,7 @@ module.exports = {
         fontFamily: {
             sans: ['Inter Variable', ...defaultTheme.fontFamily.sans],
             serif: ['Newsreader Variable', ...defaultTheme.fontFamily.serif]
+            // serif: ['Noto Sans TC', 'PingFang SC', 'Microsoft YaHei', 'Newsreader Variable', ...defaultTheme.fontFamily.serif]
         },
         extend: {
             textColor: {
@@ -54,7 +55,12 @@ module.exports = {
                         },
                         'h1,h2,h3,h4,h5,h6': {
                             fontFamily: theme('fontFamily.serif'),
-                            fontWeight: 500
+                            fontWeight: 600,
+                            color: '#425bc5',
+                            textDecoration: 'underline',
+                            textDecorationColor: '#425bc5',
+                            textUnderlineOffset: '10px',
+                            textDecorationThickness: '3px'
                         },
                         blockquote: {
                             border: 0,

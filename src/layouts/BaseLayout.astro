@@ -4,10 +4,10 @@ import BaseHead, { type Props as HeadProps } from '../components/BaseHead.astro'
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import Nav from '../components/Nav.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+export type Props = HeadProps & { showHeader?: boolean; headings?: any[] };
+const { showHeader = true,headings = [], ...head } = Astro.props;
 
-export type Props = HeadProps & { showHeader?: boolean };
-
-const { showHeader = true, ...head } = Astro.props;
 ---
 
 <!doctype html>
@@ -21,12 +21,18 @@ const { showHeader = true, ...head } = Astro.props;
         </script>
         <ClientRouter />
     </head>
-    <body class="bg-main text-main">
+    <body class="bg-main text-main relative">
         <div class="flex flex-col min-h-screen px-4 md:px-8">
             <Nav />
             {showHeader && <Header />}
-            <main class="grow w-full max-w-3xl mx-auto">
-                <slot />
+            <main class="flex justify-between w-full max-w-[1152px] mx-auto">
+                <div class="hidden lg:block w-48"></div>
+                <div class="w-full max-w-3xl mx-auto">
+                    <slot />
+                </div>
+                <aside class="hidden lg:block w-48 relative">
+                     <TableOfContents headings={headings}/> 
+                </aside>
             </main>
             <Footer />
         </div>

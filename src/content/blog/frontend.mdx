@@ -1,0 +1,127 @@
+---
+title: 前端开发tips总结
+excerpt: 长期分享前端开发中遇到的问题和解决方案
+publishDate: '2024-08-22'
+isFeatured: true
+tags:
+  - frontend
+  - tech
+seo:
+  image:
+    src: '/blog-cover-1.png'
+    alt: 前端开发常见踩坑记录
+---
+
+### 参考资料
+
+- [🌶️的20条新手Tips](https://juejin.cn/post/7301947438885191695)
+
+### 目录
+
+### 执行npm install命令时网络错误
+
+一般是vpn导致的，可以复制代理指令到终端执行
+
+- clash x
+  <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/vpn-error.png" style={{ width: '40%' }} />
+
+```base
+export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_proxy=socks5://127.0.0.1:62780
+```
+
+- clash for windows 一般开 tun mode 就可以了  
+  ps: window下npm总是各类err错误，对新手真不友好，不如mac
+
+### 关于figma设计稿基础知识
+
+- 鼠标中键拖动
+- ctrl + 鼠标快速选择元素
+- 点击元素后alt可以与其他元素查看间距
+- 点击元素后右下角可以查看元素信息，可导出
+  - 导出存在倍率问题，需要手动调整为合适
+
+### 写注释的技巧
+
+- jsdoc 注释
+
+```javascript
+/**
+ * @description 函数描述
+ * @param {string} name - 名称
+ * @param {number} age - 年龄
+ * @returns {string} 返回值
+ */
+```
+
+<img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/jsdoc.png" style={{ width: '40%' }} />
+
+### 项目突然启动失败
+
+- 可能是pull后其他人安装了新依赖,再安装依赖即可
+
+- 还是不行,复制报错信息,到stackoverflow搜索
+
+### 关于使用a标签时要注意的点
+
+使用a标签时，一般除了设置href属性，还要设置 target="\_blank"，rel="noopener noreferrer"这两个属性。target="\_blank" 用于在新窗口或者新标签页中打开链接，而不是在当前页面打开链接。rel="noopener noreferrer" 是一个安全属性，主要用于保护用户隐私安全。其中 noreferrer 指示浏览器在导航到目标资源时不要发送 Referer header（即告知目标站点来自哪个网站的信息），从而保护了用户浏览器的信息不被泄露。而 noopener 指示浏览器在接下来的新页面中取消对原页面的引用，防止被恶意页面通过 window.opener 访问到原页面中的权限，从而防止跨窗口脚本攻击。这两个属性的组合使用可以有效预防一些潜在安全问题，建议在开发过程中养成使用的习惯。
+
+### 关于版本号里尖角号（^）和波浪线（~）的区别
+
+版本号的组成：2.4.1
+
+- 2: 主版本号 (MAJOR)
+- 4: 次版本号 (MINOR)
+- 1: 修订号 (PATCH)
+
+- ^: 主版本号不变，次版本号和修订号可以更新 例如：^2.4.1 小于3.0.0
+- ~: 次版本号不变，修订号可以更新 例如：~2.4.1 小于2.5.0
+
+使用尖角号和波浪线都是为了保证依赖的包可以兼容而又能够及时更新。建议在定义package.json时选择一个合适的版本控制方式来使得项目的依赖关系更加稳定。
+
+### hover状态下debugger小知识
+
+在chrome中控制台，debugger; 可以快速断点
+
+```javascript
+setTimeout(() => {
+  debugger;
+}, 1000);
+```
+
+### gitclone 项目遇到问题及解决
+
+- 新电脑第一次clone 项目，需要配置ssh key <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/gitcloneerr.png"/>
+
+[随便找个教程就可以了，大把](https://www.cnblogs.com/yulia/p/18027685.html)
+
+- 网络问题
+
+```base
+export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_proxy=socks5://127.0.0.1:62780
+```
+
+### 关于还原设计稿
+
+1. 最外层的container,一般宽高不要固定设置，设置width:100%，max-width: 1920px;由子元素撑开即可。
+2. 移动端设计稿主要比例问题，一般750px,适配移动端主要px转rem等等问题
+
+### 关于markdown笔记
+
+<details>
+<summary>点击展开详情🔎</summary>
+
+一些markdown笔记软件都支持这个html组件，可以折叠内容
+
+```html
+<details>
+  <summary>点击展开详情🔎</summary>
+</details>
+```
+
+- [x] todo标签语法
+
+```markdown
+- [x] todo标签语法
+```
+
+</details>

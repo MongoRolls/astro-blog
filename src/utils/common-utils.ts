@@ -1,17 +1,26 @@
 export function slugify(input?: string) {
     if (!input) return '';
 
-    // make lower case and trim
-    var slug = input.toLowerCase().trim();
+    // 处理输入字符串
+    let slug = input.trim();
 
-    // remove accents from charaters
-    slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // 检查是否包含中文字符
+    if (/[\u4e00-\u9fa5]/.test(slug)) {
+        // 如果包含中文，使用 encodeURIComponent 编码
+        slug = encodeURIComponent(slug)
+            .toLowerCase()
+    } else {
+        // 如果不包含中文，使用常规的 slug 处理
+        slug = slug
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '-')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
 
-    // replace invalid chars with spaces
-    slug = slug.replace(/[^a-z0-9\s-]/g, ' ').trim();
+    // 移除首尾的连字符
+    slug = slug.replace(/^-+|-+$/g, '');
 
-    // replace multiple spaces or hyphens with a single hyphen
-    slug = slug.replace(/[\s-]+/g, '-');
-
+    // console.log('slug', slug);
     return slug;
 }

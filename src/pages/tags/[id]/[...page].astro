@@ -12,6 +12,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
     const tags = getAllTags(posts);
 
+    console.log('tags', tags);
     return tags.flatMap((tag) => {
         const filteredPosts = getPostsByTag(posts, tag.id);
         return paginate(filteredPosts, {

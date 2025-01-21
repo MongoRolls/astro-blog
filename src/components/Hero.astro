@@ -1,8 +1,9 @@
 ---
+/* 首页 */
 import { marked } from 'marked';
 import Button from './Button.astro';
 import siteConfig from '../data/site-config';
-
+import { Image } from 'astro:assets';
 const hero = siteConfig.hero;
 ---
 
@@ -10,12 +11,19 @@ const hero = siteConfig.hero;
     (hero?.title || hero?.image?.src || hero?.text || (hero?.actions && hero.actions.length > 0)) && (
         <section class="w-full flex flex-col gap-8 mb-16 sm:mb-24">
             {hero.title && <h1 class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{hero.title}</h1>}
-            {hero.image?.src && (
-                <figure>
-                    <img class="w-full" src={hero.image.src} loading="lazy" decoding="async" alt={hero.image.alt || ''} />
-                    {hero.image.caption && <figcaption class="mt-1.5 text-xs sm:text-sm">{hero.image.caption}</figcaption>}
-                </figure>
-            )}
+            <figure>
+                {hero.image?.src && (
+                    <Image
+                        class="w-full rounded-xl home-hero-image dark:home-hero-image"
+                        src={hero.image.src}
+                        alt={hero.image.alt || ''}
+                        loading="eager"
+                        width={2000}
+                        height={1200}
+                        data-astro-prefetch
+                    />
+                )}
+            </figure>
             {hero.text && <div class="max-w-none prose prose-dante sm:prose-lg" set:html={marked.parse(hero.text)} />}
             {hero.actions && hero.actions.length > 0 && (
                 <div class="flex flex-wrap gap-4">
@@ -27,3 +35,49 @@ const hero = siteConfig.hero;
         </section>
     )
 }
+
+
+<style>
+    /* 夜间模式下的图片效果 */
+    :global(.dark) .home-hero-image {
+        position: relative;
+        transition: all 0.3s ease-in-out;
+        filter: brightness(0.8) contrast(1.2);
+        box-shadow: 0 0 20px rgba(147, 197, 253, 0.3);
+        animation: glow 10s ease-in-out infinite;
+        will-change: transform;
+    }
+
+    :global(.dark) .home-hero-image::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 0.75rem;
+        background: linear-gradient(
+            225deg,
+            rgba(147, 197, 253, 0.5) 0%,
+            rgba(96, 165, 250, 0.2) 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        pointer-events: none;
+    }
+
+    :global(.dark) .home-hero-image:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(147, 197, 253, 0.6);
+    }
+
+    :global(.dark) .home-hero-image:hover::after {
+        opacity: 1;
+    }
+
+    @keyframes glow {
+        0%, 100% {
+            box-shadow: 0 0 40px rgba(147, 197, 253, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 100px rgba(147, 197, 253, 0.7);
+        }
+    }
+</style>

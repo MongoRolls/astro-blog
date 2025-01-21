@@ -22,6 +22,15 @@ export type Subscribe = {
     formUrl: string;
 };
 
+export interface Friend {
+    avatar: string;
+    name: string;
+    description: string;
+    tags: string[];
+    link?: string;
+    github?: string;
+}
+
 export type SiteConfig = {
     logo?: Image;
     title: string;
@@ -35,25 +44,29 @@ export type SiteConfig = {
     subscribe?: Subscribe;
     postsPerPage?: number;
     projectsPerPage?: number;
+    friends: Friend[];
 };
 
 const siteConfig: SiteConfig = {
-    title: 'Dante',
-    subtitle: 'Minimal Astro.js theme',
-    description: 'Astro.js and Tailwind CSS theme for blog and portfolio by justgoodui.com',
+    title: 'MongoRolls',
+    subtitle: 'a Frontend Engineer',
+    description: 'Blog by MongoRolls',
+    logo: {
+        src: '/logo.png'
+    },
     image: {
-        src: '/dante-preview.jpg',
-        alt: 'Dante - Astro.js and Tailwind CSS theme'
+        src: '/logo.png',
+        alt: 'MongoRolls - Astro.js and Tailwind CSS theme'
     },
     headerNavLinks: [
         {
             text: 'Home',
             href: '/'
         },
-        {
-            text: 'Projects',
-            href: '/projects'
-        },
+        // {
+        //     text: 'Projects',
+        //     href: '/projects'
+        // },
         {
             text: 'Blog',
             href: '/blog'
@@ -61,6 +74,10 @@ const siteConfig: SiteConfig = {
         {
             text: 'Tags',
             href: '/tags'
+        },
+        {
+            text: 'Friends',
+            href: '/friends'
         }
     ],
     footerNavLinks: [
@@ -75,47 +92,62 @@ const siteConfig: SiteConfig = {
         {
             text: 'Terms',
             href: '/terms'
-        },
-        {
-            text: 'Download theme',
-            href: 'https://github.com/JustGoodUI/dante-astro-theme'
         }
     ],
     socialLinks: [
         {
-            text: 'Dribbble',
-            href: 'https://dribbble.com/'
+            text: 'github',
+            href: 'https://github.com/MongoRolls'
         },
         {
-            text: 'Instagram',
-            href: 'https://instagram.com/'
-        },
-        {
-            text: 'X/Twitter',
-            href: 'https://twitter.com/'
+            text: 'QQ',
+            href: 'http://wpa.qq.com/msgrd?v=3&uin=1467513807&site=qq&menu=yes'
         }
     ],
     hero: {
-        title: 'Hi There & Welcome to My Corner of the Web!',
-        text: "I'm **Ethan Donovan**, a web developer at Amazing Studio, dedicated to the realms of collaboration and artificial intelligence. My approach involves embracing intuition, conducting just enough research, and leveraging aesthetics as a catalyst for exceptional products. I have a profound appreciation for top-notch software, visual design, and the principles of product-led growth. Feel free to explore some of my coding endeavors on <a href='https://github.com/JustGoodUI/dante-astro-theme'>GitHub</a> or follow me on <a href='https://twitter.com/justgoodui'>Twitter/X</a>.",
+        title: 'Hi There & Welcome to My Blog',
+        text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
         image: {
-            src: '/hero.jpeg',
-            alt: 'A person sitting at a desk in front of a computer'
+            src: '/tech/netease-b.webp',
+            alt: 'wcis kawaii'
         },
         actions: [
             {
-                text: 'Get in Touch',
-                href: '/contact'
+                text: '👋 About Me',
+                href: '/about'
             }
         ]
     },
     subscribe: {
-        title: 'Subscribe to Dante Newsletter',
-        text: 'One update per week. All the latest posts directly in your inbox.',
+        title: 'Subscribe to MongoRolls Blog',
+        text: 'Updates by my mood. All the latest posts directly in your inbox.',
         formUrl: '#'
     },
-    postsPerPage: 8,
-    projectsPerPage: 8
+    postsPerPage: 4,
+    projectsPerPage: 4,
+    friends: [
+        {
+            avatar: '/friends/hongshen.png',
+            name: '红神',
+            description: '莞青CTO',
+            tags: ['快手','小黑盒','后端'],
+            github: 'https://github.com/interca/'
+        },
+        {
+            avatar: '/friends/bantang.png',
+            name: '半糖',
+            description: '开源大佬',
+            tags: ['小米','百度','后端'],
+            github: 'https://github.com/BanTanger'
+        },
+        {
+            avatar: '/friends/jinyu.png',
+            name: '金鱼',
+            description: 'ab实验室，ak实验室',
+            tags: ['字节预备','小鹅通','后端'],
+            github: 'https://github.com/dbinggo'
+        }
+    ] as Friend[]
 };
 
 export default siteConfig;
