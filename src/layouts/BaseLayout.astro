@@ -15,7 +15,7 @@ const { showHeader = true,headings = [], ...head } = Astro.props;
     <head>
         <BaseHead {...head} />
         <script>
-            if (localStorage.theme === 'dark') {
+            if (localStorage.theme === 'dark' || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             }
         </script>
