@@ -1,6 +1,25 @@
 {
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
+    "files.associations": {
+        "*.mdx": "markdown",
+        "*.css": "tailwindcss"
+    },
+    "markdown.copyFiles.destination": {
+        "**/*.{md,mdx}": "${documentWorkspaceFolder}/public/blog/${documentBaseName}/"
+    },
+    "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
+    "[markdown]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[mdx]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
@@ -16,13 +35,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 2
     },
-    "[markdown]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 2
-    },
     "typescript.tsdk": "node_modules/typescript/lib",
-    "files.associations": {
-        "*.css": "tailwindcss"
-    },
-    "cSpell.words": ["Atcoder", "codeforce", "Codeforces", "MUJICA", "MYGO"]
+
+    "cSpell.words": ["Atcoder", "codeforce", "Codeforces", "CRDT", "MUJICA", "MYGO"]
 }

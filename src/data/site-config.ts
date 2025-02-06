@@ -130,21 +130,21 @@ const siteConfig: SiteConfig = {
             avatar: '/friends/hongshen.png',
             name: '红神',
             description: '莞青CTO',
-            tags: ['快手','小黑盒','后端'],
+            tags: ['快手', '小黑盒', '后端'],
             github: 'https://github.com/interca/'
         },
         {
             avatar: '/friends/bantang.png',
             name: '半糖',
             description: '开源大佬',
-            tags: ['小米','百度','后端'],
+            tags: ['小米', '百度', '后端'],
             github: 'https://github.com/BanTanger'
         },
         {
             avatar: '/friends/jinyu.png',
             name: '金鱼',
             description: 'ab实验室，ak实验室',
-            tags: ['字节预备','小鹅通','后端'],
+            tags: ['字节预备', '小鹅通', '后端'],
             github: 'https://github.com/dbinggo'
         }
     ] as Friend[]

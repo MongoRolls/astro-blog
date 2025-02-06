@@ -16,6 +16,8 @@
         --color-bg-muted: 240 240 240; /* 修改为更浅的颜色 #F0F0F0 */
         /* 默认边框颜色 */
         --color-border-main: 23 23 23; /* #171717 */
+        --color-primary: 124, 58, 237;
+        --color-secondary: 236, 72, 153;
     }
     html.dark {
         /* 深色模式文本颜色 */

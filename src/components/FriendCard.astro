@@ -6,49 +6,70 @@ interface Props {
 }
 
 const { friends } = Astro.props;
+
+// 预定义渐变色组合
+const gradients = [
+    { from: '#6366f1', to: '#818cf8' }, // 靛蓝色
+    { from: '#f43f5e', to: '#fb7185' }, // 玫红色
+    { from: '#f59e0b', to: '#fbbf24' }, // 琥珀色
+    { from: '#0ea5e9', to: '#38bdf8' }, // 天蓝色
+
+];
+
+// 为每个朋友分配渐变色
+const friendsWithGradients = friends.map((friend, index) => ({
+    ...friend,
+    gradient: gradients[index % gradients.length]
+}));
 ---
 
-<div class="-mt-32 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-    {friends.map(friend => (
-        <div class="friend-card group relative overflow-hidden rounded-lg bg-[#f0f4f8]/80 dark:bg-[#1e2030]/80 backdrop-blur-md transition-all duration-300 h-[220px] md:h-[240px] flex flex-col items-center border border-gray-300/50 dark:border-gray-700/20">
-            <div class="p-6 w-full flex flex-col items-center">
-                {/* 头像 */}
-                <div class="mb-4">
+<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2  gap-6 p-4">
+    {friendsWithGradients.map(friend => (
+        <div class="friend-card group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800">
+            <!-- 渐变背景 -->
+            <div 
+                class="card-background absolute inset-0 opacity-15 transition-all duration-300"
+                style={`background: linear-gradient(135deg, ${friend.gradient.from} 0%, ${friend.gradient.to} 100%);`}
+            >
+            </div>
+            
+            <!-- 卡片内容 -->
+            <div class="relative z-10 p-6">
+                <!-- 头像和基本信息 -->
+                <div class="flex items-start gap-4 mb-4">
                     <img 
                         src={friend.avatar} 
                         alt={friend.name} 
-                        class="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-blue-500/30 transition-transform duration-300 group-hover:scale-105 group-hover:border-blue-500/50"
+                        class="w-16 h-16 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-lg"
                         loading="lazy"
                     />
-                </div>
-
-                {/* 信息 */}
-                <div class="w-full flex flex-col items-center flex-grow">
-                    <h3 class="text-base md:text-lg font-medium text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {friend.name}
-                    </h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5 mb-3 line-clamp-2 text-center max-w-[90%]">
-                        {friend.description}
-                    </p>
-                    
-                    {/* 标签 */}
-                    <div class="flex flex-wrap justify-center gap-2 px-2">
-                        {friend.tags.map(tag => (
-                            <span class="inline-flex text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-[#313449] text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-300 dark:hover:bg-[#3b3f5c] whitespace-nowrap">
-                                {tag}
-                            </span>
-                        ))}
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            {friend.name}
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {friend.description}
+                        </p>
                     </div>
                 </div>
 
-                {/* 链接 */}
-                <div class="flex items-center justify-center gap-3 mt-auto pt-3 w-full border-t border-gray-300/50 dark:border-gray-700/50">
+                <!-- 标签 -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {friend.tags.map(tag => (
+                        <span class="tag px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+
+                <!-- 链接 -->
+                <div class="flex items-center gap-3 mt-auto pt-3 border-t border-gray-200 dark:border-gray-700">
                     {friend.github && (
                         <a 
                             href={friend.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-colors p-1"
+                            class="social-link"
                             aria-label={`Visit ${friend.name}'s GitHub profile`}
                         >
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -61,7 +82,7 @@ const { friends } = Astro.props;
                             href={friend.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            class="social-link"
                             aria-label={`Visit ${friend.name}'s website`}
                         >
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,37 +96,68 @@ const { friends } = Astro.props;
     ))}
 </div>
 
-<style lang="scss">
+<style>
     .friend-card {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        
-        &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
 
-        &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            background: rgba(240, 244, 248, 0.95);
-            
-            &::before {
-                transform: translateX(100%);
-            }
-            
-            .dark & {
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-                background: rgba(30, 32, 48, 0.9);
-            }
+    .friend-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-background {
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 0 70%);
+    }
+
+    .friend-card:hover .card-background {
+        opacity: 0.12;
+        clip-path: polygon(0 0, 100% 0, 100% 40%, 0 75%);
+    }
+
+    .tag {
+        transition: all 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tag:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    :global(.dark) .tag:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        color: #4a5568;
+        background: rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    :global(.dark) .social-link {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .social-link:hover {
+        transform: translateY(-2px);
+        color: #2d3748;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    :global(.dark) .social-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .friend-card {
+            margin-bottom: 1rem;
         }
     }
 </style> 

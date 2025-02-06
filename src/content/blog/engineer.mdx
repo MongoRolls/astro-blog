@@ -1,0 +1,37 @@
+---
+title: 前端工程化
+excerpt: 前端工程化是前端开发中非常重要的一部分，它可以帮助我们提高开发效率，减少重复劳动，提高代码质量。
+publishDate: '2025-02-05'
+tags:
+  - engineer
+---
+
+## 参考资料
+
+[配置React+ts企业级代码规范及样式格式和git提交规范](https://juejin.cn/post/7101596844181962788)
+
+参照原作者文章进行前端工程化实践，因为版本老旧或其他原因，在原作者基础上进行更改个人方向优化。
+
+### 代码格式规范和语法检测
+
+- vscode OR cursor:统一前端编辑器。
+- editorconfig: 统一团队vscode编辑器默认配置。
+- prettier: 保存文件自动**格式化代码**。
+- eslint: **检测代码语法规范和错误**。
+- lint-staged: 只检测暂存区文件代码,优化eslint检测速度。
+
+### 代码git提交规范
+
+- husky:可以监听githooks执行,在对应hook执行阶段做一些处理的操作.  
+- pre-commit: githooks之一,在commit提交前使用tsc和eslint对语法进行检测,  
+- commit-msg: githooks之一,在commit提交前对commit备注信息进行检测,  
+- commitlint: 在githooks的pre-commit阶段对commit备注信息进行检测。
+
+## 修改
+
+关于eslint和prettier,也尝试了新流行的**biome**。
+
+- 在速率确实是很大的提升
+- 但是还不支持html,astro,markdown等确实比较可惜
+
+## 补充

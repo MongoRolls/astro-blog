@@ -1,73 +1,59 @@
-# MongoRolls's blog
+# MongoRolls's Blog
 
+这是一个使用 Astro 构建的个人技术博客。
 
-## Theme Features
+## 特性
 
-- ✅ Dark and light color mode
-- ✅ Hero section with bio
-- ✅ Portfolio collection
-- ✅ Pagination support
-- ✅ Post tags support
-- ✅ Subscription form
-- ✅ View transitions
-- ✅ Tailwind CSS
-- ✅ Mobile-first responsive layout
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+- ✨ 极简设计风格
+- 🎨 深色模式支持
+- 📱 响应式布局
+- 🚀 快速加载
+- 📝 Markdown/MDX 支持
+- 🔍 SEO 优化
+- 📰 RSS 订阅
+- 🎯 代码高亮
+- 🌈 自定义主题色
+- 🔄 平滑页面转换
 
-## Template Integrations
+## 技术栈
 
-- @astrojs/tailwind - https://docs.astro.build/en/guides/integrations-guide/tailwind/
-- @astrojs/sitemap - https://docs.astro.build/en/guides/integrations-guide/sitemap/
-- @astrojs/mdx - https://docs.astro.build/en/guides/markdown-content/
-- @astrojs/rss - https://docs.astro.build/en/guides/rss/
+- [Astro](https://astro.build) - 静态站点生成器
+- [TailwindCSS](https://tailwindcss.com) - 样式框架
+- [TypeScript](https://www.typescriptlang.org/) - 类型安全
+- [MDX](https://mdxjs.com/) - Markdown 增强
 
-## Project Structure
+## 快速开始
 
-Inside of Dante Astro theme, you'll see the following folders and files:
+```bash
+# 安装依赖
+pnpm install
 
-```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── data/
-│   ├── icons/
-│   ├── layouts/
-│   ├── pages/
-│   ├── styles/
-│   └── utils/
-├── astro.config.mjs
-├── package.json
-├── README.md
-├── tailwind.config.cjs
-└── tsconfig.json
+# 开发模式
+pnpm dev
+
+# 构建
+pnpm build
+
+# 预览
+pnpm preview
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 项目结构
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro (`.astro`) components.
+```bash
+.
+├── public/
+├── src/
+│   ├── components/      # 组件
+│   ├── content/         # 博客内容
+│   ├── data/           # 配置数据
+│   ├── layouts/        # 布局模板
+│   ├── pages/          # 页面
+│   └── styles/         # 样式
+├── astro.config.mjs    # Astro 配置
+└── package.json
+```
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## License
 
-Any static assets, like images, can be placed in the `public/` directory.
-
-## Astro.js Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## Want to learn more about Astro.js?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
+MIT License © 2024 MongoRolls
