@@ -1,289 +1,34 @@
 ---
-import BaseHead from "../components/BaseHead.astro";
-import { ClientRouter } from 'astro:transitions';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import Hero from '../components/Hero.astro';
+import TechStack from '../components/TechStack.astro';
+import siteConfig from '../data/site-config';
+import { sortItemsByDateDesc } from '../utils/data-utils';
+import PostPreview from '../components/PostPreview.astro';
 
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const featuredPosts = posts.filter(({ data }) => data.isFeatured);
 
-const head = {
-    title: "Welcome to MongoRolls's Blog",
-    description: "A personal tech blog by MongoRolls"
-};
 ---
 
-<!doctype html>
-<html lang="zh-CN" class="antialiased break-words">
-    <head>
-        <BaseHead {...head} />
-        <script>
-            // 暗色模式初始化
-            if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-        </script>
-        <ClientRouter />
-    </head>
-    <body class="bg-white dark:bg-gray-900 relative">
-        <div class="min-h-screen overflow-hidden">
-            <!-- Emoji 墙背景 -->
-            <div id="emoji-wall" class="fixed inset-0 pointer-events-none select-none opacity-50 dark:opacity-40"></div>
-            
-            <!-- 主要内容 -->
-            <main class="relative z-10 flex flex-col min-h-screen items-center justify-center p-4">
-                <div class="w-full max-w-[620px] rounded-2xl  !bg-white/20 dark:bg-gray-800/30 p-8 md:p-8 shadow-lg backdrop-blur-md card-content">
-                    
-                    <!-- 头像区域 -->
-                    <div class="absolute -top-[60%] md:-top-[100%] md:left-[calc(50%-96px)] left-[calc(50%-64px)] md:w-48 md:h-48 w-32 h-32 animate-float">
-                        <div class="absolute inset-0 animate-spin-slow rounded-full bg-gradient-to-r from-pink-500 to-violet-500 blur-sm"></div>
-                        <img
-                            src="/music.png"
-                            alt="Avatar"
-                            class="relative h-full w-full rounded-full border-2 border-white object-cover dark:border-gray-700 shadow-lg"
-                        />
-                    </div>
-                    <!-- 文字内容 -->
-                    <div class="text-center">
-                        <h1 class="font-serif mb-2 flex items-center justify-center gap-2 md:text-3xl text-2xl font-bold text-gray-900 dark:text-white">
-                            👋 Hi, I am <span class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">MongoRolls</span>
-                        </h1>
-                        <p class="font-serif mb-1 text-gray-600 dark:text-gray-300 md:text-xl text-lg">
-                            MongoRolls's Tech Blog / Front-End Developer
-                        </p>
-                        <p class="mb-8 md:text-sm text-xs text-gray-500 dark:text-gray-400">
-                            "You can call me MongoRolls. A Front-End engineer. A lifelong learner. A dreamer."
-                        </p>
-
-                        <!-- 按钮组 -->
-                        <div class="flex justify-center md:gap-4 gap-2 flex-wrap">
-                            <a
-                                href="/about"
-                                class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r font-semibold from-pink-500 to-violet-500 md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg"
-                            >
-                                <span class="text-lg">🎉</span>
-                                Welcome
-                            </a>
-                            <a
-                                href="https://github.com/MongoRolls"
-                                class="inline-flex items-center gap-2 rounded-full bg-gray-900 font-semibold md:px-6 px-4 md:py-2 py-1.5 md:text-sm text-xs text-white transition-all hover:scale-105 hover:shadow-lg dark:bg-gray-700"
-                            >
-                                <span class="text-lg ">👨‍💻</span>
-                                Github
-                            </a>
-                        </div>
-                    </div>
+<BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
+    <Hero />
+    <div class="mb-8 sm:mb-24">
+        <TechStack />
+    </div>
+    {
+        featuredPosts?.length > 0 && (
+            <div class="mb-16 sm:mb-24">
+                <h2 class="mb-12 text-xl font-serif italic sm:mb-16 sm:text-2xl">Writing</h2>
+                {featuredPosts.map((post) => (
+                    <PostPreview post={post} class="mb-10 sm:mb-12" headingLevel="h3" />
+                ))}
+                <div class="mt-12 sm:mt-16">
+                    <Button href="/blog">View All Posts</Button>
                 </div>
-            </main>
-        </div>
-
-        <style is:global lang="scss">
-            @keyframes spin-slow {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-
-            @keyframes float {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-10px); }
-            }
-
-            .animate-spin-slow {
-                animation: spin-slow 20s linear infinite;
-            }
-
-            .animate-float {
-                animation: float 3s ease-in-out infinite;
-            }
-
-            @keyframes scroll-left {
-                0% { transform: translateX(0); }
-                50% { transform: translateX(var(--translate-x)); }
-                100% { transform: translateX(0); }
-            }
-
-            @keyframes scroll-right {
-                0% { transform: translateX(0); }
-                50% { transform: translateX(var(--translate-x)); }
-                100% { transform: translateX(0); }
-            }
-
-            /* transform-origin: left; 添加GPU加速 */
-            .emoji-row {
-                padding: 0.25rem 0;
-                width: 100%;
-                overflow: hidden;
-                animation: fadeIn 0.5s ease-out forwards;
-                animation-delay: calc(0.1s * var(--index, 0));
-                transform-origin: left;
-                will-change: transform;
-                height: auto;
-                display: flex;
-                align-items: center;
-            }
-
-            .emoji-row .flex {
-                min-width: max-content;
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                transform: translateZ(0);
-                height: 100%;
-                padding: 0.25rem;
-                flex-shrink: 0;
-            }
-
-            #emoji-wall {
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                user-select: none;
-                overflow: hidden;
-                z-index: 0;
-                width: 100vw;
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                gap: 0.5rem;
-                padding: 0.5rem 0;
-                background-color: rgba(255, 255, 255, 0.02);
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(5px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            /* Emoji样式设置 */
-            .emoji-item {
-                font-size: 2.25rem;
-                line-height: 1;
-                transform: scale(1);
-                transition: transform 0.2s ease;
-                display: inline-block;
-                height: auto;
-                vertical-align: middle;
-                margin: 0;
-                padding: 0.125rem;
-            }
-
-            /* 移动端优化 */
-            @media (max-width: 768px) {
-                .emoji-item {
-                    font-size: 1.75rem;
-                }
-                
-                /* 移动端动画优化 */
-                @keyframes scroll-left {
-                    0% { transform: translateX(0); }
-                    50% { transform: translateX(calc(var(--translate-x) * 0.6)); }
-                    100% { transform: translateX(0); }
-                }
-
-                @keyframes scroll-right {
-                    0% { transform: translateX(0); }
-                    50% { transform: translateX(calc(var(--translate-x) * 0.6)); }
-                    100% { transform: translateX(0); }
-                }
-
-                /* 移动端浮动动画调整 */
-                @keyframes float {
-                    0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-6px); }
-                }
-
-                .animate-float {
-                    animation: float 2s ease-in-out infinite;
-                }
-            }
-
-            /* 修改卡片样式 */
-            .card-content {
-                backdrop-filter: blur(10px);
-                border-radius: 1rem;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-                @media (max-width: 768px) {
-                    margin-top: 2rem;
-                }
-            }
-
-            .card-content:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-            }
-        </style>
-
-        <script>
-            // 客户端 emoji 生成和更新
-            function getRandomEmoji() {
-                const ranges = [
-                    [128512, 128591], // 表情符号
-                    [127744, 127994], // 自然
-                    [128640, 128704], // 交通
-                    [127799, 127868], // 食物
-                    [128172, 128235]  // 符号
-                ];
-                const range = ranges[Math.floor(Math.random() * ranges.length)];
-                return String.fromCodePoint(
-                    Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]
-                );
-            }
-
-            function createEmojiRows() {
-                const wall = document.getElementById('emoji-wall');
-                if (!wall) {
-                    console.error('Emoji wall element not found');
-                    return;
-                }
-                
-                wall.innerHTML = '';
-                const rowCount = Math.floor(window.innerHeight / 55);
-
-                for (let i = 0; i < rowCount; i++) {
-                    const row = document.createElement('div');
-                    row.className = 'emoji-row whitespace-nowrap flex';
-                    row.style.setProperty('--index', i.toString());
-                    // 生成随机动画参数
-                    const translateX = Math.random() * -1000 - 500; // -500px 到 -1500px 之间的随机值
-                    row.style.setProperty('--translate-x', `${translateX}px`);
-                    
-                    const speed = 40 + Math.random() * 80; // 40-120秒的随机速度
-                    const direction = i % 2 === 0 ? 'left' : 'right';
-                    
-                    // 如果是向右移动，使用正值
-                    if (direction === 'right') {
-                        row.style.setProperty('--translate-x', `${-translateX}px`);
-                    }
-                    
-                    row.style.animation = `scroll-${direction} ${speed}s linear infinite`;
-
-                    // 确保每行有足够的emoji
-                    const emojiCount = Math.ceil(window.innerWidth / 35) + 4; // 添加额外的emoji防止间隙
-                    const emojis = Array.from({ length: emojiCount }, () => getRandomEmoji());
-                    const content = document.createElement('div');
-                    content.className = 'flex gap-[2px] px-2 py-1   ';
-                    content.innerHTML = [...emojis, ...emojis]
-                        .map(emoji => `<span class="emoji-item select-none opacity-60">${emoji}</span>`)
-                        .join('');
-
-                    row.appendChild(content);
-                    wall.appendChild(row);
-                }
-            }
-
-            // 初始化和窗口调整时重新创建emoji墙
-            function initEmojiWall() {
-                createEmojiRows();
-                window.addEventListener('resize', createEmojiRows);
-            }
-
-            // 支持页面转换
-            document.addEventListener('astro:page-load', initEmojiWall);
-            document.addEventListener('astro:after-swap', initEmojiWall);
-        </script>
-    </body>
-</html>
+            </div>
+        )
+    }
+</BaseLayout>

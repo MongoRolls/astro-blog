@@ -4,27 +4,30 @@ import { marked } from 'marked';
 import Button from './Button.astro';
 import siteConfig from '../data/site-config';
 import { Image } from 'astro:assets';
-const hero = siteConfig.hero;
+const hero = siteConfig.hero!;
+
+// 预先解析markdown以避免在渲染时解析
+const parsedText = hero?.text ? marked.parse(hero.text) : '';
 ---
 
 {
     (hero?.title || hero?.image?.src || hero?.text || (hero?.actions && hero.actions.length > 0)) && (
         <section class="w-full flex flex-col gap-8 mb-16 sm:mb-24">
             {hero.title && <h1 class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{hero.title}</h1>}
-            <figure>
-                {hero.image?.src && (
+            {hero.image?.src && (
+                <figure>
                     <Image
-                        class="w-full rounded-xl home-hero-image dark:home-hero-image"
+                        class="w-full rounded-xl hero-image"
                         src={hero.image.src}
                         alt={hero.image.alt || ''}
-                        loading="eager"
-                        width={2000}
-                        height={1200}
-                        data-astro-prefetch
+                        loading="lazy"
+                        width={1200}
+                        height={800}
+                        decoding="async"
                     />
-                )}
-            </figure>
-            {hero.text && <div class="max-w-none prose prose-dante sm:prose-lg" set:html={marked.parse(hero.text)} />}
+                </figure>
+            )}
+            {hero.text && <div class="max-w-none prose prose-dante sm:prose-lg" set:html={parsedText} />}
             {hero.actions && hero.actions.length > 0 && (
                 <div class="flex flex-wrap gap-4">
                     {hero.actions.map((action) => (
@@ -36,48 +39,36 @@ const hero = siteConfig.hero;
     )
 }
 
-
 <style>
-    /* 夜间模式下的图片效果 */
-    :global(.dark) .home-hero-image {
-        position: relative;
-        transition: all 0.3s ease-in-out;
-        filter: brightness(0.8) contrast(1.2);
-        box-shadow: 0 0 20px rgba(147, 197, 253, 0.3);
-        animation: glow 10s ease-in-out infinite;
-        will-change: transform;
+    /* 优化后的夜间模式样式 */
+    :global(.dark) .hero-image {
+        filter: brightness(0.8);
+        transition: transform 0.3s ease;
     }
 
-    :global(.dark) .home-hero-image::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 0.75rem;
-        background: linear-gradient(
-            225deg,
-            rgba(147, 197, 253, 0.5) 0%,
-            rgba(96, 165, 250, 0.2) 100%
-        );
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-        pointer-events: none;
-    }
-
-    :global(.dark) .home-hero-image:hover {
+    :global(.dark) .hero-image:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0 40px rgba(147, 197, 253, 0.6);
     }
 
-    :global(.dark) .home-hero-image:hover::after {
-        opacity: 1;
+    /* 使用CSS @property来优化动画性能 */
+    @property --glow-opacity {
+        syntax: '<number>';
+        initial-value: 0.3;
+        inherits: false;
     }
 
-    @keyframes glow {
-        0%, 100% {
-            box-shadow: 0 0 40px rgba(147, 197, 253, 0.3);
+    :global(.dark) .hero-image {
+        box-shadow: 0 0 20px rgba(147, 197, 253, var(--glow-opacity));
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        :global(.dark) .hero-image {
+            animation: subtle-glow 3s ease-in-out infinite;
         }
-        50% {
-            box-shadow: 0 0 100px rgba(147, 197, 253, 0.7);
-        }
+    }
+
+    @keyframes subtle-glow {
+        0%, 100% { --glow-opacity: 0.3; }
+        50% { --glow-opacity: 0.5; }
     }
 </style>

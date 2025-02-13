@@ -5,9 +5,8 @@ module.exports = {
     darkMode: 'class',
     theme: {
         fontFamily: {
-            sans: ['Inter Variable', ...defaultTheme.fontFamily.sans],
-            serif: ['Newsreader Variable', ...defaultTheme.fontFamily.serif]
-            // serif: ['Noto Sans TC', 'PingFang SC', 'Microsoft YaHei', 'Newsreader Variable', ...defaultTheme.fontFamily.serif]
+            sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans],
+            serif: ['"Noto Serif SC"', ...defaultTheme.fontFamily.serif]
         },
         extend: {
             textColor: {
@@ -44,23 +43,54 @@ module.exports = {
                 DEFAULT: {
                     css: {
                         a: {
-                            fontWeight: 'normal',
+                            position: 'relative',
                             textDecoration: 'underline',
-                            textDecorationStyle: 'dashed',
-                            textDecorationThickness: '1px',
-                            textUnderlineOffset: '2px',
+                            textDecorationStyle: 'dotted',
+                            textDecorationThickness: '3px',
+                            textDecorationColor: 'rgb(var(--color-text-main) / 0.4)',
+                            textUnderlineOffset: '0.2em',
+                            color: 'rgb(var(--color-text-main) / 0.8)',
+                            transition: 'all 0.2s ease',
+                            '&::after': {
+                                content: '""',
+                                position: 'absolute',
+                                bottom: '-2px',
+                                left: '0',
+                                width: '100%',
+                                height: '2px',
+                                background: 'linear-gradient(90deg, #60a5fa, #e879f9)',
+                                transformOrigin: 'right',
+                                transform: 'scaleX(0)',
+                                transition: 'transform 0.3s ease'
+                            },
                             '&:hover': {
-                                textDecorationStyle: 'solid'
+                                color: 'rgb(var(--color-text-main) / 1)',
+                                textDecorationColor: 'transparent',
+                                '&::after': {
+                                    transformOrigin: 'left',
+                                    transform: 'scaleX(1)'
+                                }
                             }
+                        },
+                        'p, li, span': {
+                            color: 'rgb(102 102 102 / var(--tw-text-opacity, 1))',
+                            fontWeight: 500,
+                            fontSize: '1rem',
+                            lineHeight: '1.55rem'
+                        },
+                        'h1,h2,h3': {
+                            textDecoration: 'underline',
+                            textDecorationColor: 'rgb(var(--color-text-main) / <alpha-value>)',
+                            textUnderlineOffset: '10px',
+                            textDecorationThickness: '3px'
                         },
                         'h1,h2,h3,h4,h5,h6': {
                             fontFamily: theme('fontFamily.serif'),
-                            fontWeight: 600,
-                            color: '#425bc5',
-                            textDecoration: 'underline',
-                            textDecorationColor: '#425bc5',
-                            textUnderlineOffset: '10px',
-                            textDecorationThickness: '3px'
+                            fontWeight: 700,
+                            color: 'rgb(var(--color-text-main) / <alpha-value>)'
+                        },
+                        summary: {
+                            cursor: 'pointer'
                         },
                         blockquote: {
                             border: 0,
