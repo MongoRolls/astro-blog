@@ -6,7 +6,7 @@ import siteConfig from '../data/site-config';
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="min-h-10 pt-4 pb-12 relative sm:min-h-14 sm:pb-24 md:pt-8">
+<nav class="min-h-10 py-4 mb-8 relative sm:min-h-14">
     {
         navLinks.length > 0 && (
             <div class="w-full max-w-3xl mx-auto relative">
@@ -29,11 +29,14 @@ const navLinks = siteConfig.headerNavLinks || [];
                             </NavLink>
                         </li>
                     ))}
+                    <div class="max-md:hidden absolute right-0 top-0 z-10">
+                        <ThemeToggle />
+                    </div>
                 </ul>
             </div>
         )
     }
-    <div class="absolute right-0 top-4 z-10 md:top-8">
+    <div class="md:hidden absolute right-0 top-4 z-10 md:top-8">
         <ThemeToggle />
     </div>
 </nav>

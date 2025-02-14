@@ -7,7 +7,7 @@ import Nav from '../components/Nav.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 export type Props = HeadProps & { showHeader?: boolean; headings?: any[] };
 const { showHeader = true,headings = [], ...head } = Astro.props;
-
+// https://flocto.github.io/
 ---
 
 <!doctype html>
@@ -23,7 +23,7 @@ const { showHeader = true,headings = [], ...head } = Astro.props;
         <ClientRouter />
     </head>
     <body class="bg-main text-main relative">
-        <div class="flex flex-col min-h-screen px-4 md:px-8">
+        <div class="flex flex-col min-h-screen max-md:px-4 ">
             <Nav />
             {showHeader && <Header />}
             <main class="flex justify-between w-full max-w-[1152px] mx-auto">

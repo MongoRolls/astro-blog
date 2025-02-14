@@ -16,12 +16,6 @@ export type Hero = {
     actions?: Link[];
 };
 
-export type Subscribe = {
-    title?: string;
-    text?: string;
-    formUrl: string;
-};
-
 export interface Friend {
     avatar: string;
     name: string;
@@ -41,7 +35,6 @@ export type SiteConfig = {
     footerNavLinks?: Link[];
     socialLinks?: Link[];
     hero?: Hero;
-    subscribe?: Subscribe;
     postsPerPage?: number;
     projectsPerPage?: number;
     friends: Friend[];
@@ -85,14 +78,6 @@ const siteConfig: SiteConfig = {
             text: 'About',
             href: '/about'
         },
-        {
-            text: 'Contact',
-            href: '/contact'
-        },
-        {
-            text: 'Terms',
-            href: '/terms'
-        }
     ],
     socialLinks: [
         {
@@ -117,11 +102,6 @@ const siteConfig: SiteConfig = {
                 href: '/about'
             }
         ]
-    },
-    subscribe: {
-        title: 'Subscribe to MongoRolls Blog',
-        text: 'Updates by my mood. All the latest posts directly in your inbox.',
-        formUrl: '#'
     },
     postsPerPage: 4,
     projectsPerPage: 4,
