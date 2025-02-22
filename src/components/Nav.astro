@@ -6,7 +6,7 @@ import siteConfig from '../data/site-config';
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="min-h-10 py-4 mb-8 relative sm:min-h-14">
+<nav class="min-h-10 py-4 mb-8 relative sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-black/30">
     {
         navLinks.length > 0 && (
             <div class="w-full max-w-3xl mx-auto relative">
@@ -40,12 +40,6 @@ const navLinks = siteConfig.headerNavLinks || [];
             </div>
         )
     }
-<<<<<<< HEAD
-    <div class="md:hidden absolute right-0 top-4 z-10 md:top-8">
-        <ThemeToggle />
-    </div>
-=======
->>>>>>> 4bc333f (feat: update blog)
 </nav>
 
 <style>

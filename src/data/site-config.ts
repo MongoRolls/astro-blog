@@ -16,11 +16,8 @@ export type Hero = {
     actions?: Link[];
 };
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 4bc333f (feat: update blog)
 export interface Friend {
     avatar: string;
     name: string;
@@ -77,15 +74,6 @@ const siteConfig: SiteConfig = {
             href: '/friends'
         }
     ],
-<<<<<<< HEAD
-    footerNavLinks: [
-        {
-            text: 'About',
-            href: '/about'
-        },
-    ],
-=======
->>>>>>> 4bc333f (feat: update blog)
     socialLinks: [
         {
             text: 'github',
@@ -110,11 +98,7 @@ const siteConfig: SiteConfig = {
             }
         ]
     },
-<<<<<<< HEAD
-    postsPerPage: 4,
-=======
     postsPerPage: 6,
->>>>>>> 4bc333f (feat: update blog)
     projectsPerPage: 4,
     friends: [
         {
