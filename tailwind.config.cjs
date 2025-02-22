@@ -5,8 +5,8 @@ module.exports = {
     darkMode: 'class',
     theme: {
         fontFamily: {
-            sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans],
-            serif: ['"Noto Serif SC"', ...defaultTheme.fontFamily.serif]
+            sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans]
+            // serif: ['"Noto Serif SC"', ...defaultTheme.fontFamily.serif]
         },
         extend: {
             textColor: {

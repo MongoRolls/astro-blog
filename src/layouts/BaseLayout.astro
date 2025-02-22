@@ -31,9 +31,9 @@ const { showHeader = true,headings = [], ...head } = Astro.props;
                 <div class="w-full max-w-3xl mx-auto">
                     <slot />
                 </div>
-                <aside class="hidden lg:block w-48 relative">
+                <div class="hidden lg:block w-48 relative">
                      <TableOfContents headings={headings}/> 
-                </aside>
+                </div>
             </main>
             <Footer />
         </div>

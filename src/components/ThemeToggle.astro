@@ -1,5 +1,9 @@
 <label class="switch">
-  <input id="input" class="theme-toggle" type="checkbox" checked="darkTheme" />
+  <input 
+    id="input" 
+    class="theme-toggle" 
+    type="checkbox" 
+  />
   <div class="slider round">
     <div class="sun-moon">
       <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100">
@@ -78,6 +82,12 @@
             return 'light';
         })();
 
+        // 设置初始复选框状态
+        const checkbox = document.querySelector('.theme-toggle') as HTMLInputElement;
+        if (checkbox) {
+            checkbox.checked = theme === 'dark';
+        }
+
         if (theme === 'light') {
             document.documentElement.classList.remove('dark');
         } else {
@@ -92,6 +102,12 @@
      
             const isDark = element.classList.contains('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
+           
+            // 更新复选框状态
+            const checkbox = document.querySelector('.theme-toggle') as HTMLInputElement;
+            if (checkbox) {
+                checkbox.checked = isDark;
+            }
         };
 
         document.querySelector('.theme-toggle')?.addEventListener('click', handleToggleClick);
@@ -102,6 +118,11 @@
     document.addEventListener('astro:after-swap', () => {
         if (localStorage.theme === 'dark') {
             document.documentElement.classList.add('dark');
+            // 更新复选框状态
+            const checkbox = document.querySelector('.theme-toggle') as HTMLInputElement;
+            if (checkbox) {
+                checkbox.checked = true;
+            }
         }
     });
 </script>
