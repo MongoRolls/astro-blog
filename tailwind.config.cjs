@@ -73,7 +73,7 @@ module.exports = {
                             }
                         },
                         'p, li, span': {
-                            color: 'rgb(102 102 102 / var(--tw-text-opacity, 1))',
+                            color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
                             fontWeight: 500,
                             fontSize: '1rem',
                             lineHeight: '1.55rem'

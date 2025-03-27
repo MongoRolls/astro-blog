@@ -1,5 +1,5 @@
 ---
-title: About
+title: About Me
 seo:
   title: About Me
   description: Learn more about the person behind the website and embark on a journey of inspiration and shared experiences.
@@ -10,23 +10,23 @@ seo:
 
 👋 Hi! I'm MongoRolls
 
-🐧 A regular university student from China
+🐽 A regular university student from China
 
-🌱 Keep learning and drink more hot water♨️
+🌱 Keep learning and working on NetEase
 
 💡 Record learning and share it through blogging
 
 ### 🪁 Interests
 
-- **Programming Development** Putting ideas into practice, enjoying the fun of creation,
+- **Programming** Putting ideas into practice, enjoying the fun of creation
 
-- **Games** Pixel style, side-scrolling platformers, roguelike games,
+- **Games** Pixel style, platformers, roguelike games,Marvel rivals
 
-- **Anime** MYGO, AVE MUJICA....
+- **Anime** MYGO, ....
 
-- 🪄 Traveling
+- 🪄 **Traveling**
 
-- 📸 Photography
+- 📸 **Photography**
 
 ### 🔨 What I can do
 
@@ -38,10 +38,8 @@ seo:
 
 ### 📫 How to reach me
 
-- qq
+- qq: 1467513807
 
-- github
+- github: [MongoRolls](https://github.com/MongoRolls)
 
----
-
-> **"The road goes ever on and on, down from the door where it began."**
+> **The road goes ever on and on, down from the door where it began.**

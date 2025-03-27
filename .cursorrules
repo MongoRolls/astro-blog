@@ -1,0 +1,104 @@
+
+# Astro Blog Project Guidelines
+
+This Astro project uses MDX files for blog articles. When working with these files, follow these formatting guidelines.
+
+## MDX Blog Articles
+
+### Required Format
+
+All blog posts must be MDX files with proper frontmatter. Each MDX file must have the following structure:
+
+```yaml
+---
+title: "Article Title"
+excerpt: "A brief summary of the article content (50-100 words recommended)"
+publishDate: '2023-01-01'  # ISO date format (YYYY-MM-DD)
+tags:
+  - tag1
+  - tag2
+---
+
+Article content starts here...
+```
+
+### Frontmatter Fields
+
+| Field | Description | Format |
+|-------|-------------|--------|
+| `title` | The article title | Text, in double quotes |
+| `excerpt` | Brief article summary | Text, 50-100 words recommended |
+| `publishDate` | Publication date | ISO format ('YYYY-MM-DD') in single quotes |
+| `tags` | Article categories | Array of lowercase tags with hyphens for multi-word tags |
+
+### Auto-completion Rules
+
+For new MDX files, automatically:
+
+1. Check if the file begins with frontmatter
+2. If missing, add the frontmatter structure
+3. Ensure all required fields are present
+4. Generate an appropriate excerpt based on content
+5. Suggest relevant tags based on article subject
+6. Use current date for `publishDate` if not specified
+
+### File Organization
+
+- Place all blog articles in `src/content/blog/`
+- Name files using kebab-case: `article-title.mdx`
+- Group related articles in subdirectories when appropriate
+
+## Astro-specific Guidelines
+
+### Blog Components
+
+- Use Astro components for consistent blog layouts
+- Implement responsive design for all blog pages
+- Optimize images using Astro's built-in image optimization
+
+### Content Collections
+
+- All blog posts should be part of the blog content collection
+- Follow Astro's content collection schema for validation
+- Use proper typing for all collection queries
+
+### Styling
+
+- Use Tailwind CSS for styling blog components
+- Maintain consistent typography across all articles
+- Implement proper responsive behavior for mobile readers
+
+## Examples
+
+### Basic Article
+
+```yaml
+---
+title: "Getting Started with Astro"
+excerpt: "Learn the basics of Astro framework and how to build your first static site with modern web development practices."
+publishDate: '2023-05-15'
+tags:
+  - astro
+  - beginners
+  - web-development
+---
+
+# Getting Started with Astro
+
+Astro is a modern static site builder that offers...
+```
+
+### Code Snippet Article
+
+```yaml
+---
+title: "Advanced Astro Components"
+excerpt: "Discover how to create reusable components in Astro that enhance your blog's functionality while maintaining excellent performance."
+publishDate: '2023-06-22'
+tags:
+  - astro
+  - components
+  - advanced
+---
+
+# Building Advanced Components
