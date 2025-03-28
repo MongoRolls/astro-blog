@@ -25,6 +25,12 @@ const blog = page.data;
     showHeader={false}
 >
     <h1 class="mb-12 text-2xl leading-tight font-serif italic sm:mb-16 sm:text-4xl">Blog Archive</h1>
-    {blog.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
+    
+    <div class="flex flex-col space-y-8">
+        {blog.map((post) => (
+            <PostPreview post={post} />
+        ))}
+    </div>
+    
     <Pagination page={page} class="my-16 sm:my-24" />
 </BaseLayout>

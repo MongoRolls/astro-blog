@@ -8,28 +8,50 @@
 
 @layer base {
     :root {
-        /* 默认文本颜色 */
-        --color-text-main: 23 23 23; /* #171717 */
-        --color-text-p: 103 103 103;
-        /* 默认背景颜色 */
-        --color-bg-main: 255 255 255; /* 修改为白色 #FFFFFF */
-        /* 默认背景颜色（浅色） */
-        --color-bg-muted: 240 240 240; /* 修改为更浅的颜色 #F0F0F0 */
-        /* 默认边框颜色 */
-        --color-border-main: 23 23 23; /* #171717 */
-        --color-primary: 124, 58, 237;
-        --color-secondary: 236, 72, 153;
+        /* 主题色 - 使用CSS变量便于全局控制和暗色模式适配 */
+        --color-primary: 14, 165, 233; /* sky-500 */
+        --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
+        --color-secondary: 236, 72, 153; /* pink-500 */
+
+        /* 文本颜色 */
+        --color-text-main: 23 23 23; /* #171717 主要文本 */
+        --color-text-p: 103 103 103; /* 段落文本 */
+        --color-text-muted: 107 114 128; /* gray-500 次要文本 */
+
+        /* 背景颜色 */
+        --color-bg-main: 255 255 255; /* #FFFFFF 主背景 */
+        --color-bg-muted: 240 240 240; /* #F0F0F0 次要背景 */
+        --color-bg-card: 255 255 255; /* 卡片背景 */
+
+        /* 边框颜色 */
+        --color-border-main: 23 23 23; /* #171717 主边框 */
+        --color-border-card: 209 213 219; /* gray-300 卡片边框 */
+
+        /* 卡片特效 */
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --card-transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
+
+    /* 暗色模式变量 */
     html.dark {
-        /* 深色模式文本颜色 */
+        /* 文本颜色 */
         --color-text-main: 242 241 236; /* #F2F1EC */
         --color-text-p: 242 241 236;
-        /* 深色模式背景颜色 */
+        --color-text-muted: 156 163 175; /* gray-400 */
+
+        /* 背景颜色 */
         --color-bg-main: 23 23 23; /* #171717 */
-        /* 深色模式背景颜色（浅色） */
         --color-bg-muted: 36 36 36; /* #242424 */
-        /* 深色模式边框颜色 */
+        --color-bg-card: 31 41 55; /* gray-800 */
+
+        /* 边框颜色 */
         --color-border-main: 242 241 236; /* #F2F1EC */
+        --color-border-card: 75 85 99; /* gray-600 */
+
+        /* 卡片特效 */
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
 
     /* Cyan */
@@ -66,17 +88,18 @@
 }
 
 @layer components {
+    /* 全局图片样式 */
     img {
-        border-radius: 10px;
+        @apply rounded-lg; /* 统一圆角 */
+    }
+
+    /* 侧边栏样式 */
+    aside {
+        @apply bg-gray-50 dark:bg-gray-800 p-3 rounded-lg;
     }
 }
 
-aside {
-    background-color: #f8f8f7;
-    padding: 10px;
-    border-radius: 10px;
-}
-
+/* 全局过渡效果 */
 html {
     @apply transition-colors duration-300;
 }

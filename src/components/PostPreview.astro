@@ -2,43 +2,318 @@
 import { type CollectionEntry } from 'astro:content';
 import ArrowRight from '../icons/ArrowRight.astro';
 import FormattedDate from './FormattedDate.astro';
+import { coverImageExists, getCoverImagePath, fetchAndSaveCoverImage } from '../utils/unsplashCover';
 
 type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
 const { post, class: className, headingLevel = 'h2' } = Astro.props;
 const { title, publishDate, updatedDate, excerpt } = post.data;
 const TitleTag = headingLevel;
+
+// 处理封面图片
+let coverImageUrl = '';
+
+// 仅在服务器端运行
+if (import.meta.env.SSR) {
+  if (coverImageExists(post.id)) {
+    coverImageUrl = getCoverImagePath(post.id);
+  } else {
+    try {
+      // 根据文章标题或标签作为搜索关键词
+      const searchQuery = post.data.tags ? post.data.tags.join(' ') : title;
+      coverImageUrl = await fetchAndSaveCoverImage(post.id, searchQuery);
+    } catch (error) {
+      console.error(`获取文章 ${post.id} 的封面图片失败:`, error);
+    }
+  }
+} else {
+  // 客户端运行时，直接使用路径（假设图片已经在构建时下载）
+  coverImageUrl = getCoverImagePath(post.id);
+}
 ---
 
-<a class:list={['flex justify-between items-start gap-8 card', className]} href={`/blog/${post.id}/`}>
-    <div class="grow">
-        <TitleTag
-            class="text-xl leading-tight font-serif font-medium group-hover:underline group-hover:decoration-dashed group-hover:underline-offset-4 group-hover:decoration-1 sm:text-2xl"
-        >
-            {title}
-        </TitleTag>
-        <div class="mt-1 text-sm leading-normal">
-            <FormattedDate date={publishDate} />
-            {
-                updatedDate && (
-                    <>
-                        {' '}
-                        <span>
-                            (Updated on <FormattedDate date={updatedDate} />)
-                        </span>
-                    </>
-                )
-            }
+<a 
+  class:list={['card group transition-all', className]} 
+  href={`/blog/${post.id}/`}
+>
+    <div class="card-shape-wrapper">
+        <div class="card-container">
+            <div class="card-inner-container">
+                <div class="card-content">
+                    <div class="card-text">
+                        <TitleTag
+                            class="card-title"
+                        >
+                            {title}
+                        </TitleTag>
+                        <div class="card-date">
+                            <svg class="date-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <FormattedDate date={publishDate} />
+                        </div>
+                        {excerpt && <div class="card-excerpt">{excerpt}</div>}
+                    </div>
+                    
+                    <div class="card-action">
+                        <span class="read-text">Read Post</span> <ArrowRight class="fill-current w-4 h-4 arrow-icon" />
+                    </div>
+                </div>
+                {coverImageUrl && (
+                    <div class="card-image">
+                        <img src={coverImageUrl} alt={title} loading="lazy" />
+                        <div class="card-image-overlay"></div>
+                    </div>
+                )}
+                <div class="card-border-effect"></div>
+                <div class="card-corner-accent"></div>
+            </div>
         </div>
-        {excerpt && <div class="mt-3 text-sm leading-normal">{excerpt}</div>}
-    </div>
-    <div class="hidden font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:gap-1 sm:items-center sm:shrink-0">
-        Read Post <ArrowRight class="fill-current w-4 h-4" />
     </div>
 </a>
 
 <style>
+    /* 卡片基础样式 */
     .card {
-        @apply border border-gray-300 rounded-lg p-4 shadow-md;
+        @apply relative overflow-hidden w-full block;
+        background-color: rgb(var(--color-bg-card));
+        margin: 0;
+        transition: transform var(--card-transition);
+    }
+    
+    /* 卡片形状包装器 */
+    .card-shape-wrapper {
+        @apply relative;
+        /* 创建独特的切角效果 */
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 5% 100%, 0% 85%);
+    }
+    
+    @media (max-width: 767px) {
+        .card-shape-wrapper {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 8% 100%, 0% 90%);
+        }
+    }
+    
+    /* 悬停效果 */
+    .card:hover {
+        transform: translateY(-4px);
+    }
+    
+    /* 触摸设备交互效果 */
+    @media (hover: none) {
+        .card:active {
+            transform: translateY(-2px);
+        }
+    }
+    
+    /* 卡片容器 */
+    .card-container {
+        @apply w-full flex h-full border-2;
+        border-color: rgb(var(--color-border-card));
+        box-shadow: var(--card-shadow);
+        border-radius: 10px !important;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    /* 卡片悬停状态 */
+    .card:hover .card-container {
+        border-color: rgb(var(--color-text-muted));
+        box-shadow: var(--card-shadow-hover);
+    }
+    
+    /* 卡片内部容器布局 */
+    .card-inner-container {
+        @apply flex flex-col md:flex-row w-full relative;
+    }
+    
+    /* 顶部边框效果 */
+    .card-border-effect {
+        @apply absolute top-0 right-0 h-[3px];
+        background-color: rgb(var(--color-primary));
+        width: 0;
+        transition: width 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        opacity: 0;
+    }
+    
+    .card:hover .card-border-effect {
+        width: 100%;
+        opacity: 1;
+    }
+    
+    /* 角落装饰效果 */
+    .card-corner-accent {
+        @apply absolute border-solid opacity-0;
+        bottom: 5%;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-width: 0 0 15px 15px;
+        border-color: transparent transparent rgb(var(--color-primary)) transparent;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: scale(0);
+    }
+    
+    .card:hover .card-corner-accent {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    
+    /* 图片容器样式 */
+    .card-image {
+        @apply relative overflow-hidden;
+        width: 100%;
+        height: 180px;
+        order: 2;
+    }
+    
+    @media (min-width: 768px) {
+        .card-image {
+            width: 45%;
+            min-width: 300px;
+            height: auto;
+            min-height: 250px;
+            clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 10% 0%);
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .card-image {
+            order: 1;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+    }
+    
+    /* 图片样式 */
+    .card-image img {
+        @apply absolute inset-0 w-full h-full object-cover;
+        transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    
+    .card:hover .card-image img {
+        transform: scale(1.05);
+    }
+    
+    /* 图片遮罩层 */
+    .card-image-overlay {
+        @apply absolute inset-0;
+        background: linear-gradient(to left, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+        opacity: 0.4;
+        transition: opacity 0.3s ease, background 0.3s ease;
+    }
+    
+    .card:hover .card-image-overlay {
+        opacity: 0.2;
+        background: linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.2));
+    }
+    
+    /* 内容区域样式 */
+    .card-content {
+        @apply p-5 sm:p-6 flex flex-col justify-between grow;
+        order: 1;
+        position: relative;
+        z-index: 1;
+    }
+    
+    @media (min-width: 768px) {
+        .card-content {
+            max-width: 55%;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .card-content {
+            order: 2;
+            padding: 16px;
+        }
+    }
+    
+    /* 日期样式 */
+    .card-date {
+        @apply text-sm mt-2 mb-3 flex items-center;
+        color: rgb(var(--color-text-muted));
+        transition: color 0.3s ease;
+    }
+    
+    .date-icon {
+        @apply mr-1;
+        color: rgb(var(--color-text-muted));
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+    
+    .card:hover .date-icon {
+        transform: scale(1.1);
+        color: rgb(var(--color-text-main));
+    }
+    
+    /* 标题样式 */
+    .card-title {
+        @apply text-xl leading-tight font-medium sm:text-2xl relative;
+        color: rgb(var(--color-text-main));
+        transition: color 0.3s ease, transform 0.3s ease;
+        display: inline-block;
+    }
+    
+    .card-title::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background-color: rgb(var(--color-text-main));
+        transition: width 0.3s ease;
+    }
+    
+    .card:hover .card-title::after {
+        width: 100%;
+    }
+    
+    /* 摘要样式 */
+    .card-excerpt {
+        @apply mt-3 text-sm leading-relaxed;
+        color: rgb(var(--color-text-p));
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: color 0.3s ease;
+    }
+    
+    @media (max-width: 767px) {
+        .card-excerpt {
+            @apply mt-2 text-xs leading-normal;
+            -webkit-line-clamp: 2;
+        }
+    }
+    
+    /* 底部操作区域 */
+    .card-action {
+        @apply mt-4 pt-3 text-sm flex items-center gap-1;
+        border-top: 1px solid rgb(var(--color-border-card));
+        color: rgb(var(--color-text-main));
+        transition: border-color 0.3s ease;
+    }
+    
+    .read-text {
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover .read-text {
+        transform: translateX(-3px);
+    }
+    
+    .arrow-icon {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .card:hover .arrow-icon {
+        transform: translateX(4px);
+        opacity: 1;
     }
 </style>
+
+

@@ -16,7 +16,17 @@ export type Hero = {
     actions?: Link[];
 };
 
-
+// Unsplash API配置接口
+export interface UnsplashConfig {
+    accessKey: string;
+    searchEndpoint: string;
+    perPage: number;
+    coverImageFolder: string;
+    imageWidth: number;
+    imageHeight: number;
+    cropMode: string;
+    query: string;
+}
 
 export interface Friend {
     avatar: string;
@@ -39,6 +49,7 @@ export type SiteConfig = {
     postsPerPage?: number;
     projectsPerPage?: number;
     friends: Friend[];
+    unsplash?: UnsplashConfig; // 添加Unsplash配置
 };
 
 const siteConfig: SiteConfig = {
@@ -122,7 +133,18 @@ const siteConfig: SiteConfig = {
             tags: ['字节预备', '小鹅通', '后端'],
             github: 'https://github.com/dbinggo'
         }
-    ] as Friend[]
+    ] as Friend[],
+    // Unsplash API配置
+    unsplash: {
+        accessKey: 'jVPuYBnhE6EPu3velt7izC6cwJgO2Ttk_0VvwRAr0ms',
+        searchEndpoint: 'https://api.unsplash.com/search/photos',
+        perPage: 30, // 增加每页返回数量以随机选择
+        coverImageFolder: 'public/cover-images',
+        imageWidth: 1200,
+        imageHeight: 630, // 16:9的比例适合卡片
+        cropMode: 'entropy', // 智能裁剪，保留图片中最重要的部分
+        query: 'nature landscape'// 搜索关键词
+    }
 };
 
 export default siteConfig;
