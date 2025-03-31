@@ -15,18 +15,26 @@ const { showHeader = true,headings = [], ...head } = Astro.props;
     <head>
         <BaseHead {...head} />
          
-        <script>
-            if (localStorage.theme === 'dark' || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        <script is:inline>
+            // 初始化主题 - 确保在页面加载前应用正确的主题类，避免闪烁
+            // 使用 is:inline 确保此脚本立即执行而不被 Astro 处理
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+            
+            if (isDark) {
                 document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
             }
         </script>
         <ClientRouter />
     </head>
     <body class="bg-main text-main relative">
-        <div class="flex flex-col min-h-screen max-md:px-4 ">
-            <Nav />
+        <div class="flex flex-col min-h-screen">
+            <div class="z-10"><Nav /></div>
             {showHeader && <Header />}
-            <main class="flex justify-between w-full max-w-[1152px] mx-auto">
+            <main class="flex justify-between w-full max-w-[1152px] max-md:px-4 mx-auto z-0">
                 <div class="hidden lg:block w-48"></div>
                 <div class="w-full max-w-3xl mx-auto">
                     <slot />
