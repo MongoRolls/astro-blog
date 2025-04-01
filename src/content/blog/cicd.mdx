@@ -87,17 +87,89 @@ jobs:
 
 gitlab使用.gitlab-ci.yml文件作为配置
 
+[gitlab ci 文档](https://docs.gitlab.com/ci/)
+
 ```yaml
 # 依赖镜像
 image: xxx
 
+# 启动Dind服务
 services:
 	- name:
 		entrypoint:
 		alias: docker
 
+# 定义变量
+variables:
+	DOCKER_IMAGE_ONLINE_NAME: $ci_xxxx
+	DOCKER_IMAGE_DEV_NAME: $ci_xxxx
+	DOCKER_IMAGE_TEXT_NAME: $ci_xxxx
+
+# 定义阶段
+stages:
+  - build
+  - docker-build
+  - deploy
+  - notify
+
+# job名称
+job-build-dev:
+  # 指定该任务必须运行在带有"k8s"标签的GitLab Runner
+  tags:
+    - k8s
+  # 指定是某个阶段
+  stage: build
+  # 拉取基础镜像, push镜像在deploy阶段
+  image: harbor-registry.inner.youdao.com/ead-test/node20.17.0-pm2
+  script:
+    - node -v
+    - npm -v
+    - npm config set registry 'https://registry.npmjs.org'
+    - npm install -g yarn
+ pi
 ```
 
-###
+### pipeline
 
-### etc
+```mermaid
+graph TD
+    subgraph Pipeline Stages
+        A[build] --> B[docker-build]
+        B --> C[deploy]
+        C --> D[notify]
+    end
+
+    subgraph build Stage
+        A1(job:build-online):::trigger -->|Build Prod Artifacts| A1
+        A2(job:build-test):::non-trigger -->|Build Test Artifacts| A2
+    end
+
+    subgraph docker-build Stage
+        B1(job:docker-build-online):::trigger -->|Push Online Image| B1
+        B2(job:docker-build-test):::non-trigger -->|Push Test Image| B2
+    end
+
+    subgraph deploy Stage
+        C1(job:deploy-online):::trigger -->|Deploy to Prod| C1
+        C2(job:deploy-test):::non-trigger -->|Deploy to Test| C2
+    end
+
+    subgraph notify Stage
+        D1(job:notify_success):::success -->|Success Notification| D1
+        D2(job:notify_failure):::failure -->|Failure Notification| D2
+    end
+
+    %% 依赖关系
+    A1 -->|Triggers| B1 -->|Triggers| C1 -->|Triggers| D1
+    A2 --> B2 --> C2
+    C1 -.->|On Failure| D2
+    C2 -.->|On Failure| D2
+
+    classDef trigger fill:#d4f7d4,stroke:#2ECC40;
+    classDef non-trigger fill:#e6f3ff,stroke:#0074D9;
+    classDef success fill:#d4f7d4,stroke:#2ECC40;
+    classDef failure fill:#ffd6d6,stroke:#FF4136;
+
+```
+
+## 项目流程

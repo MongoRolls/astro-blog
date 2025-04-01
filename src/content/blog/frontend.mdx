@@ -137,3 +137,13 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 #### 参考文章
 
 [stack-overflow文章](https://stackoverflow.com/questions/75831497/how-can-i-paste-images-into-my-markdown-files-in-vs-code)
+
+### 关于mac 5000端口
+
+- 5000端口是mac的默认端口，如果想要使用其他端口，需要先关闭5000端口
+
+`lsof -i :5000` 检查
+
+发现是mac的隔空播放接收器（airpaly reciever）在占用
+
+解决方案： 到设置里面关闭即可
