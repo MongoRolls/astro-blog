@@ -6,4 +6,101 @@ tags:
   - tech
 ---
 
-## 参考资料
+某个项目比较老没有使用next，而是自己实现的同构框架相似
+
+### 参考资料
+
+- [ssr blog](https://juejin.cn/post/6844903881390964744)
+- [vite ssr](https://cn.vite.dev/guide/ssr.html)
+
+### 概念
+
+服务端渲染（Server-Side Rendering）是指由服务器直接生成完整的 HTML 页面并返回给浏览器，客户端（浏览器）接收到的是**可直接渲染的静态内容**，而非空页面或 JSON 数据。与客户端渲染（CSR）不同，SSR 的核心逻辑（如数据请求、模板拼接）在服务器端完成。
+
+react的next，vue的nuxt都是SSR比较热门的框架
+
+![image.png](attachment:ffc9878f-725c-4346-8308-b2995afb7a46:image.png)
+
+CSR的流程是返回简单的HTML，再下载JS文件去执行，去修改DOM节点，最后将页面呈现出来。
+
+而SSR是服务器预先渲染好了，直接返回完整的HTML。所以有着更好的**首屏加载**
+
+**SSR的优点**
+
+- 优化SEO
+- 更快的首屏加载
+- 性能优化，缓存，降低客户端压力
+- 兼容性 . . . . . .
+
+> react-dom/server的renderToString可以直接将jsx组件转化为string
+
+```jsx
+asd;
+// server/index.js
+import express from 'express';
+import { renderToString } from 'react-dom/server';
+import Home from './containers/Home';
+
+const app = express();
+const content = renderToString(<Home />);
+app.get('/', function (req, res) {
+  res.send(
+    `
+    <html>
+      <head>
+        <title>ssr</title>
+      </head>
+      <body>
+        <div id="root">${content}</div>
+      </body>
+    </html>
+   `
+  );
+});
+app.listen(3001, () => {
+  console.log('listen:3001');
+});
+```
+
+### 同构
+
+同构是SSR相关的重要概念，可以简单理解为同一套代码在客户端和服务端执行的结果是一致的
+
+为什么需要引入同构概念，如果我们的jsx代码上绑定了事件，如点击事件，你会发现readerToString返回的内容上没有事件绑定的。
+
+这肯定是不行，解决的方案就是添加script标签，去帮我们处理
+
+react这方面提供了[**_hydrateRoot_**](https://react.dev/reference/react-dom/client/hydrateRoot)这个客户端api来处理
+
+> 常见的一个error，就是水合错误，因为客户端和服务端的dom节点不同，导致可能挂载出现问题。 （与react的虚拟dom相关，待查证
+> ~~可以往div加suppressHydrationWarning不显示该警告~~
+
+## 同构带来的问题
+
+### 路由
+
+### redux
+
+![image.png](attachment:6ae7991d-c634-4730-92c5-cfb62273a665:image.png)
+
+对于store的连接操作，在同构项目中分两个部分，一个是与客户端store的连接，另一部分是与服务端store的连接。都是通过react-redux中的Provider来传递store的。
+
+并且服务端的Store需要加处理，不然导出去都是同一个Store了
+
+### 状态注入
+
+初始化store,将state存到windows全局里面
+
+### 数据的注水和脱水
+
+异步数据请求处理……
+
+### 多级路由渲染
+
+### node中间层
+
+### css 服务端渲染
+
+### SEO
+
+react-helmet
