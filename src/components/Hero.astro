@@ -27,7 +27,7 @@ const parsedText = hero?.text ? marked.parse(hero.text) : '';
                     />
                 </figure>
             )}
-            {hero.text && <div class="max-w-none prose prose-dante sm:prose-lg" set:html={parsedText} />}
+            {hero.text && <div class="max-w-none prose prose-mongorolls sm:prose-lg" set:html={parsedText} />}
             {hero.actions && hero.actions.length > 0 && (
                 <div class="flex flex-wrap gap-4">
                     {hero.actions.map((action) => (

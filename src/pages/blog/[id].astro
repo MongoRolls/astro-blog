@@ -49,7 +49,7 @@ const { Content,headings } = await render(post);
                 </div>
             </header>
             
-            <div class="max-w-none prose prose-dante dark:prose-invert sm:prose-lg">
+            <div class="max-w-none prose prose-mongorolls dark:prose-invert sm:prose-lg">
                 <Content />
             </div>
 
@@ -57,7 +57,7 @@ const { Content,headings } = await render(post);
                 {
                     tags.length > 0 && (
                         <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-                            {tags.map((tag) => (
+                            {tags.map((tag: string) => (
                                 <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
                                     #{tag}
                                 </a>
