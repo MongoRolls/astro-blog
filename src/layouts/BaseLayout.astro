@@ -34,7 +34,7 @@ const { showHeader = true,headings = [], ...head } = Astro.props;
         <div class="flex flex-col min-h-screen">
             <div class="z-10"><Nav /></div>
             {showHeader && <Header />}
-            <main class="flex justify-between w-full max-w-[1152px] max-md:px-4 mx-auto z-0">
+            <main class="flex justify-between w-full max-w-[1152px] max-md:pl-6 max-md:pr-7 mx-auto z-0">
                 <div class="hidden lg:block w-48"></div>
                 <div class="w-full max-w-3xl mx-auto">
                     <slot />
