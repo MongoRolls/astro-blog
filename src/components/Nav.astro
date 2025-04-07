@@ -2,7 +2,7 @@
 import NavLink from './NavLink.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import siteConfig from '../data/site-config';
-
+import Search from './Search.astro';
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
@@ -27,8 +27,12 @@ const navLinks = siteConfig.headerNavLinks || [];
                             >
                                 {link.text}
                             </NavLink>
+
                         </li>
                     ))}
+                    <li class="py-1">
+                        <Search />
+                    </li>
                 </ul>
 
                 <div class="absolute right-4 md:right-0 top-0 z-10">

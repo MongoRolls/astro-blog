@@ -10,33 +10,17 @@ seo:
 
 👋 Hi! I'm MongoRolls
 
-🐽 A regular university student from China
+🌱 Keep learning and currently working on NetEase
 
-🌱 Keep learning and working on NetEase
-
-💡 Record learning and share it through blogging
+💡 Record learning and live through blogging
 
 ### 🪁 Interests
-
-- **Programming** Putting ideas into practice, enjoying the fun of creation
-
-- **Games** Pixel style, platformers, roguelike games,Marvel rivals
-
-- **Anime** MYGO, ....
-
-- 🪄 **Traveling**
-
-- 📸 **Photography**
-
-### 🔨 What I can do
 
 - Web development
 
 - Algorithm competition (Codeforces, Atcoder, etc.)
 
-- Writing WeChat public account articles with Xiumi
-
-### 📫 How to reach me
+### 📫 Follow me
 
 - qq: 1467513807
 

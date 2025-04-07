@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import ArrowRight from '../../icons/ArrowRight.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc, getAllTags, getPostsByTag } from '../../utils/data-utils';
-import Hamster from '../../components/Hamster.astro';
 
 const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
 const tags = getAllTags(posts).sort((tagA, tagB) => {
@@ -12,17 +11,6 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     return postCountTagB - postCountTagA;
 });
 
-// 预设的标签渐变色
-const tagGradients = [
-    { from: '239, 68, 68', to: '248, 113, 113', bg: '254, 242, 242' },    // 红色
-    { from: '16, 185, 129', to: '52, 211, 153', bg: '240, 253, 244' },    // 绿色
-    { from: '59, 130, 246', to: '96, 165, 250', bg: '239, 246, 255' },    // 蓝色
-    { from: '147, 51, 234', to: '168, 85, 247', bg: '250, 245, 255' },    // 紫色
-    { from: '234, 88, 12', to: '249, 115, 22', bg: '255, 247, 237' },     // 橙色
-    { from: '202, 138, 4', to: '234, 179, 8', bg: '254, 252, 232' },      // 黄色
-    { from: '20, 184, 166', to: '45, 212, 191', bg: '240, 253, 250' },    // 青色
-    { from: '217, 70, 239', to: '232, 121, 249', bg: '253, 244, 255' }    // 粉色
-];
 ---
 
 <BaseLayout
@@ -30,171 +18,142 @@ const tagGradients = [
     description="Explore tag directory for easy navigation and discovery. Find a wide range of topics, articles, and insights organized by tags, making it effortless to locate the content that interests you most."
     showHeader={false}
 >
-    <h1 class="mb-12 text-2xl font-serif italic sm:mb-16 sm:text-4xl">All Tags</h1>
+    <h1 class="mb-8 text-3xl font-bold text-center sm:mb-12 sm:text-4xl">标签分类</h1>
    
     <div class="tags-grid">
         {
-            tags.map((tag, index) => {
+            tags.map((tag) => {
                 const postCount = getPostsByTag(posts, tag.id).length;
-                const colorIndex = index % tagGradients.length;
-                const gradient = tagGradients[colorIndex];
                 
                 return (
                     <a 
                         href={`/tags/${tag.id}`} 
                         class="tag-card"
-                        style={`
-                            --gradient-from: ${gradient.from};
-                            --gradient-to: ${gradient.to};
-                            --gradient-bg: ${gradient.bg};
-                        `}
                     >
-                        <div class="tag-content">
-                            <h2 class="tag-title">{tag.name}</h2>
-                            <div class="tag-info">
-                                <span class="tag-count">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
-                                <ArrowRight class="tag-arrow w-4 h-4" />
-                            </div>
+                        <h2 class="tag-title">{tag.name}</h2>
+                        <div class="tag-info">
+                            <span class="tag-count">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
+                            <ArrowRight class="tag-arrow" />
                         </div>
-                        <div class="tag-shine"></div>
                     </a>
                 );
             })
         }
     </div>
-    <div class="scale-50 flex mt-5 gap-5 justify-center items-center">
-        <Hamster />
-    </div>
 </BaseLayout>
 
 <style>
+    /* 主要布局 */
     .tags-grid {
-        @apply grid gap-4 px-4 max-w-7xl mx-auto;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem 3rem;
     }
-
-    @media (min-width: 1280px) {
-        .tags-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-
+    
+    /* 标签卡片样式 */
     .tag-card {
-        @apply relative flex flex-col justify-between p-4 rounded-xl opacity-0 overflow-hidden;
-        background: rgb(var(--gradient-bg));
-        border: 1px solid rgb(var(--gradient-from) / 0.2);
-        animation: fadeIn 0.5s ease forwards;
-        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem;
+        height: 160px;
+        border-radius: 0.5rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border);
+        transition: all 0.2s ease;
+        overflow: hidden;
     }
-
-    .tag-content {
-        @apply relative z-10;
-    }
-
-    .tag-shine {
-        @apply absolute inset-0 opacity-0;
-        background: linear-gradient(
-            135deg,
-            rgb(var(--gradient-from) / 0.1),
-            rgb(var(--gradient-to) / 0.1)
-        );
-        transition: all 0.3s ease;
-        transform: translateY(100%);
-    }
-
-    .tag-card:nth-child(1) { animation-delay: 0.1s; }
-    .tag-card:nth-child(2) { animation-delay: 0.15s; }
-    .tag-card:nth-child(3) { animation-delay: 0.2s; }
-    .tag-card:nth-child(4) { animation-delay: 0.25s; }
-    .tag-card:nth-child(5) { animation-delay: 0.3s; }
-    .tag-card:nth-child(6) { animation-delay: 0.35s; }
-    .tag-card:nth-child(7) { animation-delay: 0.4s; }
-    .tag-card:nth-child(8) { animation-delay: 0.45s; }
-
+    
+    /* 标签标题 */
     .tag-title {
-        @apply text-lg font-medium mb-2;
-        color: rgb(var(--gradient-from));
-        transition: all 0.3s ease;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
     }
-
+    
+    /* 信息行 */
     .tag-info {
-        @apply flex items-center justify-between;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
     }
-
+    
+    /* 文章计数 */
     .tag-count {
-        @apply text-sm;
-        color: rgb(var(--gradient-from) / 0.8);
-        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        opacity: 0.8;
     }
-
+    
+    /* 箭头图标 */
     .tag-arrow {
-        @apply scale-0 opacity-0;
-        color: rgb(var(--gradient-from));
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        transform-origin: left center;
+        width: 1.25rem;
+        height: 1.25rem;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.2s ease;
     }
-
+    
+    /* 悬停效果 */
     .tag-card:hover {
-        border-color: rgb(var(--gradient-from) / 0.4);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgb(var(--gradient-from) / 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-color: var(--accent);
     }
-
-    .tag-card:hover .tag-shine {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .tag-card:hover .tag-title {
-        transform: translateX(4px);
-    }
-
-    .tag-card:hover .tag-count {
-        color: rgb(var(--gradient-from));
-    }
-
+    
     .tag-card:hover .tag-arrow {
-        @apply scale-100 opacity-100;
-        transform: translateX(4px);
+        opacity: 1;
+        transform: translateX(0);
     }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* 深色模式优化 */
+    
+    /* 深色模式适配 */
     :global(.dark) .tag-card {
-        background: rgb(var(--gradient-from) / 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-
-    :global(.dark) .tag-shine {
-        background: linear-gradient(
-            135deg,
-            rgb(var(--gradient-from) / 0.2),
-            rgb(var(--gradient-to) / 0.2)
-        );
+    
+    :global(.dark) .tag-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
-
-    /* 响应式调整 */
-    @media (max-width: 640px) {
+    
+    /* 响应式适配 */
+    @media (max-width: 768px) {
         .tags-grid {
-            @apply gap-3 px-2;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: 1fr;
+            padding: 0 0.75rem 2rem;
+            gap: 1rem;
         }
-
+        
         .tag-card {
-            @apply p-3;
+            height: 130px;
+            padding: 1.25rem;
         }
-
+        
         .tag-title {
-            @apply text-base mb-1;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1200px) {
+        .tags-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 1201px) {
+        .tags-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    /* 减少动画 */
+    @media (prefers-reduced-motion: reduce) {
+        .tag-card, .tag-title, .tag-arrow {
+            transition: none !important;
         }
     }
 </style>

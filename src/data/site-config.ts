@@ -106,6 +106,10 @@ const siteConfig: SiteConfig = {
             {
                 text: '👋 About Me',
                 href: '/about'
+            },
+            {
+                text: '🪁 To Wiki',
+                href: 'https://www.dgutcs.wiki/'
             }
         ]
     },

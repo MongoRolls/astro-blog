@@ -52,6 +52,8 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
  */
 ```
 
+可以指定类型
+
 <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/jsdoc.png" style={{ width: '40%' }} />
 
 ### 项目突然启动失败
@@ -62,7 +64,7 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 
 ### 关于使用a标签时要注意的点
 
-使用a标签时，一般除了设置href属性，还要设置 target="\_blank"，rel="noopener noreferrer"这两个属性。target="\_blank" 用于在新窗口或者新标签页中打开链接，而不是在当前页面打开链接。rel="noopener noreferrer" 是一个安全属性，主要用于保护用户隐私安全。其中 noreferrer 指示浏览器在导航到目标资源时不要发送 Referer header（即告知目标站点来自哪个网站的信息），从而保护了用户浏览器的信息不被泄露。而 noopener 指示浏览器在接下来的新页面中取消对原页面的引用，防止被恶意页面通过 window.opener 访问到原页面中的权限，从而防止跨窗口脚本攻击。这两个属性的组合使用可以有效预防一些潜在安全问题，建议在开发过程中养成使用的习惯。
+使用a标签时，一般除了设置href属性，还要设置 target="\_blank"，rel="noopener noreferrer"这两个属性。target="\_blank" 用于在新窗口或者新标签页中打开链接，而不是在当前页面打开链接。rel="noopener noreferrer" 是一个安全属性，主要用于保护用户隐私安全。其中 noreferrer 指示浏览器在导航到目标资源时不要发送 `Referer header`（即告知目标站点来自哪个网站的信息），从而保护了用户浏览器的信息不被泄露。而 noopener 指示浏览器在接下来的新页面中取消对原页面的引用，防止被恶意页面通过 window.opener 访问到原页面中的权限，从而防止跨窗口脚本攻击。这两个属性的组合使用可以有效预防一些潜在安全问题，建议在开发过程中养成使用的习惯。
 
 ### 关于版本号里尖角号（^）和波浪线（~）的区别
 
@@ -109,7 +111,7 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 <details>
 <summary>点击展开详情🔎</summary>
 
-一些markdown笔记软件都支持这个html组件，可以折叠内容
+原生html组件，可以折叠内容
 
 ```html
 <details>
@@ -146,3 +148,13 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 发现是mac的隔空播放接收器（airpaly reciever）在占用
 
 解决方案： 到设置里面关闭即可
+
+### javascript下取整和位运算
+
+`>>>` 无符号右移运算符
+
+```javascript
+console.log(1.221398 >>> 0); // 1
+```
+
+将数值转换为 32 位整数，然后将所有位向右移动指定的位数，左侧用 0 填充。当移动 0 位时 (>>> 0)，实际上没有发生位移，但会触发数值转换。

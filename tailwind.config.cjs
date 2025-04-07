@@ -93,7 +93,7 @@ module.exports = {
                             fontSize: '1rem',
                             lineHeight: '1.55rem'
                         },
-                        'h1,h2,h3': {
+                        'h1,h2': {
                             textDecoration: 'underline',
                             textDecorationColor: 'rgb(var(--color-text-main) / <alpha-value>)',
                             textUnderlineOffset: '10px',
