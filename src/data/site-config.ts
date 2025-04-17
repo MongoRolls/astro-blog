@@ -134,7 +134,7 @@ const siteConfig: SiteConfig = {
             avatar: '/friends/jinyu.png',
             name: '金鱼',
             description: 'ab实验室，ak实验室',
-            tags: ['字节预备', '小鹅通', '后端'],
+            tags: ['字节', '小鹅通', '后端'],
             github: 'https://github.com/dbinggo'
         }
     ] as Friend[],

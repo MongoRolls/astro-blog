@@ -59,7 +59,7 @@ const { Content,headings } = await render(post);
                         <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                             {tags.map((tag: string) => (
                                 <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
-                                    #{tag}
+                                    # {tag}
                                 </a>
                             ))}
                         </div>
@@ -81,11 +81,11 @@ const { Content,headings } = await render(post);
     {
         (prevPost || nextPost) && (
             <div class="my-16 sm:my-24">
-                <h2 class="mb-12 text-xl font-serif italic sm:mb-16 sm:text-2xl">Read Next</h2>
+                <h2 class="mb-10 text-2xl font-serif italic md:mb-12 md:text-3xl">Read More</h2>
                 
                 <div class="flex flex-col space-y-8">
-                    {nextPost && <PostPreview post={nextPost} headingLevel="h3" />}
                     {prevPost && <PostPreview post={prevPost} headingLevel="h3" />}
+                    {nextPost && <PostPreview post={nextPost} headingLevel="h3" />}
                 </div>
             </div>
         )

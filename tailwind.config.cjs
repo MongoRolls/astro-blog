@@ -93,6 +93,41 @@ module.exports = {
                             fontSize: '1rem',
                             lineHeight: '1.55rem'
                         },
+                        'code:not(pre code)': {
+                            fontFamily: theme('fontFamily.mono'),
+                            fontSize: '0.875em',
+                            fontWeight: 500,
+                            backgroundColor: 'rgba(237, 237, 235)',
+                            color: theme('colors.rose.600'),
+                            borderRadius: '0.25rem',
+                            padding: '0.15em 0.4em',
+                            margin: '0 0.2em',
+                            transition: 'all 0.2s ease',
+                            position: 'relative',
+                            '.dark &': {
+                                backgroundColor: 'rgba(31, 41, 55)',
+                                color: theme('colors.pink.400'),
+                                borderColor: 'rgba(75, 85, 99, 0.4)'
+                            }
+                        },
+                        ':not(pre) > code': {
+                            '&::before, &::after': {
+                                content: 'none !important'
+                            }
+                        },
+                        pre: {
+                            borderRadius: '0.5rem',
+                            padding: '1rem',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                            margin: '1.5rem 0',
+                            overflow: 'auto',
+                            maxHeight: '80vh',
+                            border: '1px solid rgba(var(--color-border-main), 0.1)'
+                        },
+                        'pre code': {
+                            fontSize: '0.9em',
+                            fontWeight: 400
+                        },
                         'h1,h2': {
                             textDecoration: 'underline',
                             textDecorationColor: 'rgb(var(--color-text-main) / <alpha-value>)',
