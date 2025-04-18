@@ -73,12 +73,12 @@
 <script is:inline>
 // 使用 is:inline 确保脚本立即执行而不被 Astro 处理
 // 立即设置复选框状态，避免页面加载时显示错误状态
-const isDark = document.documentElement.classList.contains('dark');
+const initialIsDarkState = document.documentElement.classList.contains('dark');
 document.addEventListener('DOMContentLoaded', () => {
   const checkboxes = document.querySelectorAll('#checkbox-input');
   checkboxes.forEach(checkbox => {
     // 在内联脚本中使用普通JavaScript，避免TypeScript断言
-    checkbox.checked = isDark;
+    checkbox.checked = initialIsDarkState;
   });
 });
 </script>

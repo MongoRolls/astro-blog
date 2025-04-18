@@ -14,6 +14,7 @@ const TitleTag = headingLevel;
 let coverImageUrl = '';
 
 // 仅在服务器端运行
+// @ts-ignore
 if (import.meta.env.SSR) {
   if (coverImageExists(post.id)) {
     coverImageUrl = getCoverImagePath(post.id);
@@ -158,7 +159,7 @@ if (import.meta.env.SSR) {
     
     .card:hover .card-corner-accent {
         opacity: 0.7;
-        transform: scale(1);
+        transform: scale(1.5);
     }
     
     /* 图片容器样式 */
@@ -253,6 +254,8 @@ if (import.meta.env.SSR) {
         color: rgb(var(--color-text-main));
         transition: color 0.3s ease, transform 0.3s ease;
         display: inline-block;
+        font-family: serif;
+        font-weight: 900;
     }
     
     .card-title::after {
@@ -298,7 +301,8 @@ if (import.meta.env.SSR) {
     
     .read-text {
         position: relative;
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease;    
+        padding-left: 5px;
     }
     
     .card:hover .read-text {

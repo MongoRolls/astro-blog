@@ -169,7 +169,6 @@ async function preBuildAllCoverImages() {
             try {
                 // 检查是否已有封面图片
                 if (coverImageExists(postId)) {
-                    console.log(`文章 '${postId}' 已有封面图片`);
                     existingCount++;
                     continue;
                 }

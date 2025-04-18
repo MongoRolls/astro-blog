@@ -11,7 +11,6 @@ const { headings } = Astro.props;
 const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
-
 <nav class="toc hidden lg:block h-full">
     <div class="sticky top-24">
         <ul class="space-y-3 text-sm border-l border-gray-200 dark:border-gray-800">
@@ -20,18 +19,18 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
                 toc.map((heading) => (
                     <li
                         class:list={[
-                            'toc-item line-clamp-1 relative',
+                            'toc-item line-clamp-1 relative flex items-center',
                             {
                                 'pl-6': heading.depth === 2,
-                                'pl-8': heading.depth === 3
+                                'pl-10 ': heading.depth === 3
                             },
                         ]}
                     >
+                        {heading.depth === 3 && <span class="text-gray-500 dark:text-gray-400 pr-2 font-semibold">-</span>}
                         <a
                             href={`#${heading.slug}`}
                             class="truncate block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200"
-                        >
-                            {heading.text}
+                        >{heading.text}
                         </a>
                     </li>
                 ))
@@ -52,7 +51,7 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 
     /* 激活状态的样式 */
     .toc-item.active > a {
-        @apply text-blue-600 dark:text-blue-400 font-medium translate-x-1;
+        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-1 scale-110;
     }
 
     .toc-item.active::before {
@@ -66,10 +65,12 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
         transition: all 0.2s ease-in-out;
         @apply bg-blue-600 dark:bg-blue-400;
     }
+
 </style>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
+
+document.addEventListener('astro:page-load', () => {
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {

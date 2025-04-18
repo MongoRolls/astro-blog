@@ -5,8 +5,8 @@ module.exports = {
     darkMode: 'class',
     theme: {
         fontFamily: {
-            sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans]
-            // serif: ['"Noto Serif SC"', ...defaultTheme.fontFamily.serif]
+            sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans],
+            serif: ['Merriweather', 'Georgia', ...defaultTheme.fontFamily.serif]
         },
         extend: {
             colors: {
@@ -89,7 +89,7 @@ module.exports = {
                         },
                         'p, li, span': {
                             color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
-                            fontWeight: 500,
+                            fontWeight: 400,
                             fontSize: '1rem',
                             lineHeight: '1.55rem'
                         },
@@ -129,30 +129,32 @@ module.exports = {
                             fontWeight: 400
                         },
                         'h1,h2': {
-                            textDecoration: 'underline',
-                            textDecorationColor: 'rgb(var(--color-text-main) / <alpha-value>)',
-                            textUnderlineOffset: '10px',
-                            textDecorationThickness: '3px'
+                            fontWeight: 900,
+                            '&::before': {
+                                background: 'rgb(23, 23, 23)',
+                                content: '""',
+                                display: 'block',
+                                height: '2px',
+                                marginBottom: '18px',
+                                width: '60px'
+                            }
                         },
                         'h1,h2,h3,h4,h5,h6': {
                             fontFamily: theme('fontFamily.serif'),
-                            fontWeight: 700,
-                            color: 'rgb(var(--color-text-main) / <alpha-value>)'
+                            fontWeight: 700
+                            // color: 'rgb(var(--color-text-main) / <alpha-value>)'
                         },
                         summary: {
                             cursor: 'pointer'
                         },
                         blockquote: {
-                            border: 0,
+                            border: 10,
                             fontFamily: theme('fontFamily.serif'),
-                            fontSize: '1.3125em',
                             fontStyle: 'italic',
                             fontWeight: 'normal',
                             lineHeight: 1.4,
-                            paddingLeft: 0,
-                            '@media (min-width: theme("screens.sm"))': {
-                                fontSize: '1.66667em',
-                                lineHeight: 1.3
+                            p: {
+                                fontSize: '1.3125em'
                             }
                         }
                     }
