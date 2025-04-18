@@ -1,6 +1,21 @@
-# MongoRolls's Blog
+<h2 align="center">
+MongoRolls的个人博客
+</h2><br>
 
-这是一个使用 Astro 构建的个人技术博客。
+<p align="center">
+<br />
+<a href="https://mongorolls.cn">🖥 Online Preview</a>
+<br /><br /> 
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=astro-blog&repo-name=astro-blog" rel="nofollow"><img src="https://vercel.com/button" /></a>
+<a href="https://app.netlify.com/start/deploy?repository=https://github.com/mongoRolls/astro-blog" rel="nofollow"><img src="https://www.netlify.com/img/deploy/button.svg" /></a>
+<a href="https://stackblitz.com/github/mongoRolls/astro-blog" rel="nofollow"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" /></a>
+</p>
+
+## 👋 Introduction
+
+如果你想要搭建一个类似的站点，可直接 [Fork](https://github.com/mongoRolls/astro-blog/fork) 本仓库使用，或者通过 [Vercel](https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=blog&repo-name=blog) 一键部署。
+
+比起 docusaurus, 我更喜欢 astro的轻量, 不用纠结选择哪个blog主题，自己diy随便改。
 
 ## 特性
 
@@ -56,4 +71,4 @@ pnpm preview
 
 ## License
 
-MIT License © 2024 MongoRolls
+GPL-3.0 License © 2025 MongoRolls

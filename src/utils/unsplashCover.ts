@@ -28,7 +28,9 @@ export function coverImageExists(postId: string): boolean {
 
 // 获取封面图片的URL路径
 export function getCoverImagePath(postId: string): string {
-  return `/cover-images/${postId}.jpg`;
+  // 阿里云oss
+      return `https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${postId}.jpg`
+  // return `/cover-images/${postId}.jpg`;
 }
 
 // 获取Unsplash图片并保存

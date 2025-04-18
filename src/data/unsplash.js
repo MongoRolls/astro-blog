@@ -1,6 +1,7 @@
 const unsplashConfig = {
     // Unsplash API配置
     unsplash: {
+        // 直接泄露，感觉没什么用（
         accessKey: 'jVPuYBnhE6EPu3velt7izC6cwJgO2Ttk_0VvwRAr0ms',
         searchEndpoint: 'https://api.unsplash.com/search/photos',
         perPage: 30, // 增加每页返回数量以随机选择
