@@ -11,7 +11,6 @@ const { headings } = Astro.props;
 const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
-
 <nav class="toc hidden lg:block h-full">
     <div class="sticky top-24">
         <ul class="space-y-3 text-sm border-l border-gray-200 dark:border-gray-800">
@@ -23,7 +22,7 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
                             'toc-item line-clamp-1 relative',
                             {
                                 'pl-6': heading.depth === 2,
-                                'pl-8': heading.depth === 3
+                                'pl-10': heading.depth === 3
                             },
                         ]}
                     >
@@ -52,7 +51,7 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 
     /* 激活状态的样式 */
     .toc-item.active > a {
-        @apply text-blue-600 dark:text-blue-400 font-medium translate-x-1;
+        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-1;
     }
 
     .toc-item.active::before {
@@ -66,22 +65,16 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
         transition: all 0.2s ease-in-out;
         @apply bg-blue-600 dark:bg-blue-400;
     }
+
 </style>
 
 <script>
+
     document.addEventListener('astro:page-load', () => {
         const observer = new IntersectionObserver(
             (entries) => {
-                entries.forEach((entry) => {
-                    const id = entry.target.getAttribute('id');
-                    const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement;
-                    
-                    if (entry.isIntersecting) {
-                        document.querySelectorAll('.toc-item.active').forEach((item) => 
-                            item.classList.remove('active'));
-                        tocItem?.classList.add('active');
-                    }
-                });
+                console.log('entries',entries);
+                console.log(entries[0].target.id);
             },
             { rootMargin: '-100px 0px -66% 0px' }
         );

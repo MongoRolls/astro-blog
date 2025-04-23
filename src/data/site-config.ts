@@ -57,10 +57,10 @@ const siteConfig: SiteConfig = {
     subtitle: 'a Frontend Engineer',
     description: 'Blog by MongoRolls',
     logo: {
-        src: '/logo.png'
+        src: '/rspack-logo.png'
     },
     image: {
-        src: '/logo.png',
+        src: '/rspack-logo.png',
         alt: 'MongoRolls - Astro.js and Tailwind CSS theme'
     },
     headerNavLinks: [
