@@ -11,7 +11,6 @@ const { headings } = Astro.props;
 const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
-
 <nav class="toc hidden lg:block h-full">
     <div class="sticky top-24">
         <ul class="space-y-3 text-sm border-l border-gray-200 dark:border-gray-800">
@@ -20,18 +19,18 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
                 toc.map((heading) => (
                     <li
                         class:list={[
-                            'toc-item line-clamp-1 relative',
+                            'toc-item line-clamp-1 relative flex items-center',
                             {
                                 'pl-6': heading.depth === 2,
-                                'pl-8': heading.depth === 3
+                                'pl-10 ': heading.depth === 3
                             },
                         ]}
                     >
+                        {heading.depth === 3 && <span class="text-gray-500 dark:text-gray-400 pr-2 font-semibold">-</span>}
                         <a
                             href={`#${heading.slug}`}
                             class="truncate block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200"
-                        >
-                            {heading.text}
+                        >{heading.text}
                         </a>
                     </li>
                 ))
@@ -52,7 +51,7 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 
     /* 激活状态的样式 */
     .toc-item.active > a {
-        @apply text-blue-600 dark:text-blue-400 font-medium translate-x-1;
+        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-1 scale-110;
     }
 
     .toc-item.active::before {
@@ -66,45 +65,72 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
         transition: all 0.2s ease-in-out;
         @apply bg-blue-600 dark:bg-blue-400;
     }
+
 </style>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    const id = entry.target.getAttribute('id');
-                    const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement;
-                    
-                    if (entry.isIntersecting) {
-                        document.querySelectorAll('.toc-item.active').forEach((item) => 
-                            item.classList.remove('active'));
-                        tocItem?.classList.add('active');
-                    }
-                });
-            },
-            { rootMargin: '-100px 0px -66% 0px' }
-        );
-
-        // 观察所有标题元素
-        document.querySelectorAll('h2, h3').forEach((heading) => {
-            observer.observe(heading);
-        });
-
-        // 平滑滚动
-        document.querySelectorAll('.toc-item a').forEach((link) => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href')?.slice(1);
-                const targetElement = document.getElementById(targetId!);
+document.addEventListener('astro:page-load', () => {
+    // 记录当前活跃的目录项ID
+    let activeId = '';
+    
+    // 创建交叉观察器
+    const observer = new IntersectionObserver(
+        (entries) => {
+            // 获取所有当前可见的标题元素
+            const visibleHeadings = entries
+                .filter(entry => entry.isIntersecting)
+                .map(entry => entry.target);
+            
+            if (visibleHeadings.length > 0) {
+                // 按照在视口中的位置排序，选择最靠近顶部的标题
+                const topHeading = Array.from(visibleHeadings).sort((a, b) => {
+                    return Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top);
+                })[0];
                 
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start',
-                    });
+                const id = topHeading.getAttribute('id');
+                
+                // 只有在活跃ID变化时才更新DOM
+                if (id && id !== activeId) {
+                    activeId = id;
+                    
+                    // 移除所有当前活跃项
+                    document.querySelectorAll('.toc-item.active').forEach((item) => 
+                        item.classList.remove('active'));
+                    
+                    // 添加新的活跃项
+                    const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement;
+                    tocItem?.classList.add('active');
                 }
-            });
+            }
+        },
+        // { 
+        //     // rootMargin值解释:
+        //     // 顶部-10%: 标题必须至少进入视口10%才被考虑
+        //     // 底部-70%: 忽略视口底部70%区域内的标题
+        //     // 这样可以更好地突出当前阅读区域的标题
+        //     // rootMargin: '-10% 0px -70% 0px'
+        // }
+    );
+
+    // 观察所有标题元素
+    document.querySelectorAll('h2, h3').forEach((heading) => {
+        observer.observe(heading);
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('.toc-item a').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href')?.slice(1);
+            const targetElement = document.getElementById(targetId!);
+            
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                });
+            }
         });
     });
+});
 </script>

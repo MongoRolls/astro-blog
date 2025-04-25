@@ -57,10 +57,10 @@ const siteConfig: SiteConfig = {
     subtitle: 'a Frontend Engineer',
     description: 'Blog by MongoRolls',
     logo: {
-        src: '/logo.png'
+        src: '/rspack-logo.png'
     },
     image: {
-        src: '/logo.png',
+        src: '/rspack-logo.png',
         alt: 'MongoRolls - Astro.js and Tailwind CSS theme'
     },
     headerNavLinks: [
@@ -99,8 +99,8 @@ const siteConfig: SiteConfig = {
         title: 'Hi There & Welcome to My Blog',
         text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
         image: {
-            src: '/tech/netease-b.webp',
-            alt: 'wcis kawaii'
+            src: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/blog-cover.webp',
+            alt: '博客临时封面图'
         },
         actions: [
             {
