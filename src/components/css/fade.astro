@@ -1,0 +1,108 @@
+<div class="container">
+    <div class="img" />
+</div>
+
+
+<style lang="scss">
+    @use "sass:math";
+    /* 基本配置参数 */
+    $count: 400;        // 小方块总数量(遮罩总数)
+    $sqrt: 20;          // 平方根，表示行/列各有多少方块(20×20=400)
+    $per: math.div(100%, $sqrt); // 每个遮罩小方块的大小百分比
+    $width: 300px;      // 图片容器宽度
+    $perWid: 15;        // 每个遮罩元素的像素宽度，用于定位
+
+    /* 为每个遮罩创建CSS自定义属性(变量) */
+    @for $i from 1 to ($count + 1) {
+        @property --m-#{$i} {
+        syntax: "<number>";    // 属性值类型为数字
+        initial-value: 1;      // 初始值为1(完全不透明)
+        inherits: false;       // 不从父元素继承
+        }
+    }
+
+    /* 创建所有遮罩的径向渐变背景 */
+    @function bgSet($n) {
+        // 第一个遮罩基础样式
+        $bg : radial-gradient(rgba(0, 0, 0, var(--m-1)), rgba(0, 0, 0, var(--m-1)));
+        
+        // 循环添加剩余遮罩 2-n
+        @for $i from 2 through $n {         
+            $bg: $bg, radial-gradient(rgba(0, 0, 0, var(--m-#{$i})), rgba(0, 0, 0, var(--m-#{$i})));
+        }
+        
+        // 返回所有遮罩的组合
+        @return $bg;
+    }
+
+    /* 计算每个遮罩方块的位置 */
+    @function positionSet($n) {
+        // 初始化空位置数组
+        $bgPosition: ();
+
+        // 双层循环生成网格位置，i为横坐标，j为纵坐标
+        @for $i from 0 through ($n) {   
+            @for $j from 0 through ($n - 1) {  
+                // 将计算好的位置添加到数组
+                $bgPosition: $bgPosition, #{$i * $perWid}px #{$j * $perWid}px;
+            }
+        }
+        
+        // 返回所有位置的组合
+        @return $bgPosition;
+    }
+
+    /* 设置每个遮罩方块的过渡动画 */
+    @function transitionSet($n) {
+        // 第一个遮罩的过渡动画
+        $transition: --m-1 0.1s 0.1s;
+
+        // 为每个遮罩添加随机时间和延迟的过渡效果
+        @for $i from 1 through $n {   
+            // 随机化持续时间和延迟时间，使动画更自然
+            $transition: $transition, --m-#{$i} #{100 + math.random(500)}ms #{math.div($i, 30) * math.random(100)}ms;
+        }
+        
+        // 返回所有过渡效果的组合
+        @return $transition;
+    }
+
+    /* 容器样式 */
+    .container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center; // 水平居中
+        align-items: center;     // 垂直居中
+        background: linear-gradient(90deg, transparent, #fff); // 背景渐变
+    }
+
+    /* 图片样式 */
+    .img {
+        width: $width;
+        height: $width;
+        // 设置背景图片
+        background-image: url(https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/share.jpg?v=1.0.0);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        
+        // 应用遮罩效果
+        mask: bgSet($count);          // 使用自定义函数生成的遮罩
+        mask-size: $per $per;         // 每个遮罩大小
+        mask-repeat: no-repeat;       // 遮罩不重复
+        mask-position: positionSet($sqrt); // 设置每个遮罩的位置
+        
+        // 应用过渡动画
+        transition: transitionSet($count); // 为所有遮罩设置随机过渡效果
+
+        /* 鼠标悬停效果 */
+        &:hover{
+            // 鼠标悬停时，将所有遮罩透明度变为0
+            @for $i from 1 through $count {         
+                --m-#{$i}: 0; // 设置为0使图片部分消失
+            }
+        }
+    }
+
+</style>

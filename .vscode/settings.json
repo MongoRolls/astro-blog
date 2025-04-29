@@ -37,5 +37,6 @@
     },
     "typescript.tsdk": "node_modules/typescript/lib",
 
-    "cSpell.words": ["Atcoder", "codeforce", "Codeforces", "CRDT", "Fraunces", "MUJICA", "MYGO", "netease"]
+    "cSpell.words": ["Atcoder", "codeforce", "Codeforces", "CRDT", "Fraunces", "MUJICA", "MYGO", "netease"],
+    "liveServer.settings.port": 3002
 }
