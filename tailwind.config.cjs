@@ -147,7 +147,74 @@ module.exports = {
                             // color: 'rgb(var(--color-text-main) / <alpha-value>)'
                         },
                         summary: {
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            color: theme('colors.blue.500'),
+                            fontWeight: 500,
+                            transition: 'color 0.2s ease',
+                            '&:hover': {
+                                color: theme('colors.purple.500')
+                            }
+                        },
+
+                        // 表格相关配置
+                        table: {
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            marginTop: '1.5rem',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.9em',
+                            lineHeight: '1.5',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', // 增强阴影效果
+                            borderRadius: '0.5rem',
+                            overflow: 'hidden',
+                            border: '1px solid rgba(var(--color-border-main), 0.2)' // 添加边框
+                        },
+                        thead: {
+                            backgroundColor: 'rgba(var(--color-bg-muted) / 0.7)', // 增加背景不透明度
+                            borderBottom: '2px solid rgba(var(--color-border-main) / 0.3)' // 加重底部边框
+                        },
+                        'thead th': {
+                            fontWeight: 700,
+                            padding: '0.75rem 1rem',
+                            textAlign: 'left',
+                            color: 'rgb(var(--color-text-main) / 1)',
+                            verticalAlign: 'middle',
+                            fontSize: '0.95em',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            borderRight: '1px solid rgba(var(--color-border-main) / 0.2)', // 加重右侧边框
+                            '&:first-child': {
+                                paddingLeft: '1.5rem' // 增加第一列左侧内边距
+                            },
+                            '&:last-child': {
+                                borderRight: 'none'
+                            }
+                        },
+                        'tbody tr': {
+                            borderBottom: '1px solid rgba(var(--color-border-main) / 0.2)', // 加重底部边框
+                            '&:nth-child(even)': {
+                                backgroundColor: 'rgba(var(--color-bg-muted) / 0.2)' // 增加偶数行背景不透明度
+                            },
+                            '&:last-child': {
+                                borderBottom: 'none'
+                            },
+                            '&:hover': {
+                                backgroundColor: 'rgba(var(--color-bg-muted) / 0.25)' // 增加悬停效果
+                            }
+                        },
+                        'tbody td': {
+                            padding: '0.75rem 1rem',
+                            verticalAlign: 'top',
+                            color: 'rgb(var(--color-text-main) / 0.9)',
+                            fontSize: '0.95em',
+                            borderRight: '1px solid rgba(var(--color-border-main) / 0.2)', // 加重右侧边框
+                            '&:first-child': {
+                                paddingLeft: '1.5rem', // 增加第一列左侧内边距
+                                fontWeight: '500' // 第一列文字加粗
+                            },
+                            '&:last-child': {
+                                borderRight: 'none'
+                            }
                         },
                         blockquote: {
                             border: 10,

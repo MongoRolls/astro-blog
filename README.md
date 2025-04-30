@@ -1,11 +1,10 @@
 <h2 align="center">
 MongoRolls的个人博客
-</h2><br>
+</h2>
 
 <p align="center">
-<br />
 <a href="https://mongorolls.cn">🖥 Online Preview</a>
-<br /><br /> 
+<br /><br />
 <a href="https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=astro-blog&repo-name=astro-blog" rel="nofollow"><img src="https://vercel.com/button" /></a>
 <a href="https://app.netlify.com/start/deploy?repository=https://github.com/mongoRolls/astro-blog" rel="nofollow"><img src="https://www.netlify.com/img/deploy/button.svg" /></a>
 <a href="https://stackblitz.com/github/mongoRolls/astro-blog" rel="nofollow"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" /></a>

@@ -115,6 +115,10 @@ const siteConfig: SiteConfig = {
             {
                 text: '🪁 To Wiki',
                 href: 'https://www.dgutcs.wiki/'
+            },
+            {
+                text: '👀 Markdown Style',
+                href: '/style'
             }
         ]
     },

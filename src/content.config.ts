@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 
 const seoSchema = z.object({
     title: z.string().min(5).max(120).optional(),
-    description: z.string().min(15).max(160).optional(),
+    description: z.string().min(5).max(160).optional(),
     image: z
         .object({
             src: z.string(),
