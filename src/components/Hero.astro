@@ -19,7 +19,6 @@ const parsedText = hero?.text ? marked.parse(hero.text) : '';
                     <Image
                         class="w-full rounded-xl hero-image"
                         src={hero.image.src}
-                        data-aos="flip-left"
                         alt={hero.image.alt || ''}
                         loading="lazy"
                         width={1200}
@@ -40,7 +39,7 @@ const parsedText = hero?.text ? marked.parse(hero.text) : '';
     )
 }
 
-<style>
+<style lang="scss">
     /* 优化后的夜间模式样式 */
     :global(.dark) .hero-image {
         filter: brightness(0.8);
@@ -72,4 +71,5 @@ const parsedText = hero?.text ? marked.parse(hero.text) : '';
         0%, 100% { --glow-opacity: 0.3; }
         50% { --glow-opacity: 0.5; }
     }
+
 </style>

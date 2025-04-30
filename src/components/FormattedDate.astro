@@ -1,15 +1,21 @@
 ---
-type Props = { date: Date };
+type Props = { 
+    date: Date;
+    format?: 'iso' | 'local';
+};
 
-const { date } = Astro.props;
+const { date, format = 'local' } = Astro.props;
 ---
 
 <time datetime={date.toISOString()}>
     {
-        date.toLocaleDateString('en-us', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        })
+        format === 'iso' 
+            ? date.toISOString().split('T')[0] 
+            : date.toLocaleDateString('en-us', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'Asia/Shanghai'
+            })
     }
 </time>

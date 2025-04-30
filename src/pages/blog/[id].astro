@@ -33,6 +33,7 @@ const { Content,headings } = await render(post);
         <!-- 主要内容 -->
         <article class="w-full lg:max-w-3xl">
             <header class="mb-8">
+                <img src={`https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${post.id}.jpg`} alt={title} class="w-full h-auto rounded-lg mb-3">
                 <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
                     <FormattedDate date={publishDate} />

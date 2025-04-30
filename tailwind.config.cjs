@@ -91,7 +91,9 @@ module.exports = {
                             color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
                             fontWeight: 400,
                             fontSize: '1rem',
-                            lineHeight: '1.55rem'
+                            lineHeight: '1.55rem',
+                            marginBottom: '10px!important',
+                            marginTop: '10px!important'
                         },
                         'code:not(pre code)': {
                             fontFamily: theme('fontFamily.mono'),

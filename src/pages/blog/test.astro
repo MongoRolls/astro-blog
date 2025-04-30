@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostPreview from '../../components/PostPreview.astro';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+const blogPosts = await getCollection('blog');
+const sortedBlogPosts = blogPosts.sort(sortItemsByDateDesc);
+---
+
+<BaseLayout
+    title="Blog Test Page"
+    description="All posts"
+    image={{ src: '/blog-cover-1.png', alt: 'The preview of the site' }}
+    showHeader={false}
+>
+    <h1 class="text-center text-2xl leading-tight font-serif italic sm:mb-5 sm:text-4xl">All posts</h1>
+
+    <div class="flex justify-center mb-10">
+        <a class="text-center font-serif font-bold text-rose-400" href="/blog/test">简约</a>
+        <span class="text-center whitespace-pre">{`  /  `}</span>
+        <a class="text-center font-serif font-bold text-blue-500" href="/blog">图文</a>
+    </div>
+
+
+    <div class="flex flex-col space-y-8">
+        {sortedBlogPosts.map((post) => {
+            return (
+                <div class="!mt-2">
+                    <span class="pr-5 italic font-serif inline-block w-32"><FormattedDate format="iso" date={post.data.publishDate} /></span>
+                    <a class="a" href={`/blog/${post.id}`}>{post.data.title}</a>
+                </div>
+            )
+        })} 
+    </div>
+</BaseLayout>
+
+<style >
+    .a {
+        text-decoration: none;
+        color: #ed974f;
+
+        &:hover {
+            color: #ed974f;
+        }
+        
+        &:visited {
+            color: rgb(var(--color-text-main));
+        }
+    }
+
+    /* 打字效果 */
+    .typing {
+        font-family:  "Roboto Mono", monospace;
+        font-size: 18px;
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        animation: typing 2s steps(17, end), blink 0.75s step-end 8;
+        animation-fill-mode: forwards; /* 保持最后一帧状态 */
+        border-right: 2px solid black;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    @keyframes typing {
+        from { width: 0; }
+        to { width: calc(17ch + 1px); }
+    }
+
+    @keyframes blink {
+        from, to { border-color: transparent; }
+        50% { border-color: black; }
+    }
+</style>
