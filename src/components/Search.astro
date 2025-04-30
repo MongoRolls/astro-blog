@@ -57,6 +57,7 @@
     pagefind.init({
       language: "zh"
     });
+
   } catch (error) {
     console.error('Failed to load pagefind:', error);
   }
@@ -91,6 +92,14 @@
         const newSearchIcon = searchIcon.cloneNode(true);
         searchIcon.parentNode?.replaceChild(newSearchIcon, searchIcon);
         newSearchIcon.addEventListener('click', openSearch);
+       
+        document.addEventListener('keydown', (e) => {
+        // 检查是否按下 Ctrl+K 组合键
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault(); // 阻止默认行为
+          openSearch(); // 调用打开搜索框的函数
+        }
+      });
         
         // 打开搜索框
         function openSearch() {
@@ -231,6 +240,7 @@
     // 在页面加载和Astro页面切换后初始化搜索功能
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSearchFeature);
+     
     } else {
         initSearchFeature();
     }

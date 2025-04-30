@@ -18,7 +18,7 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     description="Explore tag directory for easy navigation and discovery. Find a wide range of topics, articles, and insights organized by tags, making it effortless to locate the content that interests you most."
     showHeader={false}
 >
-    <h1 class="mb-8 text-3xl font-bold text-center sm:mb-12 sm:text-4xl">标签分类</h1>
+    <h1 class="mb-8 font-serif text-3xl text-center sm:mb-12 sm:text-4xl">Tags</h1>
    
     <div class="tags-grid">
         {
@@ -66,10 +66,12 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
         border: 1px solid var(--border);
         transition: all 0.2s ease;
         overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
     
     /* 标签标题 */
     .tag-title {
+        font-family: 'Playfair Display', serif;
         font-size: 1.5rem;
         font-weight: 600;
         margin-bottom: 1rem;

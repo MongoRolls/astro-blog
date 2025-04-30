@@ -6,7 +6,7 @@ import Search from './Search.astro';
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="min-h-10 py-4 mb-8 relative sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-black/30 w-full">
+<nav class="nav min-h-10 py-4 mb-8 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
     {
         navLinks.length > 0 && (
             <div class="w-full max-w-3xl mx-auto relative px-4 md:px-0">
@@ -43,7 +43,7 @@ const navLinks = siteConfig.headerNavLinks || [];
     }
 </nav>
 
-<style>
+<style lang="scss">
     @media (max-width: 767px) {
         /* 移动端菜单 todo */
         .menu {
@@ -88,6 +88,16 @@ const navLinks = siteConfig.headerNavLinks || [];
         .menu-toggle.is-active .menu-toggle-icon:after {
             @apply -rotate-45;
         }
+    }
+
+    .nav {
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        backdrop-filter: blur(10px);
+
     }
 </style>
 

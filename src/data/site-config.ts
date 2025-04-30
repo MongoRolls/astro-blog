@@ -7,6 +7,7 @@ export type Image = {
 export type Link = {
     text: string;
     href: string;
+    icon?: string;
 };
 
 export type Hero = {
@@ -83,7 +84,11 @@ const siteConfig: SiteConfig = {
         {
             text: 'Friends',
             href: '/friends'
-        }
+        },
+        // {
+        //     text: 'RSS',
+        //     href: '/rss.xml'
+        // }
     ],
     socialLinks: [
         {
