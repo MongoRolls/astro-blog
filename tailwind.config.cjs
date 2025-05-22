@@ -141,7 +141,7 @@ module.exports = {
                                 width: '60px'
                             }
                         },
-                        'h1,h2,h3,h4,h5,h6': {
+                        'h1,h2,h3': {
                             fontFamily: theme('fontFamily.serif'),
                             fontWeight: 700
                             // color: 'rgb(var(--color-text-main) / <alpha-value>)'
@@ -155,7 +155,6 @@ module.exports = {
                                 color: theme('colors.purple.500')
                             }
                         },
-
                         // 表格相关配置
                         table: {
                             width: '100%',

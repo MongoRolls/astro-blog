@@ -17,9 +17,9 @@ seo:
 
 ### 目录
 
-### 执行npm install命令时网络错误
+### 执行 npm install 命令时网络错误
 
-一般是vpn导致的，可以复制代理指令到终端执行
+一般是 vpn 导致的，可以复制代理指令到终端执行
 
 - clash x
   <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/vpn-error.png" style={{ width: '40%' }} />
@@ -79,16 +79,6 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 
 使用尖角号和波浪线都是为了保证依赖的包可以兼容而又能够及时更新。建议在定义package.json时选择一个合适的版本控制方式来使得项目的依赖关系更加稳定。
 
-### hover状态下debugger小知识
-
-在chrome中控制台，debugger; 可以快速断点
-
-```javascript
-setTimeout(() => {
-  debugger;
-}, 1000);
-```
-
 ### git clone 项目遇到问题及解决
 
 - 新电脑第一次clone 项目，需要配置ssh key <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/gitcloneerr.png"/>
@@ -103,15 +93,15 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 
 ### 关于还原设计稿
 
-1. 最外层的container,一般宽高不要固定设置，设置width:100%，max-width: 1920px;由子元素撑开即可。
-2. 移动端设计稿主要比例问题，一般750px,适配移动端主要px转rem等等问题
+1. 最外层的container,一般宽高不要固定设置，设置 width:100%，max-width: 1920px;由子元素撑开即可。
+2. 移动端设计稿主要比例问题，一般 750px,适配移动端主要 px 转 rem 等等问题
 
-### 关于markdown笔记
+### 关于 markdown 笔记
 
 <details>
 <summary>点击展开详情🔎</summary>
 
-原生html组件，可以折叠内容
+原生 html 组件，可以折叠内容
 
 ```html
 <details>
@@ -127,29 +117,29 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 
 </details>
 
-### 关于markdown笔记粘贴图片
+### 关于 markdown 笔记粘贴图片
 
-- vscode原生就支持粘贴图片
-- 通过配置可以将图片粘贴到指定位置，如`/public/blog/{article_name}`目录下
+- vscode 原生就支持粘贴图片
+- 通过配置可以将图片粘贴到指定位置，如 `/public/blog/{article_name}` 目录下
 
 有一个比较重要的点就是
 ![alt text](../../../public/blog/frontend/image.png)
 
 #### 参考文章
 
-[stack-overflow文章](https://stackoverflow.com/questions/75831497/how-can-i-paste-images-into-my-markdown-files-in-vs-code)
+[stack-overflow 文章](https://stackoverflow.com/questions/75831497/how-can-i-paste-images-into-my-markdown-files-in-vs-code)
 
-### 关于mac 5000端口
+### 关于 mac 5000端口
 
-- 5000端口是mac的默认端口，如果想要使用其他端口，需要先关闭5000端口
+- 5000 端口是 mac 的默认端口，如果想要使用其他端口，需要先关闭 5000 端口
 
 `lsof -i :5000` 检查
 
-发现是mac的隔空播放接收器（airpaly reciever）在占用
+发现是 mac 的隔空播放接收器（airpaly reciever）在占用
 
 解决方案： 到设置里面关闭即可
 
-### javascript下取整和位运算
+### javascript 下取整和位运算
 
 `>>>` 无符号右移运算符
 
@@ -159,6 +149,11 @@ console.log(1.221398 >>> 0); // 1
 
 将数值转换为 32 位整数，然后将所有位向右移动指定的位数，左侧用 0 填充。当移动 0 位时 (>>> 0)，实际上没有发生位移，但会触发数值转换。
 
-### typescript
+### 调试hover类UI
 
-建议搭配类型体操去看去搞
+1. 使用 `setTimeout(()=> {debugger},3000);` 然后鼠标hover,等待debug暂停 (搭配 Snippets 更佳)
+2. 父元素断点调试：Elements 面板 -> 父元素右键 Break on -> subtree modifications
+
+文章推荐 -> [你不知道的 Chrome调试技巧](https://juejin.cn/book/6844733783166418958/section/6844733783216750600)
+
+###

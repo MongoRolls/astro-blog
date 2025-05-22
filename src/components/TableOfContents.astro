@@ -12,7 +12,7 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
 <nav class="toc hidden lg:block h-full">
-    <div class="sticky top-24">
+    <div class= "sticky top-24 max-h-[60vh] overflow-y-auto">
         <ul class="space-y-3 text-sm border-l border-gray-200 dark:border-gray-800">
         {headings.length > 0 && <h2 class="mb-6 text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-6">Content</h2>}
         {
@@ -110,6 +110,7 @@ document.addEventListener('astro:page-load', () => {
         //     // 这样可以更好地突出当前阅读区域的标题
         //     // rootMargin: '-10% 0px -70% 0px'
         // }
+        
     );
 
     // 观察所有标题元素
@@ -125,10 +126,26 @@ document.addEventListener('astro:page-load', () => {
             const targetElement = document.getElementById(targetId!);
             
             if (targetElement) {
+                
+                // 先设置醒目颜色
+                const originalBackgroundColor = targetElement.style.backgroundColor;
+                targetElement.style.color = 'red'; // 使用透明色以便显示渐变
+                
+                // 3秒后恢复原来的颜色
+                setTimeout(() => {
+                    targetElement.style.color = originalBackgroundColor;
+                }, 3000);
                 targetElement.scrollIntoView({
-                    behavior: 'smooth',
                     block: 'start',
                 });
+                // 等待滚动完成后再偏移
+                setTimeout(() => {
+                    window.scrollBy({
+                        top: -104,
+                        behavior: 'smooth'
+                    }); 
+                }, 1000); 
+
             }
         });
     });
