@@ -6,6 +6,7 @@ import FormattedDate from '../../components/FormattedDate.astro';
 import PostPreview from '../../components/PostPreview.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
+import MyComment from '../../components/MyComment.astro';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
@@ -26,6 +27,8 @@ const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
 const { title, publishDate, updatedDate, excerpt, tags = [], seo } = post.data;
 const { Content,headings } = await render(post);
+
+
 ---
 
 <BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" headings={headings} showHeader={false}>    
@@ -93,9 +96,8 @@ const { Content,headings } = await render(post);
             </div>
         )
     }
-    <!-- // twikoo 评论 -->
-    <span id="twikoo_visitors">0</span>
-    <div id="tcomment"></div>
+
+    <MyComment />
 </BaseLayout>
 
 
@@ -121,15 +123,5 @@ const { Content,headings } = await render(post);
     });
 </script>
 
-<!--  twikoo 评论 -->
-<script is:inline defer src="https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js"
- onload="initTwikoo()">
-</script>
-<script is:inline> 
-function initTwikoo() {
-  twikoo.init({
-    envId: 'https://comment.mongorolls.cn/', // 环境id，https://xxx.vercel.app，
-    el: '#tcomment', 
-    emotionCDN: 'https://raw.githubusercontent.com/ZhangKeLiang0627/ZhangKeLiang0627.github.io/main/img/sys/owo.json',
-  });
-}
+
+
