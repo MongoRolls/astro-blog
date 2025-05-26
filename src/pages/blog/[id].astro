@@ -93,7 +93,11 @@ const { Content,headings } = await render(post);
             </div>
         )
     }
+    <!-- // twikoo 评论 -->
+    <span id="twikoo_visitors">0</span>
+    <div id="tcomment"></div>
 </BaseLayout>
+
 
 <script>
     document.addEventListener('astro:page-load', () => {
@@ -116,3 +120,16 @@ const { Content,headings } = await render(post);
         }
     });
 </script>
+
+<!--  twikoo 评论 -->
+<script is:inline defer src="https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js"
+ onload="initTwikoo()">
+</script>
+<script is:inline> 
+function initTwikoo() {
+  twikoo.init({
+    envId: 'https://comment.mongorolls.cn/', // 环境id，https://xxx.vercel.app，
+    el: '#tcomment', 
+    emotionCDN: 'https://raw.githubusercontent.com/ZhangKeLiang0627/ZhangKeLiang0627.github.io/main/img/sys/owo.json',
+  });
+}
