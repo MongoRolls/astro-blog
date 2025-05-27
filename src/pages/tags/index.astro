@@ -11,150 +11,328 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     return postCountTagB - postCountTagA;
 });
 
+// 为每个标签分配一个固定的颜色 - 扩展更多颜色选择
+const tagColors = [
+    'rgb(234, 84, 85)',   // 红色
+    'rgb(249, 173, 29)',  // 黄色
+    'rgb(87, 188, 173)',  // 青色
+    'rgb(124, 127, 196)', // 紫色
+    'rgb(52, 168, 83)',   // 绿色
+    'rgb(255, 112, 67)',  // 橙红色
+    'rgb(156, 39, 176)',  // 深紫色
+    'rgb(0, 150, 136)',   // 深青色
+    'rgb(33, 150, 243)',  // 蓝色
+    'rgb(255, 152, 0)',   // 橙色
+    'rgb(233, 30, 99)',   // 粉红色
+    'rgb(76, 175, 80)',   // 浅绿色
+];
+
+const getTagColor = (index: number) => tagColors[index % tagColors.length];
+
 ---
 
 <BaseLayout
-    title="Tags"
+    title="分类"
     description="Explore tag directory for easy navigation and discovery. Find a wide range of topics, articles, and insights organized by tags, making it effortless to locate the content that interests you most."
     showHeader={false}
 >
-    <h1 class="mb-8 font-serif text-3xl text-center sm:mb-12 sm:text-4xl">Tags</h1>
-   
-    <div class="tags-grid">
-        {
-            tags.map((tag) => {
-                const postCount = getPostsByTag(posts, tag.id).length;
-                
-                return (
-                    <a 
-                        href={`/tags/${tag.id}`} 
-                        class="tag-card"
-                    >
-                        <h2 class="tag-title">{tag.name}</h2>
-                        <div class="tag-info">
-                            <span class="tag-count">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
-                            <ArrowRight class="tag-arrow" />
-                        </div>
-                    </a>
-                );
-            })
-        }
+    <div class="archive-container">
+        <div class="archive-header">
+            <div class="category-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4H10V10H4V4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 4H20V10H14V4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 14H10V20H4V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 14H20V20H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1 class="archive-title font-serif">Tags</h1>
+        </div>
+        
+        <div class="tags-grid">
+            {
+                tags.map((tag, index) => {
+                    const postCount = getPostsByTag(posts, tag.id).length;
+                    const tagColor = getTagColor(index);
+                    
+                    return (
+                        <a 
+                            href={`/tags/${tag.id}`} 
+                            class="tag-card"
+                            style={`--tag-color: ${tagColor}`}
+                        >
+                            <div class="tag-color-bar"></div>
+                            <div class="tag-content">
+                                <div class="tag-info">
+                                    <h2 class="tag-title">{tag.name}</h2>
+                                    <div class="tag-subtitle">类</div>
+                                </div>
+                                <div class="tag-count-wrapper">
+                                    <span class="tag-count">{postCount}</span>
+                                    <span class="tag-count-label">篇</span>
+                                </div>
+                            </div>
+                        </a>
+                    );
+                })
+            }
+        </div>
     </div>
 </BaseLayout>
 
 <style>
-    /* 主要布局 */
+    .archive-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .archive-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 3rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .category-icon {
+        color: #6366f1;
+        margin-right: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .archive-title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+        letter-spacing: 0.02em;
+    }
+    
+    /* 主要布局 - 固定每行两个 */
     .tags-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: 1fr 1fr;
         gap: 1.5rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem 3rem;
+        width: 100%;
     }
     
     /* 标签卡片样式 */
     .tag-card {
         position: relative;
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 1.5rem;
-        height: 160px;
-        border-radius: 0.5rem;
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border);
-        transition: all 0.2s ease;
+        align-items: center;
+        border-radius: 12px;
+        background-color: #fff;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: inherit;
+        min-height: 80px;
+        padding: 0;
+    }
+    
+    /* 彩色边条 */
+    .tag-color-bar {
+        width: 8px;
+        height: 100%;
+        background-color: var(--tag-color);
+        border-radius: 12px 0 0 12px;
+        flex-shrink: 0;
+    }
+    
+    /* 卡片内容容器 */
+    .tag-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        flex: 1;
+        min-height: 80px;
+    }
+    
+    /* 标签信息区域 */
+    .tag-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     /* 标签标题 */
     .tag-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 1rem;
+        margin: 0 0 0.25rem 0;
+        color: #1f2937;
+        line-height: 1.2;
     }
     
-    /* 信息行 */
-    .tag-info {
+    /* 标签副标题 */
+    .tag-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 400;
+        margin: 0;
+    }
+    
+    /* 计数区域 */
+    .tag-count-wrapper {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        margin-top: auto;
+        text-align: center;
+        min-width: 60px;
     }
     
     /* 文章计数 */
     .tag-count {
-        font-size: 0.9rem;
-        opacity: 0.8;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--tag-color);
+        line-height: 1;
+        margin-bottom: 0.25rem;
     }
     
-    /* 箭头图标 */
-    .tag-arrow {
-        width: 1.25rem;
-        height: 1.25rem;
-        opacity: 0;
-        transform: translateX(-10px);
-        transition: all 0.2s ease;
+    .tag-count-label {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-weight: 500;
+        letter-spacing: 0.05em;
     }
     
     /* 悬停效果 */
     .tag-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border-color: var(--accent);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
     }
     
-    .tag-card:hover .tag-arrow {
-        opacity: 1;
-        transform: translateX(0);
+    .tag-card:hover .tag-color-bar {
+        width: 12px;
+    }
+    
+    .tag-card:hover .tag-title {
+        color: var(--tag-color);
+    }
+    
+    .tag-card:hover .tag-count {
+        transform: scale(1.05);
     }
     
     /* 深色模式适配 */
+    :global(.dark) .archive-header {
+        border-bottom-color: #374151;
+    }
+    
+    :global(.dark) .archive-title {
+        color: #f9fafb;
+    }
+    
+    :global(.dark) .category-icon {
+        color: #818cf8;
+    }
+    
     :global(.dark) .tag-card {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #1f2937;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    :global(.dark) .tag-title {
+        color: #f9fafb;
+    }
+    
+    :global(.dark) .tag-subtitle {
+        color: #9ca3af;
+    }
+    
+    :global(.dark) .tag-count-label {
+        color: #6b7280;
     }
     
     :global(.dark) .tag-card:hover {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    :global(.dark) .tag-card:hover .tag-title {
+        color: var(--tag-color);
     }
     
     /* 响应式适配 */
-    @media (max-width: 768px) {
+    @media (max-width: 640px) {
+        .archive-container {
+            padding: 1.5rem 0.75rem;
+            max-width: 100%;
+        }
+        
+        .archive-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+        }
+        
+        .archive-title {
+            font-size: 2rem;
+        }
+        
+        .category-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
         .tags-grid {
             grid-template-columns: 1fr;
-            padding: 0 0.75rem 2rem;
             gap: 1rem;
         }
         
-        .tag-card {
-            height: 130px;
-            padding: 1.25rem;
+        .tag-content {
+            padding: 1rem 1.25rem;
+            min-height: 70px;
         }
         
         .tag-title {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+        }
+        
+        .tag-count {
+            font-size: 1.5rem;
+        }
+        
+        .tag-count-wrapper {
+            min-width: 50px;
         }
     }
     
-    @media (min-width: 769px) and (max-width: 1200px) {
-        .tags-grid {
-            grid-template-columns: repeat(2, 1fr);
+    @media (min-width: 641px) and (max-width: 768px) {
+        .archive-container {
+            max-width: 600px;
         }
-    }
-    
-    @media (min-width: 1201px) {
+        
         .tags-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+        
+        .tag-content {
+            padding: 1.125rem 1.25rem;
+        }
+        
+        .tag-title {
+            font-size: 1.125rem;
+        }
+        
+        .tag-count {
+            font-size: 1.625rem;
         }
     }
     
     /* 减少动画 */
     @media (prefers-reduced-motion: reduce) {
-        .tag-card, .tag-title, .tag-arrow {
+        .tag-card,
+        .tag-color-bar,
+        .tag-count {
             transition: none !important;
         }
     }

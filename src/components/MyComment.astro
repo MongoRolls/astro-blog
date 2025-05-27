@@ -2,7 +2,11 @@
 
 ---
 
-<div id="twikoo_visitors" class="font-serif text-sm">number: 0</div>
+<div class="flex items-center gap-2">
+    <span class="font-serif text-sm">访问量：</span>
+    <span id="twikoo_visitors" class="font-serif text-sm">0</span>
+</div>
+
 <div id="tcomment"></div>
 
 <!-- 只执行一次，点击其他博客跳转没有触发，可能是视图切换 -->
@@ -11,8 +15,8 @@ function initTwikoo() {
  twikoo.init({
    envId: 'https://comment.mongorolls.cn/', 
    el: '#tcomment', 
-   emotionCDN: 'https://raw.githubusercontent.com/ZhangKeLiang0627/ZhangKeLiang0627.github.io/main/img/sys/owo.json',
- });
+   emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+});
 }
 </script>
 

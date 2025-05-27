@@ -13,6 +13,7 @@ const seoSchema = z.object({
     pageType: z.enum(['website', 'article']).default('website')
 });
 
+// 博客 Collection
 const blog = defineCollection({
     loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
     schema: z.object({
