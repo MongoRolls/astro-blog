@@ -90,7 +90,8 @@ module.exports = {
                         'p, li, span': {
                             color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
                             fontWeight: 400,
-                            fontSize: '1rem',
+                            fontSize: '1.1rem',
+                            letterSpacing: '0.04rem',
                             lineHeight: '1.55rem',
                             marginBottom: '10px!important',
                             marginTop: '10px!important'
@@ -216,13 +217,18 @@ module.exports = {
                             }
                         },
                         blockquote: {
-                            border: 10,
                             fontFamily: theme('fontFamily.serif'),
                             fontStyle: 'italic',
                             fontWeight: 'normal',
-                            lineHeight: 1.4,
+                            height: '2.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            borderLeft: '4px solid #29212a',
                             p: {
-                                fontSize: '1.3125em'
+                                fontSize: '1.3125em',
+                                '&::before': {
+                                    content: '""'
+                                }
                             }
                         }
                     }
@@ -230,7 +236,7 @@ module.exports = {
                 lg: {
                     css: {
                         blockquote: {
-                            paddingLeft: 0
+                            paddingLeft: 10
                         }
                     }
                 }

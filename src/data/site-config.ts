@@ -41,6 +41,8 @@ export interface Friend {
 export type SiteConfig = {
     logo?: Image;
     title: string;
+    website?: string;
+    ossWebsite?: string;
     subtitle?: string;
     description: string;
     image?: Image;
@@ -55,6 +57,8 @@ export type SiteConfig = {
 
 const siteConfig: SiteConfig = {
     title: 'MongoRolls',
+    website: 'https://mongorolls.cn',
+    ossWebsite: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/',
     subtitle: 'a Frontend Engineer',
     description: 'Blog by MongoRolls',
     logo: {

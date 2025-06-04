@@ -2,6 +2,7 @@
 // 处理contact/about/terms页面
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import MyComment from '../components/MyComment.astro';
 
 export async function getStaticPaths() {
     const pages = await getCollection('pages');
@@ -30,4 +31,5 @@ const { Content } = await render(page);
             <Content />
         </div>
     </article>
+    {page.id === 'about' && <MyComment />}
 </BaseLayout>

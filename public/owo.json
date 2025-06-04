@@ -33,7 +33,7 @@
     },
     "Capoo": {
         "type": "image",
-        "container": [{ "icon": "<img src=\"https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/muzimi.jpg\">", "text": "muzimi" }]
+        "container": [{ "icon": "<img src=\"https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/muzimi.jpg\">", "text": "muzimi_love" }]
     },
     "Emoji": {
         "type": "emoji",
