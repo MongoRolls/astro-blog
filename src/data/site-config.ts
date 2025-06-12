@@ -123,6 +123,10 @@ const siteConfig: SiteConfig = {
             {
                 text: '👀 Markdown Style',
                 href: '/style'
+            },
+            {
+                text: '🔗 RSS',
+                href: '/rss.xml'
             }
         ]
     },
