@@ -28,8 +28,8 @@ module.exports = {
                 main: 'rgb(var(--color-text-main) / <alpha-value>)'
             },
             backgroundColor: {
-                main: 'rgb(var(--color-bg-main) / <alpha-value>)',
-                muted: 'rgb(var(--color-bg-muted) / <alpha-value>)'
+                main: 'rgb(var(--color-bg-main))',
+                muted: 'rgb(var(--color-bg-muted))'
             },
             borderColor: {
                 main: 'rgb(var(--color-border-main) / <alpha-value>)'
@@ -90,7 +90,7 @@ module.exports = {
                         'p, li, span': {
                             color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
                             fontWeight: 400,
-                            fontSize: '1.1rem',
+                            fontSize: '1rem',
                             letterSpacing: '0.04rem',
                             lineHeight: '1.55rem',
                             marginBottom: '10px!important',
