@@ -1,6 +1,6 @@
 ---
 title: 'Cursor AI 使用指南'
-excerpt: '本文将分享我使用Cursor的体验总结，以及Cursor与其他AI编程助手的比较。'
+excerpt: 'Cursor AI编程助手的完整使用指南，包含基础配置、高级实践和使用技巧'
 publishDate: '2024-01-17'
 author: MongoRolls
 tags:
@@ -13,40 +13,51 @@ seo:
     alt: 'Cursor AI 编程助手使用指南'
 ---
 
-## Cursor 使用体验
+## Cursor 简介与优势
 
-Cursor 是一个 ai + IDE(集成开发环境)，它是一个基于 VSCode 开源分支的编辑器，Cursor 对 VSCode 插件有着良好的支持。可以直接导入 VSCode 的账号设置。
+### 什么是 Cursor
 
-## 为什么使用cursor
+Cursor 是一个集成了AI功能的IDE（集成开发环境），它基于VSCode开源分支构建。**Cursor** 对VSCode插件有着良好的支持，可以直接导入VSCode的账号设置。
 
-- 搭配 `Claude` 使用，在智能补全，代码生成，bugfix等**非常好用**
-- 可以使用`@docs` `@web` 等命令，让ai使用类mcp工具去获取最新的信息，从而避免训练数据老旧等问题。
-- 使用 `.cursorrules` 文件，设置prompt，可以有效提高ai都智商. [Cursor Rules](https://cursor.directory/)
-- agent模式，只需要点accept,run, 就可以自动执行，完成任务✅
+### 核心优势
+
+- 搭配 **Claude** 使用，在智能补全、代码生成、bugfix等方面**非常好用**
+- 可以使用`@docs`、`@web`等命令，让AI使用类MCP工具获取最新信息，避免训练数据老旧问题
+- 使用 `.cursorrules` 文件设置prompt，可以有效提高AI的智能程度。参考：[Cursor Rules](https://cursor.directory/)
+- **Agent模式**，只需要点击accept、run，就可以自动执行完成任务✅
 - 上下文窗口更大，可以阅读整个项目
 
 ![Cursor 使用示例](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/cursor-try.png)
 
+## 快速上手指南
+
 ### 常用快捷键
 
-- `cmd + k` 打开聊天窗口
-- `cmd + shift + L` 打开ask
-- `cmd + i` 打开 composer
-- `@` 打开提示词库
-  - `@docs` 查看官方文档
-  - `@file` 查看当前文件的文档
-  - `@folder` 查看当前文件夹下所有文档
-  - `@web` 搜索网络上的信息
+| 快捷键            | 功能描述     |
+| ----------------- | ------------ |
+| `cmd + k`         | 打开聊天窗口 |
+| `cmd + shift + L` | 打开ask功能  |
+| `cmd + i`         | 打开composer |
+| `@`               | 打开提示词库 |
 
-### 配置 Cursor
+**提示词库功能：**
 
-1. 安装 Cursor
-2. 导入 Cursor 插件
-3. 配置 Cursor 规则
+- `@docs` - 查看官方文档
+- `@file` - 查看当前文件的文档
+- `@folder` - 查看当前文件夹下所有文档
+- `@web` - 搜索网络上的信息
 
-一个不错的 Cursor 提示词库 [Awesome CursorRules](https://github.com/PatrickJS/awesome-cursorrules?tab=readme-ov-file)
+### 基础配置
 
-### 详细提示词
+1. 安装**Cursor**
+2. 导入**Cursor**插件
+3. 配置**Cursor**规则
+
+推荐参考：[Awesome CursorRules](https://github.com/PatrickJS/awesome-cursorrules?tab=readme-ov-file) 提示词库
+
+## 高级配置与实践
+
+### 详细提示词配置
 
 <details>
 <summary>点击查看一套项目的详细提示词</summary>
@@ -181,22 +192,30 @@ Refer to Astro's official documentation for detailed information on components, 
 
 </details>
 
-甚至用 CopyCode 网站，可以直接使用 Figma 设计稿，生成一套提示词，给到 Composer 使用，直接就能生成 90% 的静态网站了。
+甚至可以使用**CopyCode**网站，直接使用Figma设计稿生成提示词，配合**Composer**使用，能够生成90%的静态网站。
 
-### 个人实践
+### 个人实践经验
 
-配置cursor规制 （.cursorrules 或者 .cursor/rules/xxx.mdc）
+根据项目和自身情况配置[cursor.directory](https://cursor.directory/)，并在配置后不断完善优化以达到最好的效果。
 
-根据项目和自身情况配置 [cursor.directory](https://cursor.directory/)
-并且在配置后不断完善优化达到最好的效果
+**配置建议：**
 
-rules下的mdc, 有多种type, `alway` 总是生效, `manual` 需要手动@文件，
-`agent request` 规则可供 AI 使用，AI 会决定是否包含它。必须提供描述,`auto attached` 引用与 glob 模式匹配的文件时包含
+- 个人喜欢为项目配置一套专门的提示词
+- 使用思维链接提示词，为AI添加深度思考能力
 
-有时候不太生效，可以直接在@添加规则文件，这样有比较高优先级
+### 规则文件管理
 
-个人喜欢为项目配置一套提示词
-还有一个是思维链接有点像mcp的那个给ai添加深度思考能力的提示词
+配置**Cursor**规则文件（`.cursorrules` 或者 `.cursor/rules/xxx.mdc`）
+
+规则文件下的MDC有多种类型：
+
+- `always` - 总是生效
+- `manual` - 需要手动@文件
+- `agent request` - 规则可供AI使用，AI会决定是否包含它（必须提供描述）
+- `auto attached` - 引用与glob模式匹配的文件时包含
+
+**使用技巧：**
+有时候规则不太生效，可以直接使用@添加规则文件，这样有比较高的优先级。
 
 <details>
 <summary>点击查看思维链接</summary>
@@ -310,20 +329,31 @@ name: base-rules
 
 </details>
 
-未来的使用应该可能更多与各类mcp工具结合使用
+## 使用技巧与注意事项
 
-### 关于关闭开启自动补全
+### 自动补全控制
 
-有时候你编程或者写文章的时候，ai补全会很烦
+有时候在编程或写文章时，AI补全功能可能会影响思路。
 
-使用`cmd` + `p` 打开命令行，输入`> cursor tab`，设置快捷键即可
+**设置方法：**
+使用`cmd + p`打开命令面板，输入`> cursor tab`，即可设置快捷键控制自动补全。
 
 ![cursor tab](../../../public/blog/cursor/image.png)
 
-我设置的热键是`cmd + up cmd + up` 和`cmd + down cmd + down`
+**个人推荐设置：**
 
-这样就可以快速开启或关闭自动补全功能了
+- 开启补全：`cmd + up cmd + up`
+- 关闭补全：`cmd + down cmd + down`
 
-cursor 虽好但是也可以明显会降低手写代码的能力  
-尤其对于不熟练的人来讲，现在外网就很多在诟病 Leetcode  
-ai 很容易给我们一种学会的错觉，
+这样就可以快速切换自动补全功能了。
+
+### 最佳实践建议
+
+**Cursor**虽然功能强大，但也需要注意以下几点：
+
+1. **保持编程能力**：过度依赖AI补全可能会降低手写代码的能力
+2. **适度使用**：对于初学者来说，AI很容易给人一种"学会了"的错觉
+3. **结合学习**：建议将**Cursor**作为辅助工具，而不是完全替代学习过程
+4. **未来发展**：预计未来会有更多与MCP工具的结合使用场景
+
+**Cursor**是一个优秀的AI编程助手，合理使用能够显著提高开发效率，但关键是要保持学习和思考的主动性。

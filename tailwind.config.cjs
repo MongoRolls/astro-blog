@@ -101,7 +101,8 @@ module.exports = {
                             fontSize: '0.875em',
                             fontWeight: 500,
                             backgroundColor: 'rgba(237, 237, 235)',
-                            color: theme('colors.rose.600'),
+                            // color: theme('colors.rose.600'),
+                            color: 'black',
                             borderRadius: '0.25rem',
                             padding: '0.15em 0.4em',
                             margin: '0 0.2em',
@@ -109,8 +110,26 @@ module.exports = {
                             position: 'relative',
                             '.dark &': {
                                 backgroundColor: 'rgba(31, 41, 55)',
-                                color: theme('colors.pink.400'),
+                                color: theme('colors.indigo.400'),
                                 borderColor: 'rgba(75, 85, 99, 0.4)'
+                            },
+                            '&:nth-of-type(3n+1)': {
+                                color: theme('colors.blue.600')
+                            },
+                            '&:nth-of-type(3n+2)': {
+                                color: theme('colors.pink.500')
+                            },
+                            '&:nth-of-type(3n+3)': {
+                                color: theme('colors.indigo.600')
+                            },
+                            '.dark &:nth-of-type(3n+1)': {
+                                color: theme('colors.blue.400')
+                            },
+                            '.dark &:nth-of-type(3n+2)': {
+                                color: theme('colors.pink.400')
+                            },
+                            '.dark &:nth-of-type(3n+3)': {
+                                color: theme('colors.indigo.400')
                             }
                         },
                         ':not(pre) > code': {

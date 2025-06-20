@@ -1,0 +1,218 @@
+---
+title: 'Git 版本控制与提交规范指南'
+excerpt: 'Git基础概念、常用命令与commit规范的完整指南'
+publishDate: '2024-01-07'
+tags:
+  - tech
+  - git
+---
+
+## Git 基础概念
+
+### 什么是 Git 和 GitHub
+
+**GitHub** 是世界上最大的代码托管平台，提供了许多开源项目的托管服务。
+
+**Git** 是一个分布式版本控制系统，是帮助个人开发或团队开发的强大工具。对于新手来说，建议先学习 [廖雪峰Git教程](https://www.liaoxuefeng.com/wiki/896043488029600) 或 [在线学习Git](https://learngitbranching.js.org/?locale=zh_CN)。
+
+### Git 的核心优势
+
+<img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/image-20240521225459227.png" />
+
+Git 作为分布式版本控制系统具有以下优点：
+
+1. **版本管理** - 可以将代码回退到之前提交的任何时间节点
+2. **分支机制** - 可以开多个分支写不同功能，随时快速切换和合并分支
+3. **多人协作** - 支持多人合作项目，每个人本地都有完整的代码库，可以清楚看到每个人的更新内容
+
+### 版本控制原理
+
+Git 的实现机制类似主席树，可以有效节省内存空间，通过快照的方式记录文件变化。
+
+<img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/image-20240521230522586.png" />
+
+## Git 常用操作
+
+### 基础操作流程
+
+**初始化项目**
+
+```bash
+git init
+```
+
+**添加文件到暂存区**
+
+```bash
+git add filename.txt    # 添加指定文件
+git add .              # 添加所有新增文件
+```
+
+**提交更改**
+
+```bash
+git commit -m "提交信息描述"
+```
+
+### 远程协作
+
+**拉取远程更新**
+
+```bash
+git pull [remote] [branch]
+```
+
+这个命令用于从远程获取代码并合并。实际上，**git pull** 是 **git fetch** 和 **git merge** 的组合体。
+
+:::danger
+使用 **git pull** 前先把本地修改的代码进行 **add** 和 **commit**，避免冲突造成代码丢失。
+
+对于未完成的开发代码可以使用 **git stash** 暂存。
+
+可以使用 **git status** 查看提交记录状态，确认无误后再执行 **git pull** 拉取远程代码。
+:::
+
+**获取远程更新（不自动合并）**
+
+```bash
+git fetch [remote]
+```
+
+这个命令只从远程获取代码，不会自动合并或修改当前工作，需要手动执行合并操作。
+
+**推送到远程仓库**
+
+```bash
+git push [remote] [branch]
+```
+
+将本地更改推送到远程分支，团队成员就可以获取到你的更改。
+
+### 分支管理
+
+**分支操作**
+
+- 列出所有本地分支：`git branch`
+- 创建新分支：`git branch [branch-name]`
+- 删除分支：`git branch -d [branch-name]`
+- 强制删除分支：`git branch -D [branch-name]`
+
+**切换分支**
+
+- 切换到已存在分支：`git checkout [branch-name]`
+- 创建并切换到新分支：`git checkout -b [branch-name]`
+- 恢复文件到指定版本：`git checkout [commit] [file]`
+
+**代码暂存**
+
+当需要临时切换分支但当前代码未完成时，可以使用暂存功能：
+
+```bash
+git stash              # 暂存当前更改
+git stash list         # 查看暂存列表
+git stash apply [node] # 应用指定暂存
+git stash pop          # 应用并删除最新暂存
+git stash clear        # 清除所有暂存
+```
+
+## Git Commit 规范
+
+### Angular 团队规范
+
+提交规范主要是为了让开发者提交完整的更新信息，方便查阅。目前最流行的提交信息规范来自于 Angular 团队。
+
+规范要求提交内容要进行分类并填写内容，基本语法如下：
+
+```bash
+git commit -m "feat: 增加新功能"
+```
+
+完整格式：
+
+```bash
+type(scope?): subject  # scope是可选的，支持多个范围
+```
+
+### 提交类型说明
+
+| 类型     | 描述                                               |
+| -------- | -------------------------------------------------- |
+| feat     | 新功能、新特性                                     |
+| fix      | 修改bug                                            |
+| perf     | 更改代码以提高性能                                 |
+| refactor | 代码重构（在不影响代码内部行为、功能下的代码修改） |
+| docs     | 文档修改                                           |
+| style    | 代码格式修改，注意不是css修改（例如分号修改）      |
+| test     | 测试用例新增、修改                                 |
+| build    | 影响项目构建或依赖项修改                           |
+| revert   | 恢复上一次提交                                     |
+| ci       | 持续集成相关文件修改                               |
+| chore    | 其他修改（不在上述类型中的修改）                   |
+| release  | 发布新版本                                         |
+| workflow | 工作流相关文件修改                                 |
+
+### 规范示例
+
+以下是一些常见的提交示例：
+
+| 提交信息                           | 描述                  |
+| ---------------------------------- | --------------------- |
+| chore: init                        | 初始化项目            |
+| chore: update deps                 | 更新依赖              |
+| chore: wording                     | 调整文字措词          |
+| chore: fix typos                   | 修复拼写错误          |
+| chore: release v1.0.0              | 发布1.0.0版本         |
+| fix: icon size                     | 修复图标大小          |
+| fix: value.length -> values.length | value变量调整为values |
+| feat(blog): add comment section    | blog新增评论部分      |
+| feat: support typescript           | 新增typescript支持    |
+| feat: improve xxx types            | 改善xxx类型           |
+| style(component): code             | 调整component代码样式 |
+| refactor: xxx                      | 重构xxx               |
+| perf(utils): random function       | 优化utils的random函数 |
+| docs: xxx.md                       | 添加xxx.md文章        |
+
+更多示例可以参考主流开源项目的commit记录。
+
+### 规范检查工具
+
+要检查commit message是否符合要求，可以使用 [commitlint](https://github.com/conventional-changelog/commitlint) 工具，并配合 [husky](https://github.com/typicode/husky) 对每次提交的commit进行检查。
+
+当然规范不是强求，但commit message一定要能简要说明本次代码的改动主要部分，有利于他人与自己后期查看代码记录。
+
+## 进阶技巧
+
+### 历史修改
+
+**合并多个提交**
+
+```bash
+git rebase -i HEAD~number
+```
+
+用来将几个commit合并成一个commit，将picker改为s/squash即可。改为R后可以更改commit message。
+
+**查看操作历史**
+
+```bash
+git reflog
+```
+
+记录所有操作，可以回退到任意版本。
+
+### 工作树管理
+
+**多分支同时开发**
+
+```bash
+git worktree
+```
+
+同时开发一个项目的两个分支，又不想使用stash或commit的情况下使用。
+
+[!NOTE]
+Highlights information that users should take into account, even when skimming.
+
+:::danger
+This is a danger admonition.
+:::
