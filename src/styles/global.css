@@ -42,7 +42,7 @@
         --color-text-muted: 156 163 175; /* gray-400 */
 
         /* 背景颜色 */
-        --color-bg-main: 23 23 23; /* #171717 */
+        --color-bg-main: 29, 31, 32; /* #1d1f20 */
         --color-bg-muted: 36 36 36; /* #242424 */
         --color-bg-card: 31 41 55; /* gray-800 */
 

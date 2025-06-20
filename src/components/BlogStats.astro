@@ -1,0 +1,170 @@
+---
+import FormattedDate from './FormattedDate.astro';
+
+type Props = {
+    stats: {
+        totalPosts: number;
+        totalTags: number;
+        latestPost: any;
+    };
+};
+
+const { stats } = Astro.props;
+
+---
+
+<div class="stats-card">
+    <h3 class="stats-title">📊 Blog Stats</h3>
+    <div class="stats-grid">
+        <div class="stat-item">
+            <span class="stat-number">{stats.totalPosts}</span>
+            <span class="stat-label">Articles</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{stats.totalTags}</span>
+            <span class="stat-label">Tags</span>
+        </div>
+    </div>
+    <div class="latest-post">
+        <p class="latest-label">: </p>
+        <a href={`/blog/${stats.latestPost.id}`} class="latest-link">
+            {stats.latestPost.data.title}
+        </a>
+        <p class="latest-date">
+            <FormattedDate date={stats.latestPost.data.publishDate} />
+        </p>
+    </div>
+</div>
+
+<style>
+    .stats-card {
+        background: rgb(var(--color-bg-card));
+        border: 2px solid rgb(var(--color-border-card));
+        border-radius: 12px;
+        padding: 12px;
+        transition: border-color 0.3s ease, transform 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        max-width: 220px;
+        margin: 0 auto;
+    }
+
+    .stats-card:hover {
+        border-color: rgb(var(--color-text-muted));
+        transform: translateY(-2px);
+    }
+
+    .stats-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        color: rgb(var(--color-text-main));
+        font-family: serif;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex: 1;
+        align-content: start;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 6px;
+        background: rgb(var(--color-bg) / 0.5);
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .stat-item:hover {
+        background: rgb(var(--color-bg) / 0.8);
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #ed974f;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: rgb(var(--color-text-muted));
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .latest-post {
+        border-top: 1px solid rgb(var(--color-border-card));
+        padding-top: 10px;
+    }
+
+    .latest-label {
+        font-size: 0.75rem;
+        color: rgb(var(--color-text-muted));
+        margin: 0 0 3px 0;
+        font-weight: 500;
+    }
+
+    .latest-link {
+        display: block;
+        color: #ed974f;
+        text-decoration: none;
+        font-weight: 500;
+        line-height: 1.2;
+        margin-bottom: 2px;
+        transition: color 0.3s ease;
+        font-size: 0.8rem;
+    }
+
+    .latest-link:hover {
+        color: rgb(var(--color-text-main));
+        text-decoration: underline;
+    }
+
+    .latest-date {
+        font-size: 0.7rem;
+        color: rgb(var(--color-text-muted));
+        margin: 0;
+        font-style: italic;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 1024px) {
+        .stats-card {
+            max-width: none;
+            padding: 16px;
+        }
+        
+        .stats-title {
+            font-size: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .latest-link {
+            font-size: 0.875rem;
+        }
+    }
+
+    /* 深色模式适配 */
+    :global(.dark) .stat-item {
+        background: rgb(var(--color-bg) / 0.3);
+    }
+
+    :global(.dark) .stat-item:hover {
+        background: rgb(var(--color-bg) / 0.5);
+    }
+</style> 

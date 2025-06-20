@@ -2,25 +2,180 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
-import Hero from '../components/Hero.astro';
 import TechStack from '../components/TechStack.astro';
 import siteConfig from '../data/site-config';
 import { sortItemsByDateDesc } from '../utils/data-utils';
 import PostPreview from '../components/PostPreview.astro';
+import { marked } from 'marked';
+import { Image } from 'astro:assets';
+import FormattedDate from '../components/FormattedDate.astro';
+import WeatherWidget from '../components/WeatherWidget.astro';
+import BlogStats from '../components/BlogStats.astro';
+import ArticleCarousel from '../components/ArticleCarousel.astro';
+import { getAllTags } from '../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort(sortItemsByDateDesc);
 const featuredPosts = posts.filter(({ data }) => data.isFeatured);
 
+// 随机选择4篇文章用于轮播
+const randomPosts = [...posts].sort(() => 0.5 - Math.random()).slice(0, 4);
+
+// 博客统计数据
+const blogStats = {
+    totalPosts: posts.length,
+    totalTags: getAllTags(posts).length,
+    latestPost: sortedPosts[0]
+};
+
+// 硬编码的hero数据
+const heroData = {
+    title: 'Hi There & Welcome to My Blog',
+    text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
+    image: {
+        src: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/blog-cover.webp',
+        alt: '博客临时封面图'
+    },
+    actions: [
+        {
+            text: '👋 About Me',
+            href: '/about'
+        },
+        {
+            text: '🪁 To Wiki',
+            href: 'https://www.dgutcs.wiki/'
+        },
+        {
+            text: '👀 Markdown Style',
+            href: '/style'
+        }
+    ]
+};
+
+// 预先解析markdown以避免在渲染时解析
+const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
+
+
+
+// 默认fallback数据，确保组件始终有内容渲染
+let weatherData = {
+  temp_C: '24',
+  weatherDesc: [{ value: 'Cloudy' }]
+};
+
+let currentDate = new Date().toLocaleDateString('en-US', { 
+  weekday: 'long' as const, 
+  month: 'long' as const, 
+  day: 'numeric' as const 
+});
+
+// 使用带超时的fetch，避免长时间阻塞SSR
+const fetchWithTimeout = async (url: string, timeout = 2000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Weather-Widget/1.0'
+      }
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
+try {
+  const response = await fetchWithTimeout('https://wttr.in/beijing?format=j1', 1500);
+  if (response.ok) {
+    const data = await response.json();
+    if (data.current_condition && data.current_condition[0]) {
+      weatherData = data.current_condition[0];
+    }
+  }
+} catch (error) {
+  // API超时或失败，使用fallback数据
+  console.log('Weather API timeout/failed, using fallback data');
+}
 ---
 
 <BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
-    <Hero />
+    <section class="w-full mb-8 ">
+        <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Posts</h1>
+        <div class="flex flex-col space-y-4">
+            {posts.slice(0, 8).map((post) => {
+                return (
+                    <div class="!mt-3">
+                        <span class="pr-5 italic font-serif inline-block w-32 text-gray-500">
+                            <FormattedDate format="iso" date={post.data.publishDate} />
+                        </span>
+                        <a class="posts-link" href={`/blog/${post.id}`}>{post.data.title}</a>
+                    </div>
+                )
+            })}
+        </div>
+        <div class="mt-8">
+            <a class="read-more-link" href="/blog/plain">Read More →</a>
+        </div>
+        <hr class="my-8 border-dashed">
+    </section>
+
+    
+     <section class="mb-8">
+        <ArticleCarousel posts={randomPosts} />
+        <hr class="my-8 border-dashed"></hr>
+    </section> 
+
+    <div class="grid sm:grid-cols-12 gap-8 mb-8">
+         <div class="sm:col-span-8 my-7">
+            <section class="hero-section space-y-8">
+                {heroData.title && <h1 class="hero-title">{heroData.title}</h1>}
+                
+                <div class="hero-content-grid">
+                    <div class="hero-content-list ">
+                        <div class="hero-text mb-3" set:html={parsedText} />
+                            <div class="hero-image-container">
+                                <Image
+                                    class="hero-image"
+                                    src={heroData.image.src}
+                                    alt={heroData.image.alt || ''}
+                                    loading="lazy"
+                                    decoding="async"
+                                    width={600}
+                                    height={315}
+                                />
+                            </div>
+                            <div class="hero-actions">
+                                {heroData.actions.map((action) => (
+                                    <Button href={action.href}>{action.text}</Button>
+                                ))}
+                            </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <div class="sm:col-span-4 sidebar-container">
+            <BlogStats stats={blogStats} />
+            <div class="min-h-[350px] scale-[0.8]">
+                <WeatherWidget weatherData={weatherData}  currentDate={currentDate} />
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="mb-8 sm:mb-24">
         <TechStack />
     </div>
+
     {
         featuredPosts?.length > 0 && (
-            <div class="mb-16 sm:mb-24">
+            <div class="mb-16 sm:mb-24 mt-12">
                 <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">Latest posts</h2>
                 <div class="flex flex-col space-y-8">
                     {featuredPosts.map((post) => (
@@ -35,3 +190,300 @@ const featuredPosts = posts.filter(({ data }) => data.isFeatured);
         )
     }
 </BaseLayout>
+
+<style lang="scss">
+    .posts-link {
+        color: rgb(var(--color-text-main) / 0.8);
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-decoration-thickness: 3px;
+        text-decoration-color: rgb(var(--color-text-main) / 0.4);
+        text-underline-offset: 0.2em;
+        font-weight: 500;
+        position: relative;
+        transition: all 0.2s ease;
+        
+        &::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #60a5fa, #e879f9);
+            transform-origin: right;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        &:hover {
+            color: rgb(var(--color-text-main) / 1);
+            text-decoration-color: transparent;
+            
+            &::after {
+                transform-origin: left;
+                transform: scaleX(1);
+            }
+        }
+        
+        &:visited {
+            color: rgb(var(--color-text-main));
+        }
+    }
+
+    .read-more-link {
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        color: rgb(var(--color-text-main));
+        font-weight: 500;
+        transition: all 0.3s ease;
+
+        &:hover {
+            text-decoration-color: rgb(var(--color-text-main));
+        }
+    }
+
+    .random-button {
+        background: linear-gradient(135deg, #ed974f, #f59e0b);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .random-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(237, 151, 79, 0.3);
+        background: linear-gradient(135deg, #f59e0b, #ed974f);
+    }
+
+    .random-button:active {
+        transform: translateY(0);
+    }
+
+    /* Hero区域样式 */
+    .hero-section {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        transition: none;
+    }
+
+    .hero-section:hover {
+        border-color: transparent;
+        transform: none;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        leading-tight: true;
+        font-family: serif;
+        font-weight: 600;
+        margin: 0 0 24px 0;
+        color: rgb(var(--color-text-main));
+        line-height: 1.2;
+    }
+
+    .hero-content-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .hero-image-container {
+        width: 100%;
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        transition: transform 0.3s ease, filter 0.3s ease;
+        max-height: 300px;
+        object-fit: cover;
+    }
+
+    .hero-image:hover {
+        transform: scale(1.02);
+    }
+
+    .hero-content-list {
+        display: flex;
+        flex-direction: column;
+        align-items: space-between;
+        gap: 20px;
+        height: 100%;
+        justify-content: space-between;
+    }
+
+    .hero-text {
+        color: rgb(var(--color-text-main));
+        font-size: 1rem;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .hero-text :global(p) {
+        margin: 0 0 12px 0;
+    }
+
+    .hero-text :global(p:last-child) {
+        margin-bottom: 0;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+    /* 侧边栏容器样式 */
+    .sidebar-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-width: none;
+        width: 100%;
+    }
+
+    .weather-container {
+        width: 100%;
+        height: 280px; /* 固定高度，对应scale(0.8)后的350px */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(0.8);
+        transform-origin: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        /* 防止布局闪动的固定容器 */
+    }
+
+    .sidebar-container > :global(*) {
+        flex: 1;
+    }
+
+    /* 优化后的夜间模式样式 */
+    :global(.dark) .hero-image {
+        filter: brightness(0.8);
+        transition: transform 0.3s ease;
+    }
+
+    :global(.dark) .hero-image:hover {
+        transform: translateY(-2px);
+    }
+
+    /* 使用CSS @property来优化动画性能 */
+    @property --glow-opacity {
+        syntax: '<number>';
+        initial-value: 0.3;
+        inherits: false;
+    }
+
+    :global(.dark) .hero-image {
+        box-shadow: 0 0 20px rgba(147, 197, 253, var(--glow-opacity));
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        :global(.dark) .hero-image {
+            animation: subtle-glow 3s ease-in-out infinite;
+        }
+    }
+
+    @keyframes subtle-glow {
+        0%, 100% { --glow-opacity: 0.3; }
+        50% { --glow-opacity: 0.5; }
+    }
+
+    /* 响应式布局调整 */
+    @media (max-width: 1024px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .lg\:col-span-3 {
+            order: 2;
+        }
+        
+        .hero-content-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .hero-title {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .sidebar-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .flex.items-center.justify-between {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .random-button {
+            align-self: stretch;
+            justify-content: center;
+        }
+
+        .hero-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero-content-grid {
+            gap: 16px;
+        }
+
+        .hero-actions {
+            gap: 10px;
+        }
+
+        .hero-actions :global(a) {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const randomButton = document.getElementById('randomArticle');
+        
+        // 文章ID列表
+        const articleIds = [
+            'frontend', 'cursor', 'docker', 'git', 'performance', 
+            'review-2024', 'share', 'ssr', 'trash', 'yjs', 
+            'ad', 'format', 'cicd'
+        ];
+        
+        randomButton?.addEventListener('click', () => {
+            // 随机选择一篇文章
+            const randomId = articleIds[Math.floor(Math.random() * articleIds.length)];
+            
+            // 添加点击动画
+            randomButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                randomButton.style.transform = '';
+                // 跳转到随机文章
+                window.location.href = `/blog/${randomId}`;
+            }, 150);
+        });
+    });
+</script>

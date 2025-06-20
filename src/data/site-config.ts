@@ -10,13 +10,6 @@ export type Link = {
     icon?: string;
 };
 
-export type Hero = {
-    title?: string;
-    text?: string;
-    image?: Image;
-    actions?: Link[];
-};
-
 // Unsplash API配置接口
 export interface UnsplashConfig {
     accessKey: string;
@@ -48,7 +41,6 @@ export type SiteConfig = {
     image?: Image;
     headerNavLinks?: Link[];
     socialLinks?: Link[];
-    hero?: Hero;
     postsPerPage?: number;
     projectsPerPage?: number;
     friends: Friend[];
@@ -85,10 +77,10 @@ const siteConfig: SiteConfig = {
             text: 'Tags',
             href: '/tags'
         },
-        {
-            text: 'Friends',
-            href: '/friends'
-        },
+        // {
+        //     text: 'Friends',
+        //     href: '/friends'
+        // },
         // {
         //     text: 'RSS',
         //     href: '/rss.xml'
@@ -104,28 +96,6 @@ const siteConfig: SiteConfig = {
             href: 'http://wpa.qq.com/msgrd?v=3&uin=1467513807&site=qq&menu=yes'
         }
     ],
-    hero: {
-        title: 'Hi There & Welcome to My Blog',
-        text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
-        image: {
-            src: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/blog-cover.webp',
-            alt: '博客临时封面图'
-        },
-        actions: [
-            {
-                text: '👋 About Me',
-                href: '/about'
-            },
-            {
-                text: '🪁 To Wiki',
-                href: 'https://www.dgutcs.wiki/'
-            },
-            {
-                text: '👀 Markdown Style',
-                href: '/style'
-            }
-        ]
-    },
     postsPerPage: 6,
     projectsPerPage: 4,
     friends: [
