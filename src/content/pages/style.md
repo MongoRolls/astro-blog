@@ -150,24 +150,36 @@ print s
 
 There must be at least 3 dashes separating each header cell. The outer pipes (|) are optional, and you don’t need to make the raw Markdown line up prettily. You can also use inline Markdown.
 
-:::tip[自定义旁白]
-This is a warning
-:::
+github style admonition
 
-:::note
+```md
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
 
-This is a note
+> [!TIP]
+> Optional information to help a user be more successful.
 
-:::
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
 
-:::caution
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
 
-This is a caution
+> [!CAUTION]
+> Negative potential consequences of an action.
+```
 
-:::
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
 
-:::danger
+> [!TIP]
+> Optional information to help a user be more successful.
 
-This is a danger
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
 
-:::
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+> [!CAUTION]
+> Negative potential consequences of an action.

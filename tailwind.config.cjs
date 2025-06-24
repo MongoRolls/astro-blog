@@ -37,22 +37,7 @@ module.exports = {
             typography: (theme) => ({
                 mongorolls: {
                     css: {
-                        '--tw-prose-body': theme('textColor.main / 100%'),
-                        '--tw-prose-headings': theme('textColor.main / 100%'),
-                        '--tw-prose-lead': theme('textColor.main / 100%'),
-                        '--tw-prose-links': theme('textColor.main / 100%'),
-                        '--tw-prose-bold': theme('textColor.main / 100%'),
-                        '--tw-prose-counters': theme('textColor.main / 100%'),
-                        '--tw-prose-bullets': theme('textColor.main / 100%'),
-                        '--tw-prose-hr': theme('borderColor.main / 100%'),
-                        '--tw-prose-quotes': theme('textColor.main / 100%'),
-                        '--tw-prose-quote-borders': theme('borderColor.main / 100%'),
-                        '--tw-prose-captions': theme('textColor.main / 100%'),
-                        '--tw-prose-code': theme('textColor.main / 100%'),
-                        '--tw-prose-pre-code': theme('colors.zinc.100'),
-                        '--tw-prose-pre-bg': theme('colors.zinc.800'),
-                        '--tw-prose-th-borders': theme('borderColor.main / 100%'),
-                        '--tw-prose-td-borders': theme('borderColor.main / 100%')
+                        // 自定义
                     }
                 },
                 DEFAULT: {
@@ -63,7 +48,7 @@ module.exports = {
                             textDecorationStyle: 'dotted',
                             textDecorationThickness: '3px',
                             textDecorationColor: 'rgb(var(--color-text-main) / 0.4)',
-                            textUnderlineOffset: '0.2em',
+                            textUnderlineOffset: '0.3em',
                             color: 'rgb(var(--color-text-main) / 0.8)',
                             transition: 'all 0.2s ease',
                             '&::after': {
@@ -151,15 +136,7 @@ module.exports = {
                             fontWeight: 400
                         },
                         'h1,h2': {
-                            fontWeight: 900,
-                            '&::before': {
-                                background: 'rgb(23, 23, 23)',
-                                content: '""',
-                                display: 'block',
-                                height: '2px',
-                                marginBottom: '18px',
-                                width: '60px'
-                            }
+                            fontWeight: 900
                         },
                         'h1,h2,h3': {
                             fontFamily: theme('fontFamily.serif'),
@@ -168,11 +145,11 @@ module.exports = {
                         },
                         summary: {
                             cursor: 'pointer',
-                            color: theme('colors.blue.500'),
+                            color: theme('colors.blue.400'),
                             fontWeight: 500,
                             transition: 'color 0.2s ease',
                             '&:hover': {
-                                color: theme('colors.purple.500')
+                                color: theme('colors.purple.300')
                             }
                         },
                         // 表格相关配置
@@ -249,13 +226,6 @@ module.exports = {
                                     content: '""'
                                 }
                             }
-                        }
-                    }
-                },
-                lg: {
-                    css: {
-                        blockquote: {
-                            paddingLeft: 10
                         }
                     }
                 }

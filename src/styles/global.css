@@ -54,38 +54,6 @@
         --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
-
-    /* Cyan */
-    /*
-    :root {
-        --color-text-main: 22 42 43;
-        --color-bg-main: 214 224 226;
-        --color-bg-muted: 204 216 219;
-        --color-border-main: 22 42 43;
-    }
-    html.dark {
-        --color-text-main: 214 224 226;
-        --color-bg-main: 22 42 43;
-        --color-bg-muted: 28 53 55;
-        --color-border-main: 214 224 226;
-    }
-    */
-
-    /* Green */
-    /*
-    :root {
-        --color-text-main: 58 66 56;
-        --color-bg-main: 243 239 230;
-        --color-bg-muted: 238 233 220;
-        --color-border-main: 58 66 56;
-    }
-    html.dark {
-        --color-text-main: 243 239 230;
-        --color-bg-main: 94 108 91;
-        --color-bg-muted: 89 103 86;
-        --color-border-main: 243 239 230;
-    }
-    */
 }
 
 @layer components {

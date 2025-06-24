@@ -129,19 +129,21 @@ document.addEventListener('astro:page-load', () => {
                 
                 // 先设置醒目颜色
                 const originalBackgroundColor = targetElement.style.backgroundColor;
-                targetElement.style.color = 'red'; // 使用透明色以便显示渐变
+                targetElement.style.color = '#FF6B6B'; // 使用柔和的珊瑚红色，更加美观
+                targetElement.style.transition = 'color 1s ease'; // 添加过渡效果使颜色变化更平滑
                 
                 // 3秒后恢复原来的颜色
                 setTimeout(() => {
                     targetElement.style.color = originalBackgroundColor;
-                }, 3000);
+                }, 2000);
                 targetElement.scrollIntoView({
                     block: 'start',
+                    behavior: 'smooth'
                 });
                 // 等待滚动完成后再偏移
                 setTimeout(() => {
                     window.scrollBy({
-                        top: -104,
+                        top: -120,
                         behavior: 'smooth'
                     }); 
                 }, 1000); 

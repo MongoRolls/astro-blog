@@ -6,7 +6,7 @@ import Search from './Search.astro';
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="nav min-h-10 py-4 mb-16 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
+<nav class="nav min-h-10 py-4 mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
     {
         navLinks.length > 0 && (
             <div class="w-full max-w-[704px] mx-auto relative px-4 md:px-0">
@@ -18,11 +18,11 @@ const navLinks = siteConfig.headerNavLinks || [];
                 >
                     <span class="menu-toggle-icon w-6 h-px relative bg-current" />
                 </button>
-                <ul id="menu-items" class="menu flex gap-6">
+                <ul id="menu-items" class="menu flex items-center gap-6">
                     {navLinks.map((link) => (
                         <li class="py-1">
                             <NavLink
-                                class="text-xl font-serif text-main hover:underline hover:underline-offset-2 hover:decoration-1 md:text-[18px]"
+                                class="text-xl font-serif text-main md:text-[18px]"
                                 href={link.href}
                             >
                                 {link.text}

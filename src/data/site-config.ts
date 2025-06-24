@@ -45,6 +45,11 @@ export type SiteConfig = {
     projectsPerPage?: number;
     friends: Friend[];
     unsplash?: UnsplashConfig; // 添加Unsplash配置
+    author?: string;
+    language?: string;
+    locale?: string;
+    keywords?: string[];
+    themeColor?: string;
 };
 
 const siteConfig: SiteConfig = {
@@ -53,6 +58,11 @@ const siteConfig: SiteConfig = {
     ossWebsite: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/',
     subtitle: 'a Frontend Engineer',
     description: 'Blog by MongoRolls',
+    author: 'MongoRolls',
+    language: 'zh-CN',
+    locale: 'zh_CN',
+    keywords: ['前端开发', '技术博客', 'JavaScript', 'React', 'Vue', 'Node.js'],
+    themeColor: '#425bc5',
     logo: {
         src: '/rspack-logo.png'
     },
@@ -70,8 +80,8 @@ const siteConfig: SiteConfig = {
         //     href: '/projects'
         // },
         {
-            text: 'Blog',
-            href: '/blog'
+            text: 'Post',
+            href: '/post'
         },
         {
             text: 'Tags',
@@ -81,10 +91,14 @@ const siteConfig: SiteConfig = {
         //     text: 'Friends',
         //     href: '/friends'
         // },
-        // {
-        //     text: 'RSS',
-        //     href: '/rss.xml'
-        // }
+        {
+            text: 'About',
+            href: '/about'
+        },
+        {    
+            text: 'RSS',
+            href: '/rss.xml'
+        }
     ],
     socialLinks: [
         {

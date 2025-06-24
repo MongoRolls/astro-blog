@@ -119,15 +119,15 @@ try {
             })}
         </div>
         <div class="mt-8">
-            <a class="read-more-link" href="/blog/plain">Read More →</a>
+            <a class="read-more-link font-serif" href="/post">Read More →</a>
         </div>
-        <hr class="my-8 border-dashed">
+        <hr class="my-8 border-dashed border-main">
     </section>
 
     
      <section class="mb-8">
         <ArticleCarousel posts={randomPosts} />
-        <hr class="my-8 border-dashed"></hr>
+        <hr class="my-8 border-dashed border-main "></hr>
     </section> 
 
     <div class="grid sm:grid-cols-12 gap-8 mb-8">
@@ -243,31 +243,7 @@ try {
         }
     }
 
-    .random-button {
-        background: linear-gradient(135deg, #ed974f, #f59e0b);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
 
-    .random-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(237, 151, 79, 0.3);
-        background: linear-gradient(135deg, #f59e0b, #ed974f);
-    }
-
-    .random-button:active {
-        transform: translateY(0);
-    }
 
     /* Hero区域样式 */
     .hero-section {
@@ -356,18 +332,7 @@ try {
         width: 100%;
     }
 
-    .weather-container {
-        width: 100%;
-        height: 280px; /* 固定高度，对应scale(0.8)后的350px */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transform: scale(0.8);
-        transform-origin: center;
-        overflow: hidden;
-        flex-shrink: 0;
-        /* 防止布局闪动的固定容器 */
-    }
+
 
     .sidebar-container > :global(*) {
         flex: 1;
@@ -437,10 +402,7 @@ try {
             gap: 12px;
         }
         
-        .random-button {
-            align-self: stretch;
-            justify-content: center;
-        }
+
 
         .hero-title {
             font-size: 1.5rem;
@@ -462,28 +424,3 @@ try {
     }
 </style>
 
-<script>
-    document.addEventListener('astro:page-load', () => {
-        const randomButton = document.getElementById('randomArticle');
-        
-        // 文章ID列表
-        const articleIds = [
-            'frontend', 'cursor', 'docker', 'git', 'performance', 
-            'review-2024', 'share', 'ssr', 'trash', 'yjs', 
-            'ad', 'format', 'cicd'
-        ];
-        
-        randomButton?.addEventListener('click', () => {
-            // 随机选择一篇文章
-            const randomId = articleIds[Math.floor(Math.random() * articleIds.length)];
-            
-            // 添加点击动画
-            randomButton.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                randomButton.style.transform = '';
-                // 跳转到随机文章
-                window.location.href = `/blog/${randomId}`;
-            }, 150);
-        });
-    });
-</script>

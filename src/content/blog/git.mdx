@@ -1,7 +1,8 @@
 ---
 title: 'Git 版本控制与提交规范指南'
 excerpt: 'Git基础概念、常用命令与commit规范的完整指南'
-publishDate: '2024-01-07'
+publishDate: '2024-01-06'
+updatedDate: '2025-06-23'
 tags:
   - tech
   - git
@@ -64,15 +65,12 @@ git pull [remote] [branch]
 
 这个命令用于从远程获取代码并合并。实际上，**git pull** 是 **git fetch** 和 **git merge** 的组合体。
 
-:::danger
-使用 **git pull** 前先把本地修改的代码进行 **add** 和 **commit**，避免冲突造成代码丢失。
+> [!CAUTION]
+> 使用 **git pull** 前先把本地修改的代码进行 **add** 和 **commit**，避免冲突造成代码丢失。
+> 对于未完成的开发代码可以使用 **git stash** 暂存。
+> 可以使用 **git status** 查看提交记录状态，确认无误后再执行 **git pull** 拉取远程代码。
 
-对于未完成的开发代码可以使用 **git stash** 暂存。
-
-可以使用 **git status** 查看提交记录状态，确认无误后再执行 **git pull** 拉取远程代码。
-:::
-
-**获取远程更新（不自动合并）**
+**获取远程更新**
 
 ```bash
 git fetch [remote]
@@ -209,20 +207,3 @@ git worktree
 ```
 
 同时开发一个项目的两个分支，又不想使用stash或commit的情况下使用。
-
-> [!NOTE]
-> Highlights information that users should take into account, even when skimming.
-
-> [!TIP]
-> Optional information to help a user be more successful.
-
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed.
-
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-
-> [!CAUTION]
-> Negative potential consequences of an action.
-
-> 普通引用

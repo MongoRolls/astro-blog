@@ -26,17 +26,17 @@ type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], seo } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], keywords = [], seo } = post.data;
 const { Content,headings,remarkPluginFrontmatter  } = await render(post);
 const { minutesRead } = remarkPluginFrontmatter;
 ---
 
-<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" headings={headings} showHeader={false}>    
+<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" keywords={keywords} author="MongoRolls" headings={headings} showHeader={false}>    
     <div class="relative lg:flex lg:gap-10">
         <!-- 主要内容 -->
         <article class="w-full lg:max-w-[704px]">
             <header class="mb-8">
-                <img src={`https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${post.id}.jpg`} alt={title} class="w-full h-auto rounded-lg mb-3">
+                <img src={`https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${post.id}.jpg`} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3">
                 <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
                     <div>published: <FormattedDate date={publishDate} /></div>
@@ -56,7 +56,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                 <div class="w-full h-[1px] bg-gray-400 my-4" />
             </header>
             
-            <div class="max-w-none prose prose-mongorolls dark:prose-invert sm:prose-lg">
+            <div class="max-w-none prose  dark:prose-invert">
                 <Content />
             </div>
 
@@ -65,7 +65,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                     tags.length > 0 && (
                         <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                             {tags.map((tag: string) => (
-                                <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
+                                <a class="text-main text-lg hover:underline" href={`/tags/${slugify(tag)}`}>
                                     # {tag}
                                 </a>
                             ))}
