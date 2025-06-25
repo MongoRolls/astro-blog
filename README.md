@@ -71,3 +71,45 @@ pnpm preview
 ## License
 
 GPL-3.0 License © 2025 MongoRolls
+
+# 环境变量配置
+
+## 图片资源配置
+
+项目支持通过环境变量控制图片资源加载策略：
+
+### ASTRO_IMAGE_SOURCE
+
+控制图片资源来源，可选值：
+
+- `local`: 使用本地 public 文件夹中的图片
+- `oss`: 使用阿里云 OSS CDN 图片
+
+**默认行为：**
+
+- 开发环境 (`npm run dev`): 自动使用 `local`
+- 生产环境 (`npm run build`): 自动使用 `oss`
+
+**手动设置：**
+
+```bash
+# 强制使用本地图片
+ASTRO_IMAGE_SOURCE=local npm run dev
+
+# 强制使用 OSS 图片
+ASTRO_IMAGE_SOURCE=oss npm run dev
+```
+
+### 图片目录结构
+
+```
+public/
+├── cover-images/          # 博客封面图片
+├── tech/                  # 技术栈图标
+├── friends/               # 友链头像
+└── ...                   # 其他静态资源
+```
+
+## 构建说明
+
+构建时会自动下载 Unsplash 图片到本地 `public/cover-images/` 目录，但生产环境默认使用 OSS 加速访问。

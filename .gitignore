@@ -13,6 +13,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 thought.mdx
+complete-file-upload-guide.mdx
+javascript-http-requests.mdx
 
 # environment variables
 .env

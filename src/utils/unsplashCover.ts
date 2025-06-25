@@ -1,18 +1,11 @@
 import fs from 'node:fs';
 import https from 'node:https';
 import path from 'node:path';
-import siteConfig from '../data/site-config';
+import { imageConfig } from '../config/image';
+import { getCoverImagePath as getImagePath } from './imagePath';
 
 // 获取Unsplash API配置
-const UNSPLASH_API_CONFIG = siteConfig.unsplash || {
-  accessKey: '',
-  searchEndpoint: 'https://api.unsplash.com/search/photos',
-  perPage: 30,
-  coverImageFolder: 'public/cover-images',
-  imageWidth: 1200,
-  imageHeight: 630,
-  cropMode: 'entropy'
-};
+const UNSPLASH_API_CONFIG = imageConfig.unsplash;
 
 // 确保封面图片目录存在
 function ensureCoverImageDirExists() {
@@ -28,9 +21,7 @@ export function coverImageExists(postId: string): boolean {
 
 // 获取封面图片的URL路径
 export function getCoverImagePath(postId: string): string {
-  // 阿里云oss
-      return `https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${postId}.jpg`
-  // return `/cover-images/${postId}.jpg`;
+  return getImagePath(postId);
 }
 
 // 获取Unsplash图片并保存

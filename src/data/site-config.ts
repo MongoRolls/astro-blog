@@ -1,8 +1,8 @@
-export type Image = {
-    src: string;
-    alt?: string;
-    caption?: string;
-};
+// 导入统一的类型定义
+import type { Image } from '../types/image';
+import { imageConfig } from '../config/image';
+
+export type { Image };
 
 export type Link = {
     text: string;
@@ -10,7 +10,7 @@ export type Link = {
     icon?: string;
 };
 
-// Unsplash API配置接口
+// Unsplash API配置接口（保留向后兼容）
 export interface UnsplashConfig {
     accessKey: string;
     searchEndpoint: string;
@@ -64,10 +64,10 @@ const siteConfig: SiteConfig = {
     keywords: ['前端开发', '技术博客', 'JavaScript', 'React', 'Vue', 'Node.js'],
     themeColor: '#425bc5',
     logo: {
-        src: '/rspack-logo.png'
+        src: '/logo.png'
     },
     image: {
-        src: '/rspack-logo.png',
+        src: '/logo.png',
         alt: 'MongoRolls - Astro.js and Tailwind CSS theme'
     },
     headerNavLinks: [
@@ -135,17 +135,8 @@ const siteConfig: SiteConfig = {
             github: 'https://github.com/dbinggo'
         }
     ] as Friend[],
-    // Unsplash API配置
-    unsplash: {
-        accessKey: 'jVPuYBnhE6EPu3velt7izC6cwJgO2Ttk_0VvwRAr0ms',
-        searchEndpoint: 'https://api.unsplash.com/search/photos',
-        perPage: 30, // 增加每页返回数量以随机选择
-        coverImageFolder: 'public/cover-images',
-        imageWidth: 1200,
-        imageHeight: 630, // 16:9的比例适合卡片
-        cropMode: 'entropy', // 智能裁剪，保留图片中最重要的部分
-        query: 'nature landscape'// 搜索关键词
-    }
+    // Unsplash API配置（使用统一配置）
+    unsplash: imageConfig.unsplash
 };
 
 export default siteConfig;

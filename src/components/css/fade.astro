@@ -1,5 +1,11 @@
+---
+import { getCSSBackgroundImageUrl } from '../../utils/imagePath';
+
+const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
+---
+
 <div class="container">
-    <div class="img" />
+    <div class="img" style={`--bg-image: ${bgImageUrl}`} />
 </div>
 
 
@@ -81,7 +87,7 @@
         width: $width;
         height: $width;
         // 设置背景图片
-        background-image: url(https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/share.jpg?v=1.0.0);
+        background-image: var(--bg-image);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;

@@ -40,7 +40,7 @@ function coverImageExists(postId) {
     return fs.existsSync(path.join(UNSPLASH_API_CONFIG.coverImageFolder, `${postId}.jpg`));
 }
 
-// 获取封面图片的URL路径
+// 获取封面图片的URL路径（构建时始终返回本地路径）
 function getCoverImagePath(postId) {
     return `/cover-images/${postId}.jpg`;
 }

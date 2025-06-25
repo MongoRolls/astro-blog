@@ -7,6 +7,7 @@ import PostPreview from '../../components/PostPreview.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
 import MyComment from '../../components/MyComment.astro';
+import { getCoverImagePath } from '../../utils/imagePath';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
@@ -36,7 +37,7 @@ const { minutesRead } = remarkPluginFrontmatter;
         <!-- 主要内容 -->
         <article class="w-full lg:max-w-[704px]">
             <header class="mb-8">
-                <img src={`https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${post.id}.jpg`} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3">
+                <img src={getCoverImagePath(post.id)} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3">
                 <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
                     <div>published: <FormattedDate date={publishDate} /></div>

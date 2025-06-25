@@ -2,7 +2,8 @@
 import { type CollectionEntry } from 'astro:content';
 import ArrowRight from '../icons/ArrowRight.astro';
 import FormattedDate from './FormattedDate.astro';
-import { coverImageExists, getCoverImagePath, fetchAndSaveCoverImage } from '../utils/unsplashCover';
+import { coverImageExists, fetchAndSaveCoverImage } from '../utils/unsplashCover';
+import { getCoverImagePath } from '../utils/imagePath';
 
 type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
