@@ -12,17 +12,17 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
 <nav class="toc hidden lg:block h-full">
-    <div class= "sticky top-24 max-h-[60vh] overflow-y-auto">
-        <ul class="space-y-3 text-sm border-l border-gray-200 dark:border-gray-800">
-        {headings.length > 0 && <h2 class="mb-6 text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-6">Content</h2>}
+    <div class= "sticky top-24 max-h-[70vh] overflow-y-auto">
+        <ul class="space-y-1 text-xs leading-4 border-l border-gray-200 dark:border-gray-800">
+        {headings.length > 0 && <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">Content</h2>}
         {
                 toc.map((heading) => (
                     <li
                         class:list={[
                             'toc-item line-clamp-1 relative flex items-center',
                             {
-                                'pl-6': heading.depth === 2,
-                                'pl-10 ': heading.depth === 3
+                                'pl-4': heading.depth === 2,
+                                'pl-6': heading.depth === 3
                             },
                         ]}
                     >
@@ -41,17 +41,18 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 
 <style>
     .toc {
-        width: 240px;
-        padding-left: 1.5rem;
+        width: 220px;
+        padding-left: 1rem;
     }
 
     .toc-item {
-        line-height: 1.4;
+        line-height: 1rem;
+        font-size: 0.75rem;
     }
 
     /* 激活状态的样式 */
     .toc-item.active > a {
-        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-1 scale-110;
+        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-0.5 scale-105;
     }
 
     .toc-item.active::before {
@@ -60,9 +61,9 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
         left: -1px;
         top: 0;
         bottom: 0;
-        width: 4px;
-        border-radius: 6px;
-        transition: all 0.2s ease-in-out;
+        width: 3px;
+        border-radius: 4px;
+        transition: all 0.15s ease-in-out;
         @apply bg-blue-600 dark:bg-blue-400;
     }
 
@@ -143,10 +144,10 @@ document.addEventListener('astro:page-load', () => {
                 // 等待滚动完成后再偏移
                 setTimeout(() => {
                     window.scrollBy({
-                        top: -120,
+                        top: -80,
                         behavior: 'smooth'
                     }); 
-                }, 1000); 
+                }, 800); 
 
             }
         });

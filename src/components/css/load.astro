@@ -117,7 +117,7 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
 <script>
     // 当页面加载完成时自动触发加载动画
     document.addEventListener('DOMContentLoaded', () => {
-        console.log("页面已加载，淡入动画开始");
+        // console.log("页面已加载，淡入动画开始");
         
         // 获取正确的元素 - .img 而不是 img 标签
         const imgElement = document.querySelector('.img');
@@ -126,7 +126,7 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
             // 给一个很短的延迟，确保DOM完全加载
             setTimeout(() => {
                 imgElement.classList.add('loaded');
-                console.log("添加loaded类，动画应该开始了");
+                // console.log("添加loaded类，动画应该开始了");
             }, 500);
         } else {
             console.error("没有找到.img元素");

@@ -1,0 +1,226 @@
+---
+// 动画签名组件
+export interface Props {
+  /** 动画持续时间 */
+  animationDuration?: string;
+  /** 边框颜色 */
+  strokeColor?: string;
+  /** 填充颜色 */
+  fillColor?: string;
+  /** 暗色模式下边框颜色 */
+  darkStrokeColor?: string;
+  /** 暗色模式下填充颜色 */
+  darkFillColor?: string;
+  /** SVG宽度 */
+  width?: string;
+  /** SVG高度 */
+  height?: string;
+  /** 边框宽度 */
+  strokeWidth?: number;
+  /** 是否在移动端隐藏 */
+  hiddenOnMobile?: boolean;
+  /** 动画开始延迟间隔 */
+  delayInterval?: number;
+  /** 自定义CSS类名 */
+  className?: string;
+}
+
+const { 
+  animationDuration = '8s',
+  strokeColor = 'currentColor',
+  fillColor = 'currentColor', 
+  darkStrokeColor = '#fdfdfd',
+  darkFillColor = '#fdfdfd',
+  width = '117px',
+  height = '51px',
+  strokeWidth = 12,
+  hiddenOnMobile = true,
+  delayInterval = 0.15,
+  className = ''
+} = Astro.props;
+
+// 计算各个路径的延迟时间
+const pathDelays = Array.from({length: 7}, (_, i) => `${i * delayInterval}s`);
+
+// 映射为独立的主题变量
+const lightFillColor = fillColor;
+const actualDarkFillColor = darkFillColor;
+---
+
+<svg 
+  class={`signature-container ${className}`}
+  version="1.0" 
+  xmlns="http://www.w3.org/2000/svg"
+  width={width}
+  height={height}
+  viewBox="0 0 374.000000 172.000000"
+  preserveAspectRatio="xMidYMid meet"
+>
+
+<g transform="translate(0.000000,172.000000) scale(0.100000,-0.100000)"
+fill="#000000" stroke="none">
+<path class="signature-path path-1" d="M2400 1608 c0 -43 -1 -43 -62 -72 -107 -50 -186 -139 -202 -228 -7
+-41 8 -113 26 -124 8 -5 9 0 3 17 -26 81 -8 154 52 211 38 36 142 98 165 98
+17 0 18 -8 13 -97 -3 -54 -10 -217 -15 -363 -6 -146 -13 -284 -16 -307 -5 -38
+-3 -43 14 -43 21 0 32 33 32 101 l0 39 44 0 c42 0 46 -3 96 -65 97 -118 166
+-143 246 -89 37 25 66 55 59 62 -1 2 -20 -8 -40 -23 -52 -34 -101 -33 -151 4
+-44 32 -120 109 -113 114 2 2 29 16 61 30 73 36 176 144 217 229 90 191 58
+377 -78 452 -43 23 -159 48 -186 41 -5 -2 -36 -6 -67 -9 l-58 -6 0 35 c0 28
+-4 35 -20 35 -17 0 -20 -7 -20 -42z m245 -73 c219 -35 257 -356 66 -558 -46
+-49 -140 -107 -173 -107 -8 0 -31 9 -53 20 -22 11 -46 20 -53 20 -12 0 -14 23
+-8 143 3 78 9 217 12 309 l7 168 31 5 c81 13 89 13 171 0z m-185 -660 c10 -13
+9 -15 -8 -15 -22 0 -36 13 -25 24 10 10 20 7 33 -9z"/>
+<path class="signature-path path-2" d="M947 1548 c-50 -62 -112 -168 -222 -387 -53 -105 -100 -189 -106
+-186 -5 4 -9 43 -9 88 0 105 -17 264 -31 299 -6 15 -18 29 -26 32 -21 9 -45
+-13 -38 -35 10 -31 -16 -190 -47 -284 -67 -208 -176 -334 -286 -335 -38 0 -87
+22 -101 47 -9 16 -10 15 -11 -5 0 -14 14 -38 34 -58 28 -28 42 -34 75 -34 117
+0 229 130 304 350 27 78 56 209 58 257 3 59 17 -53 23 -182 9 -180 14 -205 36
+-205 26 0 42 26 160 255 117 227 173 325 199 349 16 15 14 -1 -15 -101 -56
+-193 -86 -354 -91 -500 -8 -183 15 -263 73 -263 25 0 77 54 101 106 l16 33 28
+-30 c56 -60 149 -28 184 66 33 84 -1 155 -74 155 -61 0 -131 -70 -131 -130 0
+-40 -92 -153 -116 -143 -8 3 -21 30 -30 61 -30 102 -3 315 77 629 50 191 49
+187 23 191 -15 2 -32 -10 -57 -40z m264 -637 c28 -35 21 -97 -16 -128 -33 -29
+-50 -29 -80 2 -42 41 -31 136 18 154 30 11 54 3 78 -28z"/>
+<path class="signature-path path-3" d="M3202 1457 c-80 -85 -106 -480 -41 -627 30 -67 56 -90 100 -90 32 0
+43 6 70 40 29 36 34 39 42 23 23 -43 51 -63 87 -63 43 0 75 29 118 109 l30 53
+26 -38 c32 -47 34 -89 6 -104 -24 -13 -38 -6 -50 24 -8 20 -8 20 -19 -8 -31
+-78 53 -89 99 -14 31 50 26 97 -15 150 -31 42 -33 48 -24 82 16 57 8 100 -18
+104 -47 7 -70 -86 -37 -149 15 -29 14 -33 -12 -86 -47 -91 -95 -115 -133 -66
+-35 43 -36 68 -5 136 52 116 75 213 81 343 7 142 -4 190 -44 200 -71 18 -113
+-73 -134 -294 -10 -106 -4 -222 17 -324 5 -22 0 -34 -24 -58 -37 -37 -64 -38
+-91 -3 -35 43 -36 68 -5 136 49 110 75 214 81 333 6 122 0 175 -23 199 -22 22
+-57 19 -82 -8z m66 -57 c29 -96 1 -311 -59 -445 l-22 -50 -9 35 c-13 51 -12
+294 1 374 24 139 61 176 89 86z m200 0 c29 -96 1 -311 -59 -445 l-22 -50 -9
+35 c-13 51 -12 294 1 374 24 139 61 176 89 86z m142 -383 c-1 -39 -2 -41 -15
+-23 -23 30 -18 85 6 70 5 -3 9 -24 9 -47z"/>
+<path class="signature-path path-4" d="M1338 979 c-31 -17 -23 -239 8 -239 7 0 31 38 53 85 23 47 45 85 50
+85 10 0 21 -49 21 -97 0 -54 49 -94 94 -77 24 9 19 24 -9 24 -32 0 -43 22 -51
+104 -12 120 -44 124 -102 12 l-37 -71 -5 92 c-5 84 -7 91 -22 82z"/>
+<path class="signature-path path-5" d="M1690 964 c-93 -40 -143 -151 -94 -205 23 -26 89 -25 132 1 18 11 34
+20 36 20 1 0 -3 -30 -10 -67 -23 -124 -37 -335 -31 -488 6 -157 11 -185 33
+-185 24 0 29 27 22 122 -10 145 -9 339 3 492 8 116 14 150 35 189 13 27 24 56
+24 64 0 29 -25 7 -50 -44 -27 -57 -62 -83 -109 -83 -33 0 -71 30 -71 55 0 9 7
+30 16 46 21 41 73 62 143 57 50 -3 56 -1 56 17 0 17 -7 20 -50 22 -28 2 -65
+-4 -85 -13z"/>
+<path class="signature-path path-6" d="M1942 955 c-57 -48 -77 -127 -47 -184 16 -33 33 -41 80 -41 91 0 162
+151 104 224 -28 36 -95 37 -137 1z m77 -20 c58 -29 54 -137 -6 -164 -61 -28
+-119 71 -82 140 8 16 34 34 57 38 2 1 16 -6 31 -14z"/>
+<path class="signature-path path-7" d="M2940 954 c-42 -36 -60 -74 -60 -129 0 -61 32 -95 89 -95 101 0 171
+160 100 231 -29 29 -90 25 -129 -7z m101 -43 c28 -35 21 -97 -16 -128 -33 -29
+-50 -29 -80 2 -42 41 -31 136 18 154 30 11 54 3 78 -28z"/>
+</g>
+</svg>
+
+<style lang="scss" define:vars={{ 
+  animationDuration, 
+  strokeColor, 
+  lightFillColor, 
+  strokeWidth,
+  darkStrokeColor,
+  actualDarkFillColor,
+  hiddenOnMobile,
+  ...Object.fromEntries(pathDelays.map((delay, i) => [`path${i + 1}Delay`, delay]))
+}}>
+  .signature-container {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .signature-path {
+    stroke: var(--strokeColor);
+    stroke-width: var(--strokeWidth);
+    stroke-dasharray: 7600;
+    stroke-dashoffset: 7600;
+    fill: transparent;
+    animation: drawSignature var(--animationDuration) ease-in-out infinite;
+  }
+
+  // .path-1 { animation-delay: var(--path1Delay); }
+  // .path-2 { animation-delay: var(--path2Delay); }
+  // .path-3 { animation-delay: var(--path3Delay); }
+  // .path-4 { animation-delay: var(--path4Delay); }
+  // .path-5 { animation-delay: var(--path5Delay); }
+  // .path-6 { animation-delay: var(--path6Delay); }
+  // .path-7 { animation-delay: var(--path7Delay); }
+
+  @keyframes drawSignature {
+    0% {
+      stroke-dashoffset: 7600;
+      fill: transparent;
+    }
+
+    20% {
+      stroke-dashoffset: 0;
+      fill: transparent;
+    }
+
+    40% {
+      stroke-dashoffset: 0;
+      fill: var(--lightFillColor);
+    }
+
+    75% {
+      stroke-dashoffset: 0;
+      fill: var(--lightFillColor);
+    }
+
+    90%, 
+    100% {
+      stroke-dashoffset: 7600;
+      fill: transparent;
+    }
+  }
+
+  @keyframes drawSignatureDark {
+    0% {
+      stroke-dashoffset: 7600;
+      fill: transparent;
+    }
+
+    20% {
+      stroke-dashoffset: 0;
+      fill: transparent;
+    }
+
+    40% {
+      stroke-dashoffset: 0;
+      fill: var(--actualDarkFillColor);
+    }
+
+    75% {
+      stroke-dashoffset: 0;
+      fill: var(--actualDarkFillColor);
+    }
+
+    90%, 
+    100% {
+      stroke-dashoffset: 7600;
+      fill: transparent;
+    }
+  }
+
+  /* 移动端隐藏选项 */
+  @media (max-width: 768px) {
+    .signature-container {
+      display: none;
+    }
+  }
+
+  /* 暗色模式支持 */
+  :global(.dark) .signature-path {
+    stroke: var(--darkStrokeColor);
+    animation: drawSignatureDark var(--animationDuration) ease-in-out infinite;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const signaturePath = document.querySelectorAll('.signature-path');
+    let maxLength = 0;
+    signaturePath.forEach(path => {
+      maxLength = Math.max(maxLength, path?.getTotalLength());
+    });
+    console.log('maxLength',maxLength);
+  });
+</script>

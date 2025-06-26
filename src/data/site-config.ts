@@ -71,10 +71,10 @@ const siteConfig: SiteConfig = {
         alt: 'MongoRolls - Astro.js and Tailwind CSS theme'
     },
     headerNavLinks: [
-        {
-            text: 'Home',
-            href: '/'
-        },
+        // {
+        //     text: 'Home',
+        //     href: '/'
+        // },
         // {
         //     text: 'Projects',
         //     href: '/projects'
@@ -84,6 +84,10 @@ const siteConfig: SiteConfig = {
             href: '/post'
         },
         {
+            text: 'Blog',
+            href: '/blog'
+        },
+        {
             text: 'Tags',
             href: '/tags'
         },
@@ -91,10 +95,10 @@ const siteConfig: SiteConfig = {
         //     text: 'Friends',
         //     href: '/friends'
         // },
-        {
-            text: 'About',
-            href: '/about'
-        },
+        // {
+        //     text: 'About',
+        //     href: '/about'
+        // },
         {    
             text: 'RSS',
             href: '/rss.xml'

@@ -43,7 +43,6 @@
     // 避免被删除设置等
     // 实例化对象
     const observer = new MutationObserver((mutationsList) => {
-        console.log('test',mutationsList);
         for(let mutation of mutationsList){
             // 如果属性发生修改，并且是当前目标对象，则重新绘制
             if(mutation.type === 'attributes' && mutation.target === wm){

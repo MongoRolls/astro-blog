@@ -72,15 +72,15 @@ module.exports = {
                                 }
                             }
                         },
-                        'p, li, span': {
-                            color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
-                            fontWeight: 400,
-                            fontSize: '1rem',
-                            letterSpacing: '0.04rem',
-                            lineHeight: '1.55rem',
-                            marginBottom: '10px!important',
-                            marginTop: '10px!important'
-                        },
+                        // 'p, li, span': {
+                        //     color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
+                        //     fontWeight: 400,
+                        //     fontSize: '1rem',
+                        //     letterSpacing: '0.04rem',
+                        //     lineHeight: '1.55rem',
+                        //     marginBottom: '10px!important',
+                        //     marginTop: '10px!important'
+                        // },
                         'code:not(pre code)': {
                             fontFamily: theme('fontFamily.mono'),
                             fontSize: '0.875em',

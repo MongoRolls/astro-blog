@@ -9,28 +9,28 @@ importers:
   .:
     dependencies:
       '@astrojs/mdx':
-        specifier: ^4.2.6
+        specifier: ^4.3.0
         version: 4.3.0(astro@5.8.0(@types/node@22.15.24)(jiti@1.21.7)(rollup@4.41.1)(sass-embedded@1.89.0)(typescript@5.8.3)(yaml@2.8.0))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.11
       '@astrojs/sitemap':
-        specifier: ^3.3.1
+        specifier: ^3.4.0
         version: 3.4.0
       '@astrojs/tailwind':
         specifier: ^6.0.2
         version: 6.0.2(astro@5.8.0(@types/node@22.15.24)(jiti@1.21.7)(rollup@4.41.1)(sass-embedded@1.89.0)(typescript@5.8.3)(yaml@2.8.0))(tailwindcss@3.4.17)
       '@fontsource-variable/inter':
-        specifier: ^5.1.0
+        specifier: ^5.2.5
         version: 5.2.5
       '@fontsource-variable/newsreader':
-        specifier: ^5.1.0
+        specifier: ^5.2.7
         version: 5.2.7
       '@pagefind/default-ui':
         specifier: ^1.3.0
         version: 1.3.0
       astro:
-        specifier: ^5.7.11
+        specifier: ^5.8.0
         version: 5.8.0(@types/node@22.15.24)(jiti@1.21.7)(rollup@4.41.1)(sass-embedded@1.89.0)(typescript@5.8.3)(yaml@2.8.0)
       astro-pagefind:
         specifier: ^1.8.3
@@ -39,7 +39,7 @@ importers:
         specifier: ^0.473.0
         version: 0.473.0(astro@5.8.0(@types/node@22.15.24)(jiti@1.21.7)(rollup@4.41.1)(sass-embedded@1.89.0)(typescript@5.8.3)(yaml@2.8.0))
       marked:
-        specifier: ^15.0.4
+        specifier: ^15.0.12
         version: 15.0.12
       mdast-util-to-string:
         specifier: ^4.0.0
@@ -64,19 +64,19 @@ importers:
         version: 3.4.17
     devDependencies:
       '@tailwindcss/typography':
-        specifier: ^0.5.15
+        specifier: ^0.5.16
         version: 0.5.16(tailwindcss@3.4.17)
       prettier:
-        specifier: ^3.4.2
+        specifier: ^3.5.3
         version: 3.5.3
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.9
+        specifier: ^0.6.11
         version: 0.6.11(prettier@3.5.3)
       rollup-plugin-visualizer:
         specifier: ^5.14.0
         version: 5.14.0(rollup@4.41.1)
       sass-embedded:
-        specifier: ^1.83.4
+        specifier: ^1.89.0
         version: 1.89.0
 
 packages:
@@ -785,8 +785,8 @@ packages:
     resolution: {integrity: sha512-F3PH5k5juxom4xktynS7MoFY+NUWH5LC4CnH11YB8NPew+HLpmBLCybSAEyb2F+4pRXhuhWqFesoQd6DAyc2hw==}
     engines: {node: '>=18'}
 
-  brace-expansion@2.0.1:
-    resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==}
+  brace-expansion@2.0.2:
+    resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -3158,7 +3158,7 @@ snapshots:
       widest-line: 5.0.0
       wrap-ansi: 9.0.0
 
-  brace-expansion@2.0.1:
+  brace-expansion@2.0.2:
     dependencies:
       balanced-match: 1.0.2
 
@@ -4202,7 +4202,7 @@ snapshots:
 
   minimatch@9.0.5:
     dependencies:
-      brace-expansion: 2.0.1
+      brace-expansion: 2.0.2
 
   minipass@7.1.2: {}
 

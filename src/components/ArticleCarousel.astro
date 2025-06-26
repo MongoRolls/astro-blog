@@ -7,13 +7,14 @@ type Props = {
 };
 
 const { posts } = Astro.props;
+
 ---
 
 <div class="carousel-container">
     <div class="carousel-wrapper">
         {posts.map((post, index) => (
-            <div class="carousel-slide" data-index={index}>
-                <a href={`/blog/${post.id}`} class="carousel-link">
+            <div class="carousel-slide" data-post-id={post.id}>
+                <div class="carousel-link">
                     <img 
                         src={getCoverImagePath(post.id)} 
                         alt={post.data.title}
@@ -24,7 +25,7 @@ const { posts } = Astro.props;
                         <h3 class="carousel-title">{post.data.title}</h3>
                         {post.data.excerpt && <p class="carousel-excerpt">{post.data.excerpt}</p>}
                     </div>
-                </a>
+                </div>
             </div>
         ))}
     </div>
@@ -63,6 +64,10 @@ const { posts } = Astro.props;
 
     .carousel-slide.active {
         opacity: 1;
+    }
+
+    .carousel-slide.pointer-events-none {
+        pointer-events: none;
     }
 
     .carousel-link {
@@ -168,6 +173,7 @@ const { posts } = Astro.props;
         function showSlide(index: number) {
             slides.forEach((slide, i) => {
                 slide.classList.toggle('active', i === index);
+                slide.classList.toggle('pointer-events-none', i !== index);
             });
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
@@ -193,6 +199,14 @@ const { posts } = Astro.props;
         if (slides.length > 0) {
             showSlide(0);
             startAutoPlay();
+
+            // 设置点击事件
+            slides.forEach((slide) => {
+                slide.addEventListener('click', () => {
+                    const postId = slide.getAttribute('data-post-id');
+                    window.location.href = `/blog/${postId}`;
+                });
+            });
 
             // 点击控制
             dots.forEach((dot, index) => {

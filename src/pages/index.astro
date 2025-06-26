@@ -11,16 +11,15 @@ import { Image } from 'astro:assets';
 import FormattedDate from '../components/FormattedDate.astro';
 import WeatherWidget from '../components/WeatherWidget.astro';
 import BlogStats from '../components/BlogStats.astro';
-import ArticleCarousel from '../components/ArticleCarousel.astro';
+
 import { getAllTags } from '../utils/data-utils';
 import { getHeroImagePath } from '../utils/imagePath';
-
+import ArticleCarousel from '../components/ArticleCarousel.astro';
 const posts = await getCollection('blog');
 const sortedPosts = posts.sort(sortItemsByDateDesc);
 const featuredPosts = posts.filter(({ data }) => data.isFeatured);
 
-// 随机选择4篇文章用于轮播
-const randomPosts = [...posts].sort(() => 0.5 - Math.random()).slice(0, 4);
+const randomPosts = posts.sort(() => 0.5 - Math.random()).slice(0, 4);
 
 // 博客统计数据
 const blogStats = {
@@ -105,6 +104,7 @@ try {
 ---
 
 <BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
+   
     <section class="w-full mb-8 ">
         <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Posts</h1>
         <div class="flex flex-col space-y-4">
@@ -125,11 +125,8 @@ try {
         <hr class="my-8 border-dashed border-main">
     </section>
 
-    
-     <section class="mb-8">
-        <ArticleCarousel posts={randomPosts} />
-        <hr class="my-8 border-dashed border-main "></hr>
-    </section> 
+    <ArticleCarousel posts={randomPosts} />
+    <hr class="my-8 border-dashed border-main">
 
     <div class="grid sm:grid-cols-12 gap-8 mb-8">
          <div class="sm:col-span-8 my-7">
@@ -423,5 +420,211 @@ try {
             text-align: center;
         }
     }
+
+    /* Carousel样式 */
+    .carousel-container {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .carousel-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        display: none;
+    }
+
+    .carousel-slide.active {
+        opacity: 1;
+        display: block;
+    }
+
+    .carousel-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .carousel-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .carousel-link:hover .carousel-image {
+        transform: scale(1.05);
+    }
+
+    .carousel-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        padding: 30px 20px 20px;
+        color: white;
+    }
+
+    .carousel-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        line-height: 1.3;
+        font-family: serif;
+    }
+
+    .carousel-excerpt {
+        font-size: 0.875rem;
+        margin: 0;
+        opacity: 0.9;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .carousel-dots {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .carousel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .carousel-dot.active {
+        background: white;
+    }
+
+    @media (max-width: 768px) {
+        .carousel-container {
+            height: 250px;
+        }
+
+        .carousel-title {
+            font-size: 1.1rem;
+        }
+
+        .carousel-excerpt {
+            font-size: 0.8rem;
+            -webkit-line-clamp: 1;
+        }
+
+        .carousel-overlay {
+            padding: 20px 15px 15px;
+        }
+    }
 </style>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const carouselContainer = document.getElementById('article-carousel');
+        if (!carouselContainer) return;
+
+        const allSlides = carouselContainer.querySelectorAll('.carousel-slide');
+        const dots = carouselContainer.querySelectorAll('.carousel-dot');
+        let currentSlide = 0;
+        let autoPlayInterval: any;
+        let activeSlides: HTMLElement[] = [];
+
+        // 随机选择4篇文章显示
+        function selectRandomSlides() {
+            // 隐藏所有slides
+            allSlides.forEach(slide => {
+                (slide as HTMLElement).style.display = 'none';
+                slide.classList.remove('active');
+            });
+
+            // 随机选择4个索引
+            const shuffled = Array.from({length: allSlides.length}, (_, i) => i)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 4);
+
+            // 显示选中的slides并加入activeSlides数组
+            activeSlides = shuffled.map(index => {
+                const slide = allSlides[index] as HTMLElement;
+                slide.style.display = 'block';
+                return slide;
+            });
+        }
+
+        function showSlide(index: number) {
+            activeSlides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % activeSlides.length;
+            showSlide(currentSlide);
+        }
+
+        function startAutoPlay() {
+            autoPlayInterval = setInterval(nextSlide, 4000);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+            }
+        }
+
+        // 初始化
+        if (allSlides.length > 0) {
+            // 延迟执行随机选择，避免页面闪烁
+            setTimeout(() => {
+                selectRandomSlides();
+                showSlide(0);
+                startAutoPlay();
+            }, 100);
+
+            // 点击控制
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentSlide = index;
+                    showSlide(currentSlide);
+                    stopAutoPlay();
+                    startAutoPlay(); // 重新开始自动播放
+                });
+            });
+
+            // 鼠标悬停暂停自动播放
+            carouselContainer.addEventListener('mouseenter', stopAutoPlay);
+            carouselContainer.addEventListener('mouseleave', startAutoPlay);
+        }
+    });
+</script>
 
