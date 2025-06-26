@@ -84,6 +84,10 @@ const siteConfig: SiteConfig = {
             href: '/post'
         },
         {
+            text: 'Blog',
+            href: '/blog'
+        },
+        {
             text: 'Tags',
             href: '/tags'
         },
@@ -91,10 +95,10 @@ const siteConfig: SiteConfig = {
         //     text: 'Friends',
         //     href: '/friends'
         // },
-        {
-            text: 'About',
-            href: '/about'
-        },
+        // {
+        //     text: 'About',
+        //     href: '/about'
+        // },
         {    
             text: 'RSS',
             href: '/rss.xml'
