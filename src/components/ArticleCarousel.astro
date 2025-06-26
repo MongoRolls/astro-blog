@@ -7,6 +7,10 @@ type Props = {
 };
 
 const { posts } = Astro.props;
+
+posts.forEach(post => {
+    console.log(post.id);
+});
 ---
 
 <div class="carousel-container">
