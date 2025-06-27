@@ -1,0 +1,67 @@
+---
+title: css demo
+excerpt: css demo
+description: css demo
+publishDate: 2025-06-27
+---
+
+import AnimatedSignature from '../../components/AnimatedSignature.astro';
+import Typing from '../../components/css/typing.astro';
+import Card3d from '../../components/css/card3d.astro';
+import Load from '../../components/css/load.astro';
+
+## 签名动画
+
+效果如下：
+
+<AnimatedSignature width="150" height="150" fillColor="blue" strokeColor="blue" />
+
+Step:
+
+1. [signature](https://signaturely.com/online-signature/type/) 生成好看文字图片
+2. png to SVG 找个免费网站
+3. 编写代码
+
+svg 属性：
+
+- [stroke-dasharray](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Reference/Attribute/stroke-dasharray)定义了虚线和间隙的长度，二者等长，轮流
+- [stroke-dashoffset](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Reference/Attribute/stroke-dashoffset)定义了虚线开始的位置
+
+实际动画效果将dashArray设置为和绘制的笔画长度一致，然后通过dashOffset来控制位置，实现开始的空白。然后keyframes 改变dashOffset实现复位，从而实现绘画的动画效果。
+
+tips: 记得获取最长path的长度
+
+## 打字机效果
+
+<Typing text="Hello, world!" />
+Step:
+
+1. animation step
+2. ch，等宽字体
+
+## 3d card
+
+<Card3d />
+
+Step:
+
+1. transform-style: preserve-3d;
+2. perspective
+3. mix-blend-mode: color-dodge;
+4. js 实现鼠标追踪
+5. transform: rotateX, rotateY
+
+链接：[pokemon](https://pokemon-tcg-pocket.wiki/)
+
+## 加载动画
+
+<div style="transform: scale(0.2); width: 0px; height: 0px;">
+  <Load />
+</div>
+
+<div style="height: 160px;"></div>
+
+Step:
+
+1. scss 变量计算，自定义函数
+2. mask mask-position mask-size mask-repeat

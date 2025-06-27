@@ -15,6 +15,7 @@ pnpm-debug.log*
 thought.mdx
 complete-file-upload-guide.mdx
 javascript-http-requests.mdx
+tmp.mdx
 
 # environment variables
 .env

@@ -1,31 +1,60 @@
 ---
 const { text } = Astro.props;
+
+const textLength = text.length;
 ---
 
-<div class="typing">
-  {text}
-</div>
+<div class="typing">{text}</div>
 
-<style lang="scss">
+<style define:vars={{ textLength }}>
 /* 打字效果 */
 .typing {
-font-family: monospace;
-font-size:32px;
-display: inline-block;
-white-space: nowrap;
-overflow: hidden;
-animation: typing 4s steps(13, end), blink 0.75s step-end infinite;
-border-right: 3px solid black;
-vertical-align: middle;
+  font-family: monospace;
+  font-size: 32px;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid black;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.typing-active {
+  animation: typing 4s steps(var(--textLength), end), blink 0.75s step-end infinite;
 }
 
 @keyframes typing {
-from { width: 0; }
-to { width: 13ch; }
+  from { width: 0; }
+  to { width: calc(var(--textLength) * 1ch + 4px); }
 }
 
 @keyframes blink {
-from, to { border-color: transparent; }
-50% { border-color: black; }
+  from, to { border-color: transparent; }
+  50% { border-color: black; }
+}
+
+/* 暗色模式支持 */
+:global(.dark) .typing {
+  border-right-color: white;
+}
+
+:global(.dark) .typing {
+  animation: typing 4s steps(var(--textLength), end), blinkDark 0.75s step-end infinite;
+}
+
+@keyframes blinkDark {
+  from, to { border-color: transparent; }
+  50% { border-color: white; }
 }
 </style>
+
+
+<script>
+  const typing = document.querySelector('.typing');
+
+  if(typing){
+    typing.addEventListener('click', () => {
+      typing.classList.toggle('typing-active');
+    });
+  }
+</script>

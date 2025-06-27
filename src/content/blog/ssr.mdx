@@ -17,7 +17,7 @@ tags:
 
 服务端渲染（Server-Side Rendering）是指由服务器直接生成完整的 HTML 页面并返回给浏览器，客户端（浏览器）接收到的是**可直接渲染的静态内容**，而非空页面或 JSON 数据。与客户端渲染（CSR）不同，SSR 的核心逻辑（如数据请求、模板拼接）在服务器端完成。
 
-react的next，vue的nuxt都是SSR比较热门的框架
+next，nuxt都是SSR比较热门的框架
 
 ![image.png](attachment:ffc9878f-725c-4346-8308-b2995afb7a46:image.png)
 
@@ -34,8 +34,7 @@ CSR的流程是返回简单的HTML，再下载JS文件去执行，去修改DOM�
 
 > react-dom/server的renderToString可以直接将jsx组件转化为string
 
-```jsx
-asd;
+```js
 // server/index.js
 import express from 'express';
 import { renderToString } from 'react-dom/server';
@@ -79,9 +78,13 @@ react这方面提供了[**_hydrateRoot_**](https://react.dev/reference/react-dom
 
 ### 路由
 
+在同构应用中，路由是一个重要的问题。客户端和服务端都需要能够理解和处理相同的路由逻辑，以确保页面能够正确渲染。
+
+对于React应用，通常使用React Router来处理路由。在SSR环境中，我们需要使用`StaticRouter`而不是`BrowserRouter`
+
 ### redux
 
-![image.png](attachment:6ae7991d-c634-4730-92c5-cfb62273a665:image.png)
+![image.png](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2019/7/4/16bbc59406a49fad~tplv-t2oaga2asx-jj-mark:3024:0:0:0:q75.awebp)
 
 对于store的连接操作，在同构项目中分两个部分，一个是与客户端store的连接，另一部分是与服务端store的连接。都是通过react-redux中的Provider来传递store的。
 

@@ -216,7 +216,7 @@ module.exports = {
                             fontFamily: theme('fontFamily.serif'),
                             fontStyle: 'italic',
                             fontWeight: 'normal',
-                            height: '2.5rem',
+                            height: '100%',
                             display: 'flex',
                             alignItems: 'center',
                             borderLeft: '4px solid #29212a',

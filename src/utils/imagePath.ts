@@ -89,17 +89,3 @@ export function getCoverImageInfo(postId: string): CoverImage {
     exists: false // 实际检查需要在构建时进行
   };
 }
-
-/**
- * 获取动态CSS背景图片URL
- */
-export function getCSSBackgroundImageUrl(imageName: string, options?: ImagePathOptions): string {
-  const source = options?.source || envConfig.imageSource;
-  
-  if (source === 'local') {
-    return `url(/${imageName})`;
-  } else {
-    const baseUrl = getImageBaseUrl(source);
-    return `url(${baseUrl}/img/${imageName})`;
-  }
-} 
