@@ -2,31 +2,19 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
-import TechStack from '../components/TechStack.astro';
 import siteConfig from '../data/site-config';
 import { sortItemsByDateDesc } from '../utils/data-utils';
 import PostPreview from '../components/PostPreview.astro';
 import { marked } from 'marked';
 import { Image } from 'astro:assets';
 import FormattedDate from '../components/FormattedDate.astro';
-import WeatherWidget from '../components/WeatherWidget.astro';
-import BlogStats from '../components/BlogStats.astro';
-
-import { getAllTags } from '../utils/data-utils';
 import { getHeroImagePath } from '../utils/imagePath';
 import ArticleCarousel from '../components/ArticleCarousel.astro';
+
 const posts = await getCollection('blog');
 const sortedPosts = posts.sort(sortItemsByDateDesc);
 const featuredPosts = posts.filter(({ data }) => data.isFeatured);
-
 const randomPosts = posts.sort(() => 0.5 - Math.random()).slice(0, 4);
-
-// 博客统计数据
-const blogStats = {
-    totalPosts: posts.length,
-    totalTags: getAllTags(posts).length,
-    latestPost: sortedPosts[0]
-};
 
 // 硬编码的hero数据
 const heroData = {
@@ -55,56 +43,41 @@ const heroData = {
 // 预先解析markdown以避免在渲染时解析
 const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 
-
-
-// 默认fallback数据，确保组件始终有内容渲染
-let weatherData = {
-  temp_C: '24',
-  weatherDesc: [{ value: 'Cloudy' }]
-};
-
-let currentDate = new Date().toLocaleDateString('en-US', { 
-  weekday: 'long' as const, 
-  month: 'long' as const, 
-  day: 'numeric' as const 
-});
-
-// 使用带超时的fetch，避免长时间阻塞SSR
-const fetchWithTimeout = async (url: string, timeout = 2000) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-  try {
-    const response = await fetch(url, { 
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Weather-Widget/1.0'
-      }
-    });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
-
-try {
-  const response = await fetchWithTimeout('https://wttr.in/beijing?format=j1', 1500);
-  if (response.ok) {
-    const data = await response.json();
-    if (data.current_condition && data.current_condition[0]) {
-      weatherData = data.current_condition[0];
-    }
-  }
-} catch (error) {
-  // API超时或失败，使用fallback数据
-  console.log('Weather API timeout/failed, using fallback data');
-}
 ---
 
 <BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
-   
+
+    <section class="hero-section w-full mb-8 sm:mb-16">
+        {heroData.title && <h1 class="hero-title w-full">{heroData.title}</h1>}     
+        <div class="hero-content-grid w-full max-w-screen-xl mx-auto">
+            <div class="hero-content-list w-full flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="hero-text mb-3 flex-1" set:html={parsedText} />
+                <div class="hero-image-container flex-1">
+                    <Image
+                        class="hero-image w-full h-auto"
+                        src={heroData.image.src}
+                        alt={heroData.image.alt || ''}
+                        loading="lazy"
+                        decoding="async"
+                        width={600}
+                        height={315}
+                    />
+                </div>
+                <div class="hero-actions w-full flex flex-col md:flex-row gap-4 justify-start">
+                    {heroData.actions.map((action) => (
+                        <Button href={action.href} class="w-full md:w-auto">{action.text}</Button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-8 border-dashed border-main">
+    <ArticleCarousel posts={randomPosts} />
+    <hr class="my-8 border-dashed border-main">
+
+  
+
     <section class="w-full mb-8 ">
         <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Posts</h1>
         <div class="flex flex-col space-y-4">
@@ -124,52 +97,6 @@ try {
         </div>
         <hr class="my-8 border-dashed border-main">
     </section>
-
-    <ArticleCarousel posts={randomPosts} />
-    <hr class="my-8 border-dashed border-main">
-
-    <div class="grid sm:grid-cols-12 gap-8 mb-8">
-         <div class="sm:col-span-8 my-7">
-            <section class="hero-section space-y-8">
-                {heroData.title && <h1 class="hero-title">{heroData.title}</h1>}
-                
-                <div class="hero-content-grid">
-                    <div class="hero-content-list ">
-                        <div class="hero-text mb-3" set:html={parsedText} />
-                            <div class="hero-image-container">
-                                <Image
-                                    class="hero-image"
-                                    src={heroData.image.src}
-                                    alt={heroData.image.alt || ''}
-                                    loading="lazy"
-                                    decoding="async"
-                                    width={600}
-                                    height={315}
-                                />
-                            </div>
-                            <div class="hero-actions">
-                                {heroData.actions.map((action) => (
-                                    <Button href={action.href}>{action.text}</Button>
-                                ))}
-                            </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        
-        <div class="sm:col-span-4 sidebar-container">
-            <BlogStats stats={blogStats} />
-            <div class="min-h-[350px] scale-[0.8]">
-                <WeatherWidget weatherData={weatherData}  currentDate={currentDate} />
-            </div>
-        </div>
-    </div>
-
-
-
-    <div class="mb-8 sm:mb-24">
-        <TechStack />
-    </div>
 
     {
         featuredPosts?.length > 0 && (
@@ -321,20 +248,7 @@ try {
         margin-top: auto;
     }
 
-    /* 侧边栏容器样式 */
-    .sidebar-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        max-width: none;
-        width: 100%;
-    }
 
-
-
-    .sidebar-container > :global(*) {
-        flex: 1;
-    }
 
     /* 优化后的夜间模式样式 */
     :global(.dark) .hero-image {
@@ -370,13 +284,6 @@ try {
 
     /* 响应式布局调整 */
     @media (max-width: 1024px) {
-        .grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .lg\:col-span-3 {
-            order: 2;
-        }
         
         .hero-content-grid {
             grid-template-columns: 1fr;
@@ -389,11 +296,6 @@ try {
     }
 
     @media (max-width: 640px) {
-        .sidebar-container {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        
         .flex.items-center.justify-between {
             flex-direction: column;
             align-items: flex-start;
@@ -421,129 +323,7 @@ try {
         }
     }
 
-    /* Carousel样式 */
-    .carousel-container {
-        position: relative;
-        width: 100%;
-        height: 300px;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
 
-    .carousel-wrapper {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
-    .carousel-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        display: none;
-    }
-
-    .carousel-slide.active {
-        opacity: 1;
-        display: block;
-    }
-
-    .carousel-link {
-        display: block;
-        width: 100%;
-        height: 100%;
-        position: relative;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .carousel-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .carousel-link:hover .carousel-image {
-        transform: scale(1.05);
-    }
-
-    .carousel-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        padding: 30px 20px 20px;
-        color: white;
-    }
-
-    .carousel-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin: 0 0 8px 0;
-        line-height: 1.3;
-        font-family: serif;
-    }
-
-    .carousel-excerpt {
-        font-size: 0.875rem;
-        margin: 0;
-        opacity: 0.9;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .carousel-dots {
-        position: absolute;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 8px;
-        z-index: 10;
-    }
-
-    .carousel-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255, 255, 255, 0.5);
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .carousel-dot.active {
-        background: white;
-    }
-
-    @media (max-width: 768px) {
-        .carousel-container {
-            height: 250px;
-        }
-
-        .carousel-title {
-            font-size: 1.1rem;
-        }
-
-        .carousel-excerpt {
-            font-size: 0.8rem;
-            -webkit-line-clamp: 1;
-        }
-
-        .carousel-overlay {
-            padding: 20px 15px 15px;
-        }
-    }
 </style>
 
 <script>
