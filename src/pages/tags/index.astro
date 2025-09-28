@@ -1,31 +1,31 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { sortItemsByDateDesc, getAllTags, getPostsByTag } from '../../utils/data-utils';
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils'
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc)
 const tags = getAllTags(posts).sort((tagA, tagB) => {
-    const postCountTagA = getPostsByTag(posts, tagA.id).length;
-    const postCountTagB = getPostsByTag(posts, tagB.id).length;
-    return postCountTagB - postCountTagA;
+    const postCountTagA = getPostsByTag(posts, tagA.id).length
+    const postCountTagB = getPostsByTag(posts, tagB.id).length
+    return postCountTagB - postCountTagA
 });
 
 ---
 
 <BaseLayout
-    title="Tags"
-    description="Explore tag directory for easy navigation and discovery."
-    showHeader={false}
+  title="Tags"
+  description="Explore tag directory for easy navigation and discovery."
+  showHeader={false}
 >
     <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Tags</h1>
 
     <div class="flex flex-col space-y-8">
         {tags.map((tag) => {
-            const postCount = getPostsByTag(posts, tag.id).length;
+            const postCount = getPostsByTag(posts, tag.id).length
             return (
-                <div class="!mt-2"> 
+                <div class="!mt-2">
                     <span class="tag-link">
-                        <a class="text-gray-500 " href={`/tags/${tag.id}`}>#{tag.name}</a> 
+                        <a class="text-gray-500 " href={`/tags/${tag.id}`}>#{tag.name}</a>
                         <span class="text-gray-500">-- {postCount} posts</span>
                     </span>
                 </div>
@@ -35,5 +35,5 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
 </BaseLayout>
 
 <style lang="scss">
-  
+
 </style>

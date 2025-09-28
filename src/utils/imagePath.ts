@@ -3,24 +3,25 @@
  * 提供环境感知的图片路径获取功能
  */
 
-import { envConfig } from '../config/env';
-import { getImageBaseUrl, getCoverPathPrefix } from '../config/image';
-import type { ImageSource, ImagePathOptions, CoverImage } from '../types/image';
+import type { CoverImage, ImagePathOptions } from '../types/image'
+import { envConfig } from '../config/env'
+import { getCoverPathPrefix, getImageBaseUrl } from '../config/image'
 
 /**
  * 获取封面图片路径
  */
 export function getCoverImagePath(postId: string, options?: ImagePathOptions): string {
-  const source = options?.source || envConfig.imageSource;
-  const baseUrl = getImageBaseUrl(source);
-  const pathPrefix = getCoverPathPrefix(source);
-  
-  const fileName = `${postId}.jpg`;
-  
+  const source = options?.source || envConfig.imageSource
+  const baseUrl = getImageBaseUrl(source)
+  const pathPrefix = getCoverPathPrefix(source)
+
+  const fileName = `${postId}.jpg`
+
   if (source === 'local') {
-    return `${pathPrefix}/${fileName}`;
-  } else {
-    return `${baseUrl}${pathPrefix}/${fileName}`;
+    return `${pathPrefix}/${fileName}`
+  }
+  else {
+    return `${baseUrl}${pathPrefix}/${fileName}`
   }
 }
 
@@ -28,14 +29,14 @@ export function getCoverImagePath(postId: string, options?: ImagePathOptions): s
  * 获取封面图片路径（带fallback）
  */
 export function getCoverImagePathWithFallback(postId: string, options?: ImagePathOptions): string {
-  const source = options?.source || envConfig.imageSource;
-  const fallback = options?.fallback || '/logo.png';
-  
+  const fallback = options?.fallback || '/logo.png'
+
   try {
-    return getCoverImagePath(postId, options);
-  } catch (error) {
-    console.warn(`Failed to get cover image for ${postId}, using fallback: ${fallback}`);
-    return fallback;
+    return getCoverImagePath(postId, options)
+  }
+  catch (error: any) {
+    console.warn(`Failed to get cover image for ${postId}, using fallback: ${fallback}`, error)
+    return fallback
   }
 }
 
@@ -43,19 +44,20 @@ export function getCoverImagePathWithFallback(postId: string, options?: ImagePat
  * 获取静态资源图片路径
  */
 export function getStaticImagePath(imagePath: string, options?: ImagePathOptions): string {
-  const source = options?.source || envConfig.imageSource;
-  
+  const source = options?.source || envConfig.imageSource
+
   if (source === 'local') {
     // 本地静态资源直接使用public路径
-    return imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  } else {
+    return imagePath.startsWith('/') ? imagePath : `/${imagePath}`
+  }
+  else {
     // OSS静态资源需要检查是否已经是完整URL
     if (imagePath.startsWith('http')) {
-      return imagePath;
+      return imagePath
     }
-    const baseUrl = getImageBaseUrl(source);
-    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-    return `${baseUrl}/img/${cleanPath}`;
+    const baseUrl = getImageBaseUrl(source)
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
+    return `${baseUrl}/img/${cleanPath}`
   }
 }
 
@@ -63,13 +65,14 @@ export function getStaticImagePath(imagePath: string, options?: ImagePathOptions
  * 获取Hero图片路径
  */
 export function getHeroImagePath(imageName: string, options?: ImagePathOptions): string {
-  const source = options?.source || envConfig.imageSource;
-  const baseUrl = getImageBaseUrl(source);
-  
+  const source = options?.source || envConfig.imageSource
+  const baseUrl = getImageBaseUrl(source)
+
   if (source === 'local') {
-    return `/${imageName}`;
-  } else {
-    return `${baseUrl}/img/${imageName}`;
+    return `/${imageName}`
+  }
+  else {
+    return `${baseUrl}/img/${imageName}`
   }
 }
 
@@ -77,15 +80,15 @@ export function getHeroImagePath(imageName: string, options?: ImagePathOptions):
  * 检查封面图片是否存在（仅用于构建时）
  */
 export function getCoverImageInfo(postId: string): CoverImage {
-  const fileName = `${postId}.jpg`;
-  const localPath = `/cover-images/${fileName}`;
-  const ossPath = `https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${fileName}`;
-  
+  const fileName = `${postId}.jpg`
+  const localPath = `/cover-images/${fileName}`
+  const ossPath = `https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/${fileName}`
+
   return {
     postId,
     fileName,
     localPath,
     ossPath,
-    exists: false // 实际检查需要在构建时进行
-  };
+    exists: false, // 实际检查需要在构建时进行
+  }
 }

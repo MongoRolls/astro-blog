@@ -1,7 +1,7 @@
 ---
-import { getCSSBackgroundImageUrl } from '../../utils/imagePath';
+import { getStaticImagePath } from '../../utils/imagePath'
 
-const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
+const bgImageUrl = getStaticImagePath('cover-images/share.jpg');
 ---
 
 <div class="container">
@@ -31,12 +31,12 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
     @function bgSet($n) {
         // 第一个遮罩基础样式
         $bg : radial-gradient(rgba(0, 0, 0, var(--m-1)), rgba(0, 0, 0, var(--m-1)));
-        
+
         // 循环添加剩余遮罩 2-n
-        @for $i from 2 through $n {         
+        @for $i from 2 through $n {
             $bg: $bg, radial-gradient(rgba(0, 0, 0, var(--m-#{$i})), rgba(0, 0, 0, var(--m-#{$i})));
         }
-        
+
         // 返回所有遮罩的组合
         @return $bg;
     }
@@ -47,13 +47,13 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
         $bgPosition: ();
 
         // 双层循环生成网格位置，i为横坐标，j为纵坐标
-        @for $i from 0 through ($n) {   
-            @for $j from 0 through ($n - 1) {  
+        @for $i from 0 through ($n) {
+            @for $j from 0 through ($n - 1) {
                 // 将计算好的位置添加到数组
                 $bgPosition: $bgPosition, #{$i * $perWid}px #{$j * $perWid}px;
             }
         }
-        
+
         // 返回所有位置的组合
         @return $bgPosition;
     }
@@ -64,11 +64,11 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
         $transition: --m-1 0.1s 0.1s;
 
         // 为每个遮罩添加随机时间和延迟的过渡效果
-        @for $i from 1 through $n {   
+        @for $i from 1 through $n {
             // 随机化持续时间和延迟时间，使动画更自然
             $transition: $transition, --m-#{$i} #{100 + math.random(500)}ms #{math.div($i, 30) * math.random(100)}ms;
         }
-        
+
         // 返回所有过渡效果的组合
         @return $transition;
     }
@@ -91,20 +91,20 @@ const bgImageUrl = getCSSBackgroundImageUrl('share.jpg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        
+
         // 应用遮罩效果
         mask: bgSet($count);          // 使用自定义函数生成的遮罩
         mask-size: $per $per;         // 每个遮罩大小
         mask-repeat: no-repeat;       // 遮罩不重复
         mask-position: positionSet($sqrt); // 设置每个遮罩的位置
-        
+
         // 应用过渡动画
         transition: transitionSet($count); // 为所有遮罩设置随机过渡效果
 
         /* 鼠标悬停效果 */
         &:hover{
             // 鼠标悬停时，将所有遮罩透明度变为0
-            @for $i from 1 through $count {         
+            @for $i from 1 through $count {
                 --m-#{$i}: 0; // 设置为0使图片部分消失
             }
         }

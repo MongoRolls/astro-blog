@@ -1,6 +1,15 @@
 {
-    "editor.tabSize": 4,
+    "editor.tabSize": 2,
     "editor.formatOnSave": true,
+    "eslint.useFlatConfig": true,
+    "eslint.run": "onSave",
+    "eslint.nodePath": "node_modules/.pnpm",
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+
     "files.associations": {
         "*.mdx": "markdown",
         "*.css": "tailwindcss"
@@ -21,7 +30,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
+        "source.fixAll.eslint": "always"
     },
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

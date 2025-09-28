@@ -1,14 +1,14 @@
 ---
+import FriendCard from '../../components/FriendCard.astro'
+import siteConfig from '../../data/site-config'
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import FriendCard from '../../components/FriendCard.astro';
-import siteConfig from '../../data/site-config';
 ---
 
 <BaseLayout
- title="Friends" 
- description="Friends and links from around the web"
- showHeader={false}
- >
+  title="Friends"
+  description="Friends and links from around the web"
+  showHeader={false}
+>
     <main class="container mx-auto px-4 py-12">
         <div class="mt-12 max-w-7xl mx-auto">
             <FriendCard friends={siteConfig.friends} />

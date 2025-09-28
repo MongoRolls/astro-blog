@@ -27,18 +27,18 @@ Here is an example of headings. You can use this heading by the following markdo
 
 ```js
 // 带有语法高亮的 JavaScript 代码。
-var fun = function lang(l) {
-  dateformat.i18n = require('./lang/' + l);
-  return true;
-};
+function fun(l) {
+  dateformat.i18n = require(`./lang/${l}`)
+  return true
+}
 ```
 
 ```js
 // my-test-file.js
 
 // my-test-file.js
-// eslint-disable-next-line no-console
-console.log('Hello World!');
+
+// console.log('Hello World!')
 ```
 
 ---
@@ -124,8 +124,8 @@ Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam nihil enim maxime 
 This is an `Inline code` sample.
 
 ```javascript
-var s = 'JavaScript syntax highlighting';
-alert(s);
+const s = 'JavaScript syntax highlighting'
+alert(s)
 ```
 
 ```python

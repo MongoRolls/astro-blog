@@ -1,7 +1,7 @@
 ---
 title: SSR
 excerpt: SSR 是 Server-Side Rendering 的缩写，是一种用于构建动态网页的技术。
-publishDate: '2025-04-07'
+publishDate: "2025-04-07"
 tags:
   - tech
 ---
@@ -34,13 +34,13 @@ CSR的流程是返回简单的HTML，再下载JS文件去执行，去修改DOM�
 
 ```js
 // server/index.js
-import express from 'express';
-import { renderToString } from 'react-dom/server';
-import Home from './containers/Home';
+import express from "express";
+import { renderToString } from "react-dom/server";
+import Home from "./containers/Home";
 
 const app = express();
 const content = renderToString(<Home />);
-app.get('/', function (req, res) {
+app.get("/", function (req, res) {
   res.send(
     `
     <html>
@@ -55,7 +55,7 @@ app.get('/', function (req, res) {
   );
 });
 app.listen(3001, () => {
-  console.log('listen:3001');
+  // console.log('listen:3001');
 });
 ```
 

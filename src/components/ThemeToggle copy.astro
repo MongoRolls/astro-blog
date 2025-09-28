@@ -1,8 +1,8 @@
 <label class="switch">
-  <input 
-    id="checkbox-input" 
-    class="theme-toggle" 
-    type="checkbox" 
+  <input
+    id="checkbox-input"
+    class="theme-toggle"
+    type="checkbox"
   />
   <div class="slider round">
     <div class="sun-moon">
@@ -73,125 +73,127 @@
 <script is:inline>
 // 使用 is:inline 确保脚本立即执行而不被 Astro 处理
 // 立即设置复选框状态，避免页面加载时显示错误状态
-const initialIsDarkState = document.documentElement.classList.contains('dark');
+const initialIsDarkState = document.documentElement.classList.contains('dark')
 document.addEventListener('DOMContentLoaded', () => {
-  const checkboxes = document.querySelectorAll('#checkbox-input');
-  checkboxes.forEach(checkbox => {
+  const checkboxes = document.querySelectorAll('#checkbox-input')
+  checkboxes.forEach((checkbox) => {
     // 在内联脚本中使用普通JavaScript，避免TypeScript断言
-    checkbox.checked = initialIsDarkState;
-  });
-});
+    checkbox.checked = initialIsDarkState
+  })
+})
 </script>
 
 <script>
 // 主题切换处理函数
-const handleThemeToggle = (isDark: boolean) => {
-  const html = document.documentElement;
+function handleThemeToggle(isDark: boolean) {
+  const html = document.documentElement
   if (isDark) {
-    html.classList.add('dark');
-  } else {
-    html.classList.remove('dark');
+    html.classList.add('dark')
   }
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-};
+  else {
+    html.classList.remove('dark')
+  }
+  localStorage.setItem('theme', isDark ? 'dark' : 'light')
+}
 
-const handleThemeChange = (event: Event) => {
-  const isDark = (event.target as HTMLInputElement).checked;
-  handleThemeToggle(isDark);
-};
+function handleThemeChange(event: Event) {
+  const isDark = (event.target as HTMLInputElement).checked
+  handleThemeToggle(isDark)
+}
 
 // 检测当前的主题状态
-const getCurrentThemeState = (): boolean => {
+function getCurrentThemeState(): boolean {
   // 优先检查 HTML 元素的 class，因为这反映了当前实际的主题状态
   if (document.documentElement.classList.contains('dark')) {
-    return true;
+    return true
   }
-  
+
   // 其次检查本地存储
-  const savedTheme = localStorage.getItem('theme');
+  const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
-    return savedTheme === 'dark';
+    return savedTheme === 'dark'
   }
-  
+
   // 最后检查系统偏好
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
 
 // 立即设置复选框状态
-const setCheckboxState = () => {
-  const isDark = getCurrentThemeState();
-  const checkboxes = document.querySelectorAll('#checkbox-input') as NodeListOf<HTMLInputElement>;
-  
-  checkboxes.forEach(checkbox => {
-    checkbox.checked = isDark;
-  });
-};
+function setCheckboxState() {
+  const isDark = getCurrentThemeState()
+  const checkboxes = document.querySelectorAll('#checkbox-input') as NodeListOf<HTMLInputElement>
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = isDark
+  })
+}
 
 // 初始化主题
-const initializeTheme = () => {
-  const isDark = getCurrentThemeState();
-  
+function initializeTheme() {
+  const isDark = getCurrentThemeState()
+
   // 先应用主题
-  handleThemeToggle(isDark);
-  
+  handleThemeToggle(isDark)
+
   // 然后设置复选框状态
-  setCheckboxState();
-};
+  setCheckboxState()
+}
 
 // 事件绑定
-const setupListeners = () => {
+function setupListeners() {
   // 使用事件委托到父元素
   document.body.addEventListener('change', (e) => {
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.matches('#checkbox-input')) {
-      handleThemeChange(e);
+      handleThemeChange(e)
     }
-  });
-  
+  })
+
   // 监听系统主题变化
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     if (localStorage.getItem('theme') === null) { // 只有当用户没有手动设置主题时才响应
-      const isDark = e.matches;
-      handleThemeToggle(isDark);
-      setCheckboxState();
+      const isDark = e.matches
+      handleThemeToggle(isDark)
+      setCheckboxState()
     }
-  });
-};
+  })
+}
 
 // Astro 页面生命周期处理
 document.addEventListener('astro:before-preparation', () => {
   // 确保跳转前保存当前主题状态
-  const isDark = getCurrentThemeState();
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+  const isDark = getCurrentThemeState()
+  localStorage.setItem('theme', isDark ? 'dark' : 'light')
+})
 
 document.addEventListener('astro:page-load', () => {
   // 页面加载完成后立即设置主题和复选框状态
-  initializeTheme();
-  setupListeners();
-});
+  initializeTheme()
+  setupListeners()
+})
 
 document.addEventListener('astro:after-swap', () => {
   // 页面内容交换后，重新设置状态
-  initializeTheme();
-  setupListeners();
-});
+  initializeTheme()
+  setupListeners()
+})
 
 // 立即执行初始化
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initializeTheme();
-    setupListeners();
-  });
-} else {
+    initializeTheme()
+    setupListeners()
+  })
+}
+else {
   // DOM 已经加载完成
-  initializeTheme();
-  setupListeners();
+  initializeTheme()
+  setupListeners()
 }
 
 // 一些浏览器可能会在重新加载时保留表单状态但不执行脚本
 // 添加一个小延迟来确保复选框状态在视觉上是正确的
-setTimeout(setCheckboxState, 50);
+setTimeout(setCheckboxState, 50)
 </script>
 
 

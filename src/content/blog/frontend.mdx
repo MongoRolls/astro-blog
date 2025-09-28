@@ -1,13 +1,13 @@
 ---
 title: 前端开发tips总结
 excerpt: 长期分享前端开发中遇到的问题和解决方案
-publishDate: '2024-08-22'
+publishDate: "2024-08-22"
 isFeatured: true
 tags:
   - tech
 seo:
   image:
-    src: '/blog-cover-1.png'
+    src: "/blog-cover-1.png"
     alt: 前端开发常见踩坑记录
 ---
 
@@ -22,7 +22,11 @@ seo:
 一般是 vpn 导致的，可以复制代理指令到终端执行
 
 - clash x
-  <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/vpn-error.png" alt="VPN代理设置界面截图" style={{ width: '40%' }} />
+  <img
+    src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/vpn-error.png"
+    alt="VPN代理设置界面截图"
+    style={{ width: "40%" }}
+  />
 
 ```bash
 export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_proxy=socks5://127.0.0.1:62780
@@ -54,7 +58,11 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 
 可以指定类型
 
-<img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/jsdoc.png" alt="JSDoc注释代码提示效果截图" style={{ width: '40%' }} />
+<img
+  src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/jsdoc.png"
+  alt="JSDoc注释代码提示效果截图"
+  style={{ width: "40%" }}
+/>
 
 ### 项目突然启动失败
 
@@ -144,7 +152,7 @@ export https_proxy=http://127.0.0.1:62780 http_proxy=http://127.0.0.1:62780 all_
 `>>>` 无符号右移运算符
 
 ```javascript
-console.log(1.221398 >>> 0); // 1
+// console.log(1.221398 >>> 0); // 1
 ```
 
 将数值转换为 32 位整数，然后将所有位向右移动指定的位数，左侧用 0 填充。当移动 0 位时 (>>> 0)，实际上没有发生位移，但会触发数值转换。

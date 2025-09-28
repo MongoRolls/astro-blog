@@ -41,7 +41,7 @@ v8一开始是作为浏览器引擎，所以默认设置堆内存大小为1.5g�
 
 上述参数在环境初始化时生效，一旦生效，就不能动态改变，只能手动调整，如果遇到内存不够的情况，可以用这个方法手动放宽限制
 
-tips: 可以通过 `console.log(process.memoryUsage());` 查看内存使用信息（单位type）
+tips: 可以通过 `// console.log(process.memoryUsage());` 查看内存使用信息（单位type）
 
 ```bash
 {
@@ -142,9 +142,9 @@ function createCounter() {
 }
 
 const counter = createCounter();
-console.log(counter()); // 输出 1
-console.log(counter()); // 输出 2
-console.log(counter()); // 输出 3
+// console.log(counter()); // 输出 1
+// console.log(counter()); // 输出 2
+// console.log(counter()); // 输出 3
 ```
 
 全局变量
@@ -207,13 +207,13 @@ useEffect(() => {
 }, []);
 ```
 
-Q: 为什么 `console.log` 会导致内存泄露
+Q: 为什么 `// console.log` 会导致内存泄露
 
-A: 当你使用 console.log() 打印一个对象时，浏览器的开发者工具会 **保留对该对象的引用**，
+A: 当你使用 // console.log() 打印一个对象时，浏览器的开发者工具会 **保留对该对象的引用**，
 
 这使得即使在代码中没有其他引用，对象也可能不会被垃圾回收器回收，如果你打印了一个大型对象或包含循环引用的对象，控制台中的引用可能会阻止整个对象图被回收
 
-生产环境代码中通常会移除 `console.log` 语句
+生产环境代码中通常会移除 `// console.log` 语句
 
 ### 总结
 

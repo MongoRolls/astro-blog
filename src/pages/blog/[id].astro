@@ -1,43 +1,44 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Button from '../../components/Button.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import PostPreview from '../../components/PostPreview.astro';
-import { sortItemsByDateDesc } from '../../utils/data-utils';
-import { slugify } from '../../utils/common-utils';
-import MyComment from '../../components/MyComment.astro';
-import { getCoverImagePath } from '../../utils/imagePath';
+import type { CollectionEntry } from 'astro:content'
+import { getCollection, render } from 'astro:content'
+import Button from '../../components/Button.astro'
+import FormattedDate from '../../components/FormattedDate.astro'
+import MyComment from '../../components/MyComment.astro'
+import PostPreview from '../../components/PostPreview.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { slugify } from '../../utils/common-utils'
+import { sortItemsByDateDesc } from '../../utils/data-utils'
+import { getCoverImagePath } from '../../utils/imagePath'
 
 export async function getStaticPaths() {
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
-    const postCount = posts.length;
+        const posts = (await getCollection('blog')).sort(sortItemsByDateDesc)
+    const postCount = posts.length
 
-    return posts.map((post, index) => ({
+    return posts.map((post: any, index: any) => ({
         params: { id: post.id },
         props: {
             post,
             prevPost: index + 1 !== postCount ? posts[index + 1] : null,
-            nextPost: index !== 0 ? posts[index - 1] : null
-        }
-    }));
+            nextPost: index !== 0 ? posts[index - 1] : null,
+        },
+    }))
 }
 
-type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>; nextPost: CollectionEntry<'blog'> };
+type Props = { post: CollectionEntry<'blog'>, prevPost: CollectionEntry<'blog'>, nextPost: CollectionEntry<'blog'> }
 
-const { href } = Astro.url;
-const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], keywords = [], seo } = post.data;
-const { Content,headings,remarkPluginFrontmatter  } = await render(post);
+// const { href } = Astro.url
+const { post, prevPost, nextPost } = Astro.props
+const { title, publishDate, updatedDate, excerpt, tags = [], keywords = [], seo } = post.data
+const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const { minutesRead } = remarkPluginFrontmatter;
 ---
 
-<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" keywords={keywords} author="MongoRolls" headings={headings} showHeader={false}>    
+<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" keywords={keywords} author="MongoRolls" headings={headings} showHeader={false}>
     <div class="relative lg:flex lg:gap-10">
         <!-- 主要内容 -->
         <article class="w-full lg:max-w-[674px]">
             <header class="mb-8">
-                <img src={getCoverImagePath(post.id)} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3">
+                <img src={getCoverImagePath(post.id)} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3" />
                 <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
                     <div>published: <FormattedDate date={publishDate} /></div>
@@ -56,7 +57,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                 </div>
                 <div class="w-full h-[1px] bg-gray-400 my-4" />
             </header>
-            
+
             <div class="max-w-none prose  dark:prose-invert">
                 <Content />
             </div>
@@ -73,12 +74,12 @@ const { minutesRead } = remarkPluginFrontmatter;
                         </div>
                     )
                 }
-                <Button 
-                    class="copy-url-button" 
-                    aria-label="Copy link" 
-                    data-url={Astro.url.href} 
-                    data-tooltip-default="Copy link" 
-                    data-tooltip-success="Copied"
+                <Button
+                  class="copy-url-button"
+                  aria-label="Copy link"
+                  data-url={Astro.url.href}
+                  data-tooltip-default="Copy link"
+                  data-tooltip-success="Copied"
                 >
                     Share
                 </Button>
@@ -90,7 +91,7 @@ const { minutesRead } = remarkPluginFrontmatter;
         (prevPost || nextPost) && (
             <div class="my-16 sm:my-24">
                 <h2 class="mb-10 text-2xl font-serif italic md:mb-12 md:text-3xl">Read More</h2>
-                
+
                 <div class="flex flex-col space-y-8">
                     {prevPost && <PostPreview post={prevPost} headingLevel="h3" />}
                     {nextPost && <PostPreview post={nextPost} headingLevel="h3" />}
@@ -104,25 +105,25 @@ const { minutesRead } = remarkPluginFrontmatter;
 
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement;
-        copyUrlButton?.addEventListener('click', async () => {
-            await copyUrl(copyUrlButton);
-        });
+  document.addEventListener('astro:page-load', () => {
+    const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement
+    copyUrlButton?.addEventListener('click', async () => {
+      await copyUrl(copyUrlButton)
+    })
 
-        async function copyUrl(button: HTMLButtonElement) {
-            let url = button.getAttribute('data-url') || '';
-            let label = button.innerText;
+    async function copyUrl(button: HTMLButtonElement) {
+      const url = button.getAttribute('data-url') || ''
+      const label = button.textContent
 
-            await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(url)
 
-            button.innerText = 'Copied';
+      button.textContent = 'Copied'
 
-            setTimeout(() => {
-                button.innerText = label;
-            }, 2500);
-        }
-    });
+      setTimeout(() => {
+        button.textContent = label
+      }, 2500)
+    }
+  })
 </script>
 
 

@@ -1,16 +1,16 @@
 ---
 interface Props {
-    title?: string;
-    description?: string;
-    website?: string;
-    avatar?: string;
+    title?: string
+    description?: string
+    website?: string
+    avatar?: string
 }
 
-const { 
-    title = "MongoRolls", 
-    description = "MongoRolls", 
-    website = "https://mongorolls.com",
-    avatar = "https://mongorolls.com/logo.png" 
+const {
+    title = 'MongoRolls',
+    description = 'MongoRolls',
+    website = 'https://mongorolls.com',
+    avatar = 'https://mongorolls.com/logo.png',
 } = Astro.props;
 ---
 
@@ -64,23 +64,23 @@ const {
         font-size: 14px;
         transition: box-shadow 0.3s ease, transform 0.1s ease;
         will-change: transform, left, top;
-        
+
         &:hover {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-            
+
             .copy-button {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         &.dragging {
             cursor: grabbing;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
             transition: box-shadow 0.2s ease, transform 0s;
         }
     }
-    
+
     .yaml-card-header {
         display: flex;
         justify-content: space-between;
@@ -88,7 +88,7 @@ const {
         padding: 10px 14px;
         background-color: #f7f7f7;
         border-bottom: 1px solid #eaeaea;
-        
+
         h3 {
             margin: 0;
             font-size: 14px;
@@ -97,7 +97,7 @@ const {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
     }
-    
+
     .copy-button {
         position: absolute;
         top: 8px;
@@ -116,24 +116,24 @@ const {
         opacity: 0;
         transform: translateY(-4px);
         z-index: 10;
-        
+
         &:hover {
             background-color: #fff;
             color: #333;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             transform: translateY(0) scale(1.05);
         }
-        
+
         &:active {
             transform: translateY(0) scale(0.95);
         }
     }
-    
+
     .yaml-card-content {
         padding: 14px;
         position: relative;
     }
-    
+
     .yaml-item {
         padding: 3px 0;
         line-height: 1.5;
@@ -141,272 +141,278 @@ const {
         font-size: 13px;
         word-break: break-all;
     }
-    
+
     .yaml-key {
         color: #905;
         font-weight: 600;
         margin-right: 6px;
         flex-shrink: 0;
     }
-    
+
     .yaml-value {
         color: rgb(4, 119, 6);
         overflow-wrap: break-word;
     }
-    
+
     .yaml-card-status {
         height: 3px;
         width: 0;
         background-color: #4CAF50;
         transition: width 0.3s ease-out;
     }
-    
+
     // Dark mode support
     :global(.dark) .yaml-card {
         background-color: #1a1b26;
         border-color: #2a2b36;
     }
-    
+
     :global(.dark) .yaml-card-header {
         background-color: #16161e;
         border-bottom-color: #2a2b36;
-        
+
         h3 {
             color: #c0caf5;
         }
     }
-    
+
     :global(.dark) .copy-button {
         background-color: rgba(30, 30, 46, 0.9);
         color: #a9b1d6;
-        
+
         &:hover {
             background-color: rgba(36, 36, 54, 1);
             color: #c0caf5;
         }
     }
-    
+
     :global(.dark) .yaml-key {
         color: #f7768e;
     }
-    
+
     :global(.dark) .yaml-value {
         color: #9ece6a;
     }
 </style>
 
 <script is:inline>
-    // 初始化卡片拖拽功能
-    function initializeCards() {
-        const cards = document.querySelectorAll('.yaml-card');
-        
-        cards.forEach(card => {
-            // 避免重复初始化
-            if (card.dataset.initialized === "true") return;
-            card.dataset.initialized = "true";
-            
-            // Drag state variables
-            let isDragging = false;
-            let offsetX, offsetY;
-            let lastX, lastY;
-            let velocityX = 0, velocityY = 0;
-            let lastTimestamp = 0;
-            let animationFrameId = null;
-            
-            // Copy button functionality
-            const copyButton = card.querySelector('.copy-button');
-            const statusBar = card.querySelector('.yaml-card-status');
-            
-            copyButton.addEventListener('click', (e) => {
-                // Prevent card dragging when clicking the copy button
-                e.stopPropagation();
-                
-                const content = Array.from(card.querySelectorAll('.yaml-item'))
-                    .map(item => {
-                        const key = item.querySelector('.yaml-key').textContent;
-                        const value = item.querySelector('.yaml-value').textContent;
-                        return `${key} ${value}\n`;
-                    })
-                    .join('\n');
-                
-                navigator.clipboard.writeText(content)
-                    .then(() => {
-                        // Visual feedback for copy
-                        copyButton.style.color = '#4CAF50';
-                        statusBar.style.width = '100%';
-                        
-                        setTimeout(() => {
-                            copyButton.style.color = '';
-                            statusBar.style.width = '0';
-                        }, 1500);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                        statusBar.style.backgroundColor = '#f44336';
-                        statusBar.style.width = '100%';
-                        
-                        setTimeout(() => {
-                            statusBar.style.width = '0';
-                            statusBar.style.backgroundColor = '#4CAF50';
-                        }, 1500);
-                    });
-            });
-            
-            // Helper function to apply position with bounds checking
-            function setPosition(left, top) {
-                // Keep within viewport
-                const maxWidth = window.innerWidth - card.offsetWidth;
-                const maxHeight = window.innerHeight - card.offsetHeight;
-                
-                const boundedLeft = Math.max(0, Math.min(left, maxWidth));
-                const boundedTop = Math.max(0, Math.min(top, maxHeight));
-                
-                card.style.left = `${boundedLeft}px`;
-                card.style.top = `${boundedTop}px`;
-                
-                return { boundedLeft, boundedTop };
-            }
-            
-            // Apply tilt effect based on velocity
-            function applyTilt(velX, velY) {
-                const maxTilt = 1.5; // Maximum tilt in degrees
-                const tiltX = Math.min(maxTilt, Math.max(-maxTilt, velY * 0.05));
-                const tiltY = Math.min(maxTilt, Math.max(-maxTilt, -velX * 0.05));
-                
-                card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-            }
-            
-            // 处理惯性动画
-            function applyInertia() {
-                if (Math.abs(velocityX) < 0.5 && Math.abs(velocityY) < 0.5) {
-                    // Stop animation when velocity becomes very small
-                    cancelAnimationFrame(animationFrameId);
-                    card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-                    return;
-                }
-                
-                // Apply friction (deceleration)
-                velocityX *= 0.95;
-                velocityY *= 0.95;
-                
-                // Get current position
-                const rect = card.getBoundingClientRect();
-                const { boundedLeft, boundedTop } = setPosition(
-                    rect.left + velocityX, 
-                    rect.top + velocityY
-                );
-                
-                // If we hit the viewport boundaries, reduce velocity more dramatically
-                if (boundedLeft === 0 || boundedLeft >= window.innerWidth - card.offsetWidth) {
-                    velocityX *= -0.5; // Bounce effect with energy loss
-                }
-                if (boundedTop === 0 || boundedTop >= window.innerHeight - card.offsetHeight) {
-                    velocityY *= -0.5; // Bounce effect with energy loss
-                }
-                
-                // Apply tilt based on velocity
-                applyTilt(velocityX, velocityY);
-                
-                // Continue animation
-                animationFrameId = requestAnimationFrame(applyInertia);
-            }
-            
-            // Drag functionality
-            card.addEventListener('mousedown', (e) => {
-                // Don't trigger drag if clicking the copy button
-                if (e.target.closest('.copy-button')) return;
-                
-                // Stop any ongoing animation
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                }
-                
-                isDragging = true;
-                card.classList.add('dragging');
-                
-                // Calculate mouse offset from card top-left corner
-                const rect = card.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                
-                // Initialize last position and timestamp for velocity calculation
-                lastX = e.clientX;
-                lastY = e.clientY;
-                lastTimestamp = Date.now();
-                
-                // Reset velocity
-                velocityX = 0;
-                velocityY = 0;
-                
-                // Remove animation transition during drag
-                card.style.transition = 'none';
-                card.style.zIndex = '1000';
-                
-                // Prevent text selection while dragging
-                document.body.style.userSelect = 'none';
-            });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                // Calculate time since last move for velocity
-                const now = Date.now();
-                const dt = now - lastTimestamp;
-                
-                if (dt > 0) {
-                    // Calculate instantaneous velocity (pixels per millisecond)
-                    velocityX = (e.clientX - lastX) / dt * 16.7; // Scale to roughly pixels per frame at 60fps
-                    velocityY = (e.clientY - lastY) / dt * 16.7;
-                    
-                    // Update last position and timestamp
-                    lastX = e.clientX;
-                    lastY = e.clientY;
-                    lastTimestamp = now;
-                }
-                
-                // Move card position
-                const newLeft = e.clientX - offsetX;
-                const newTop = e.clientY - offsetY;
-                setPosition(newLeft, newTop);
-                
-                // Apply subtle tilt effect while dragging based on velocity
-                applyTilt(velocityX, velocityY);
-            });
-            
-            document.addEventListener('mouseup', () => {
-                if (!isDragging) return;
-                
-                isDragging = false;
-                card.classList.remove('dragging');
-                
-                // Restore transition
-                card.style.transition = 'box-shadow 0.3s ease, transform 0.5s ease';
-                card.style.zIndex = '100';
-                
-                // Restore text selection
-                document.body.style.userSelect = '';
-                
-                // Apply inertia effect if the card was moving
-                if (Math.abs(velocityX) > 0.5 || Math.abs(velocityY) > 0.5) {
-                    animationFrameId = requestAnimationFrame(applyInertia);
-                } else {
-                    // If not moving fast enough, just reset tilt
-                    card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-                }
-            });
-            
-            // Handle resize event to ensure card stays in bounds
-            window.addEventListener('resize', () => {
-                const rect = card.getBoundingClientRect();
-                setPosition(rect.left, rect.top);
-            });
-        });
+// 初始化卡片拖拽功能
+function initializeCards() {
+  const cards = document.querySelectorAll('.yaml-card')
+
+  cards.forEach((card) => {
+    // 避免重复初始化
+    if (card.dataset.initialized === 'true')
+      return
+    card.dataset.initialized = 'true'
+
+    // Drag state variables
+    let isDragging = false
+    let offsetX, offsetY
+    let lastX, lastY
+    let velocityX = 0
+    let velocityY = 0
+    let lastTimestamp = 0
+    let animationFrameId = null
+
+    // Copy button functionality
+    const copyButton = card.querySelector('.copy-button')
+    const statusBar = card.querySelector('.yaml-card-status')
+
+    copyButton.addEventListener('click', (e) => {
+      // Prevent card dragging when clicking the copy button
+      e.stopPropagation()
+
+      const content = Array.from(card.querySelectorAll('.yaml-item'))
+        .map((item) => {
+          const key = item.querySelector('.yaml-key').textContent
+          const value = item.querySelector('.yaml-value').textContent
+          return `${key} ${value}\n`
+        })
+        .join('\n')
+
+      navigator.clipboard.writeText(content)
+        .then(() => {
+          // Visual feedback for copy
+          copyButton.style.color = '#4CAF50'
+          statusBar.style.width = '100%'
+
+          setTimeout(() => {
+            copyButton.style.color = ''
+            statusBar.style.width = '0'
+          }, 1500)
+        })
+        .catch((err) => {
+          console.error('Failed to copy: ', err)
+          statusBar.style.backgroundColor = '#f44336'
+          statusBar.style.width = '100%'
+
+          setTimeout(() => {
+            statusBar.style.width = '0'
+            statusBar.style.backgroundColor = '#4CAF50'
+          }, 1500)
+        })
+    })
+
+    // Helper function to apply position with bounds checking
+    function setPosition(left, top) {
+      // Keep within viewport
+      const maxWidth = window.innerWidth - card.offsetWidth
+      const maxHeight = window.innerHeight - card.offsetHeight
+
+      const boundedLeft = Math.max(0, Math.min(left, maxWidth))
+      const boundedTop = Math.max(0, Math.min(top, maxHeight))
+
+      card.style.left = `${boundedLeft}px`
+      card.style.top = `${boundedTop}px`
+
+      return { boundedLeft, boundedTop }
     }
-    
-    // 首次加载时初始化
-    // document.addEventListener('DOMContentLoaded', initializeCards);
-    
-    // Astro 页面生命周期处理
-    document.addEventListener('astro:page-load', initializeCards);
+
+    // Apply tilt effect based on velocity
+    function applyTilt(velX, velY) {
+      const maxTilt = 1.5 // Maximum tilt in degrees
+      const tiltX = Math.min(maxTilt, Math.max(-maxTilt, velY * 0.05))
+      const tiltY = Math.min(maxTilt, Math.max(-maxTilt, -velX * 0.05))
+
+      card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
+    }
+
+    // 处理惯性动画
+    function applyInertia() {
+      if (Math.abs(velocityX) < 0.5 && Math.abs(velocityY) < 0.5) {
+        // Stop animation when velocity becomes very small
+        cancelAnimationFrame(animationFrameId)
+        card.style.transform = 'rotateX(0deg) rotateY(0deg)'
+        return
+      }
+
+      // Apply friction (deceleration)
+      velocityX *= 0.95
+      velocityY *= 0.95
+
+      // Get current position
+      const rect = card.getBoundingClientRect()
+      const { boundedLeft, boundedTop } = setPosition(
+        rect.left + velocityX,
+        rect.top + velocityY,
+      )
+
+      // If we hit the viewport boundaries, reduce velocity more dramatically
+      if (boundedLeft === 0 || boundedLeft >= window.innerWidth - card.offsetWidth) {
+        velocityX *= -0.5 // Bounce effect with energy loss
+      }
+      if (boundedTop === 0 || boundedTop >= window.innerHeight - card.offsetHeight) {
+        velocityY *= -0.5 // Bounce effect with energy loss
+      }
+
+      // Apply tilt based on velocity
+      applyTilt(velocityX, velocityY)
+
+      // Continue animation
+      animationFrameId = requestAnimationFrame(applyInertia)
+    }
+
+    // Drag functionality
+    card.addEventListener('mousedown', (e) => {
+      // Don't trigger drag if clicking the copy button
+      if (e.target.closest('.copy-button'))
+        return
+
+      // Stop any ongoing animation
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+
+      isDragging = true
+      card.classList.add('dragging')
+
+      // Calculate mouse offset from card top-left corner
+      const rect = card.getBoundingClientRect()
+      offsetX = e.clientX - rect.left
+      offsetY = e.clientY - rect.top
+
+      // Initialize last position and timestamp for velocity calculation
+      lastX = e.clientX
+      lastY = e.clientY
+      lastTimestamp = Date.now()
+
+      // Reset velocity
+      velocityX = 0
+      velocityY = 0
+
+      // Remove animation transition during drag
+      card.style.transition = 'none'
+      card.style.zIndex = '1000'
+
+      // Prevent text selection while dragging
+      document.body.style.userSelect = 'none'
+    })
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging)
+        return
+
+      // Calculate time since last move for velocity
+      const now = Date.now()
+      const dt = now - lastTimestamp
+
+      if (dt > 0) {
+        // Calculate instantaneous velocity (pixels per millisecond)
+        velocityX = (e.clientX - lastX) / dt * 16.7 // Scale to roughly pixels per frame at 60fps
+        velocityY = (e.clientY - lastY) / dt * 16.7
+
+        // Update last position and timestamp
+        lastX = e.clientX
+        lastY = e.clientY
+        lastTimestamp = now
+      }
+
+      // Move card position
+      const newLeft = e.clientX - offsetX
+      const newTop = e.clientY - offsetY
+      setPosition(newLeft, newTop)
+
+      // Apply subtle tilt effect while dragging based on velocity
+      applyTilt(velocityX, velocityY)
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging)
+        return
+
+      isDragging = false
+      card.classList.remove('dragging')
+
+      // Restore transition
+      card.style.transition = 'box-shadow 0.3s ease, transform 0.5s ease'
+      card.style.zIndex = '100'
+
+      // Restore text selection
+      document.body.style.userSelect = ''
+
+      // Apply inertia effect if the card was moving
+      if (Math.abs(velocityX) > 0.5 || Math.abs(velocityY) > 0.5) {
+        animationFrameId = requestAnimationFrame(applyInertia)
+      }
+      else {
+        // If not moving fast enough, just reset tilt
+        card.style.transform = 'rotateX(0deg) rotateY(0deg)'
+      }
+    })
+
+    // Handle resize event to ensure card stays in bounds
+    window.addEventListener('resize', () => {
+      const rect = card.getBoundingClientRect()
+      setPosition(rect.left, rect.top)
+    })
+  })
+}
+
+// 首次加载时初始化
+// document.addEventListener('DOMContentLoaded', initializeCards);
+
+// Astro 页面生命周期处理
+document.addEventListener('astro:page-load', initializeCards)
 </script>
 

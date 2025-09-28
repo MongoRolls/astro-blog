@@ -1,10 +1,10 @@
 ---
-import { type CollectionEntry } from 'astro:content';
-import { getCoverImagePath } from '../utils/unsplashCover';
+import type { CollectionEntry } from 'astro:content'
+import { getCoverImagePath } from '../utils/unsplashCover'
 
 type Props = {
-    posts: CollectionEntry<'blog'>[];
-};
+    posts: CollectionEntry<'blog'>[]
+}
 
 const { posts } = Astro.props;
 
@@ -12,14 +12,14 @@ const { posts } = Astro.props;
 
 <div class="carousel-container">
     <div class="carousel-wrapper">
-        {posts.map((post, index) => (
+        {posts.map((post, _) => (
             <div class="carousel-slide" data-post-id={post.id}>
                 <div class="carousel-link">
-                    <img 
-                        src={getCoverImagePath(post.id)} 
-                        alt={post.data.title}
-                        class="carousel-image"
-                        loading="lazy"
+                    <img
+                      src={getCoverImagePath(post.id)}
+                      alt={post.data.title}
+                      class="carousel-image"
+                      loading="lazy"
                     />
                     <div class="carousel-overlay">
                         <h3 class="carousel-title">{post.data.title}</h3>
@@ -164,66 +164,66 @@ const { posts } = Astro.props;
 </style>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        const slides = document.querySelectorAll('.carousel-slide');
-        const dots = document.querySelectorAll('.carousel-dot');
-        let currentSlide = 0;
-        let autoPlayInterval: any;
+  document.addEventListener('astro:page-load', () => {
+    const slides = document.querySelectorAll('.carousel-slide')
+    const dots = document.querySelectorAll('.carousel-dot')
+    let currentSlide = 0
+    let autoPlayInterval: any
 
-        function showSlide(index: number) {
-            slides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-                slide.classList.toggle('pointer-events-none', i !== index);
-            });
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-        }
+    function showSlide(index: number) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index)
+        slide.classList.toggle('pointer-events-none', i !== index)
+      })
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index)
+      })
+    }
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            showSlide(currentSlide);
-        }
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length
+      showSlide(currentSlide)
+    }
 
-        function startAutoPlay() {
-            autoPlayInterval = setInterval(nextSlide, 4000);
-        }
+    function startAutoPlay() {
+      autoPlayInterval = setInterval(nextSlide, 4000)
+    }
 
-        function stopAutoPlay() {
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-            }
-        }
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval)
+      }
+    }
 
-        // 初始化
-        if (slides.length > 0) {
-            showSlide(0);
-            startAutoPlay();
+    // 初始化
+    if (slides.length > 0) {
+      showSlide(0)
+      startAutoPlay()
 
-            // 设置点击事件
-            slides.forEach((slide) => {
-                slide.addEventListener('click', () => {
-                    const postId = slide.getAttribute('data-post-id');
-                    window.location.href = `/blog/${postId}`;
-                });
-            });
+      // 设置点击事件
+      slides.forEach((slide) => {
+        slide.addEventListener('click', () => {
+          const postId = slide.getAttribute('data-post-id')
+          window.location.href = `/blog/${postId}`
+        })
+      })
 
-            // 点击控制
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    currentSlide = index;
-                    showSlide(currentSlide);
-                    stopAutoPlay();
-                    startAutoPlay(); // 重新开始自动播放
-                });
-            });
+      // 点击控制
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentSlide = index
+          showSlide(currentSlide)
+          stopAutoPlay()
+          startAutoPlay() // 重新开始自动播放
+        })
+      })
 
-            // 鼠标悬停暂停自动播放
-            const container = document.querySelector('.carousel-container');
-            if (container) {
-                container.addEventListener('mouseenter', stopAutoPlay);
-                container.addEventListener('mouseleave', startAutoPlay);
-            }
-        }
-    });
-</script> 
+      // 鼠标悬停暂停自动播放
+      const container = document.querySelector('.carousel-container')
+      if (container) {
+        container.addEventListener('mouseenter', stopAutoPlay)
+        container.addEventListener('mouseleave', startAutoPlay)
+      }
+    }
+  })
+</script>

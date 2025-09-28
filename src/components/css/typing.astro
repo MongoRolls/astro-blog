@@ -1,5 +1,5 @@
 ---
-const { text } = Astro.props;
+const { text } = Astro.props
 
 const textLength = text.length;
 ---
@@ -50,11 +50,11 @@ const textLength = text.length;
 
 
 <script>
-  const typing = document.querySelector('.typing');
+const typing = document.querySelector('.typing')
 
-  if(typing){
-    typing.addEventListener('click', () => {
-      typing.classList.toggle('typing-active');
-    });
-  }
+if (typing) {
+  typing.addEventListener('click', () => {
+    typing.classList.toggle('typing-active')
+  })
+}
 </script>

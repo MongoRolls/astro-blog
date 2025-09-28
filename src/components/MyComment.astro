@@ -1,5 +1,5 @@
 ---
-import siteConfig from '../data/site-config';
+
 ---
 
 <div class="flex items-center gap-2">
@@ -10,24 +10,23 @@ import siteConfig from '../data/site-config';
 <div id="tcomment"></div>
 
 <!-- 只执行一次，点击其他博客跳转没有触发，可能是视图切换 -->
-<script is:inline > 
+<script is:inline>
 function initTwikoo() {
- twikoo.init({
-   envId: 'https://comment.mongorolls.cn/', 
-   el: '#tcomment', 
-   emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
-});
+  twikoo.init({
+    envId: 'https://comment.mongorolls.cn/',
+    el: '#tcomment',
+    emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+  })
 }
 </script>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        
-        let script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0';
-        script.onload = () => {
-            (window as any).initTwikoo();
-        };
-        document.body.appendChild(script);
-    });
+document.addEventListener('astro:page-load', () => {
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0'
+  script.onload = () => {
+    (window as any).initTwikoo()
+  }
+  document.body.appendChild(script)
+})
 </script>

@@ -13,7 +13,7 @@
             <div class="absolute -top-[60%] md:-top-[100%] md:left-[calc(50%-96px)] left-[calc(50%-64px)] md:w-48 md:h-48 w-32 h-32 animate-float">
                 <div class="absolute inset-0 animate-spin-slow rounded-full bg-gradient-to-r from-pink-500 to-violet-500 blur-sm"></div>
                 <img
-                    src="/music.png"
+                        src="/music.png"
                     alt="Avatar"
                     class="relative h-full w-full rounded-full border-2 border-white object-cover dark:border-gray-700 shadow-lg"
                 />
@@ -47,16 +47,15 @@
                     </a>
                 </div>
             </div>
-        </div>
+            </div>
     </main>
 </div>
 
-        <style is:global lang="scss">
+    <style is:global lang="scss">
             @keyframes spin-slow {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
             }
-
             @keyframes float {
                 0%, 100% { transform: translateY(0); }
                 50% { transform: translateY(-10px); }
@@ -196,72 +195,72 @@
         </style>
 
         <script>
-            // 客户端 emoji 生成和更新
-            function getRandomEmoji() {
-                const ranges = [
-                    [128512, 128591], // 表情符号
-                    [127744, 127994], // 自然
-                    [128640, 128704], // 交通
-                    [127799, 127868], // 食物
-                    [128172, 128235]  // 符号
-                ];
-                const range = ranges[Math.floor(Math.random() * ranges.length)];
-                return String.fromCodePoint(
-                    Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]
-                );
-            }
+// 客户端 emoji 生成和更新
+function getRandomEmoji() {
+  const ranges = [
+    [128512, 128591], // 表情符号
+    [127744, 127994], // 自然
+    [128640, 128704], // 交通
+    [127799, 127868], // 食物
+    [128172, 128235], // 符号
+  ]
+  const range = ranges[Math.floor(Math.random() * ranges.length)]
+  return String.fromCodePoint(
+    Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0],
+  )
+}
 
-            function createEmojiRows() {
-                const wall = document.getElementById('emoji-wall');
-                if (!wall) {
-                    console.error('Emoji wall element not found');
-                    return;
-                }
-                
-                wall.innerHTML = '';
-                const rowCount = Math.floor(window.innerHeight / 40);
+function createEmojiRows() {
+  const wall = document.getElementById('emoji-wall')
+  if (!wall) {
+    console.error('Emoji wall element not found')
+    return
+  }
 
-                for (let i = 0; i < rowCount; i++) {
-                    const row = document.createElement('div');
-                    row.className = 'emoji-row whitespace-nowrap flex';
-                    row.style.setProperty('--index', i.toString());
-                    // 生成随机动画参数
-                    const translateX = Math.random() * -1000 - 500; // -500px 到 -1500px 之间的随机值
-                    row.style.setProperty('--translate-x', `${translateX}px`);
-                    
-                    const speed = 40 + Math.random() * 80; // 40-120秒的随机速度
-                    const direction = i % 2 === 0 ? 'left' : 'right';
-                    
-                    // 如果是向右移动，使用正值
-                    if (direction === 'right') {
-                        row.style.setProperty('--translate-x', `${-translateX}px`);
-                    }
-                    
-                    row.style.animation = `scroll-${direction} ${speed}s linear infinite`;
+  wall.innerHTML = ''
+  const rowCount = Math.floor(window.innerHeight / 40)
 
-                    // 确保每行有足够的emoji
-                    const emojiCount = Math.ceil(window.innerWidth / 30) + 4; // 添加额外的emoji防止间隙
-                    const emojis = Array.from({ length: emojiCount }, () => getRandomEmoji());
-                    const content = document.createElement('div');
-                    content.className = 'flex gap-[2px] px-2';
-                    content.innerHTML = [...emojis, ...emojis]
-                        .map(emoji => `<span class="emoji-item select-none opacity-60">${emoji}</span>`)
-                        .join('');
+  for (let i = 0; i < rowCount; i++) {
+    const row = document.createElement('div')
+    row.className = 'emoji-row whitespace-nowrap flex'
+    row.style.setProperty('--index', i.toString())
+    // 生成随机动画参数
+    const translateX = Math.random() * -1000 - 500 // -500px 到 -1500px 之间的随机值
+    row.style.setProperty('--translate-x', `${translateX}px`)
 
-                    row.appendChild(content);
-                    wall.appendChild(row);
-                }
-            }
+    const speed = 40 + Math.random() * 80 // 40-120秒的随机速度
+    const direction = i % 2 === 0 ? 'left' : 'right'
 
-            // 初始化和窗口调整时重新创建emoji墙
-            function initEmojiWall() {
-                createEmojiRows();
-                window.addEventListener('resize', createEmojiRows);
-            }
+    // 如果是向右移动，使用正值
+    if (direction === 'right') {
+      row.style.setProperty('--translate-x', `${-translateX}px`)
+    }
 
-            // 支持页面转换
-            document.addEventListener('astro:page-load', initEmojiWall);
-            document.addEventListener('astro:after-swap', initEmojiWall);
-        </script>
+    row.style.animation = `scroll-${direction} ${speed}s linear infinite`
+
+    // 确保每行有足够的emoji
+    const emojiCount = Math.ceil(window.innerWidth / 30) + 4 // 添加额外的emoji防止间隙
+    const emojis = Array.from({ length: emojiCount }, () => getRandomEmoji())
+    const content = document.createElement('div')
+    content.className = 'flex gap-[2px] px-2'
+    content.innerHTML = [...emojis, ...emojis]
+      .map(emoji => `<span class="emoji-item select-none opacity-60">${emoji}</span>`)
+      .join('')
+
+    row.appendChild(content)
+    wall.appendChild(row)
+  }
+}
+
+// 初始化和窗口调整时重新创建emoji墙
+function initEmojiWall() {
+  createEmojiRows()
+  window.addEventListener('resize', createEmojiRows)
+}
+
+// 支持页面转换
+document.addEventListener('astro:page-load', initEmojiWall)
+document.addEventListener('astro:after-swap', initEmojiWall)
+</script>
     </div>
 </html>

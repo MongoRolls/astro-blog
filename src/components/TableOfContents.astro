@@ -1,35 +1,35 @@
 ---
 interface Props {
     headings: {
-        depth: number;
-        slug: string;
-        text: string;
-    }[];
+        depth: number
+        slug: string
+        text: string
+    }[]
 }
 
-const { headings } = Astro.props;
+const { headings } = Astro.props
 const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 ---
 
 <nav class="toc hidden lg:block h-full">
-    <div class= "sticky top-24 max-h-[70vh] overflow-y-auto">
+    <div class="sticky top-24 max-h-[70vh] overflow-y-auto">
         <ul class="space-y-1 text-xs leading-4 border-l border-gray-200 dark:border-gray-800">
         {headings.length > 0 && <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">Content</h2>}
         {
-                toc.map((heading) => (
+                toc.map(heading => (
                     <li
-                        class:list={[
+                      class:list={[
                             'toc-item line-clamp-1 relative flex items-center',
                             {
                                 'pl-4': heading.depth === 2,
-                                'pl-6': heading.depth === 3
+                                'pl-6': heading.depth === 3,
                             },
                         ]}
                     >
                         {heading.depth === 3 && <span class="text-gray-500 dark:text-gray-400 pr-2 font-semibold">-</span>}
                         <a
-                            href={`#${heading.slug}`}
-                            class="truncate block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200"
+                          href={`#${heading.slug}`}
+                          class="truncate block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200"
                         >{heading.text}
                         </a>
                     </li>
@@ -71,86 +71,84 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 
 <script>
 document.addEventListener('astro:page-load', () => {
-    // 记录当前活跃的目录项ID
-    let activeId = '';
-    
-    // 创建交叉观察器
-    const observer = new IntersectionObserver(
-        (entries) => {
-            // 获取所有当前可见的标题元素
-            const visibleHeadings = entries
-                .filter(entry => entry.isIntersecting)
-                .map(entry => entry.target);
-            
-            if (visibleHeadings.length > 0) {
-                // 按照在视口中的位置排序，选择最靠近顶部的标题
-                const topHeading = Array.from(visibleHeadings).sort((a, b) => {
-                    return Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top);
-                })[0];
-                
-                const id = topHeading.getAttribute('id');
-                
-                // 只有在活跃ID变化时才更新DOM
-                if (id && id !== activeId) {
-                    activeId = id;
-                    
-                    // 移除所有当前活跃项
-                    document.querySelectorAll('.toc-item.active').forEach((item) => 
-                        item.classList.remove('active'));
-                    
-                    // 添加新的活跃项
-                    const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement;
-                    tocItem?.classList.add('active');
-                }
-            }
-        },
-        // { 
-        //     // rootMargin值解释:
-        //     // 顶部-10%: 标题必须至少进入视口10%才被考虑
-        //     // 底部-70%: 忽略视口底部70%区域内的标题
-        //     // 这样可以更好地突出当前阅读区域的标题
-        //     // rootMargin: '-10% 0px -70% 0px'
-        // }
-        
-    );
+  // 记录当前活跃的目录项ID
+  let activeId = ''
 
-    // 观察所有标题元素
-    document.querySelectorAll('h2, h3').forEach((heading) => {
-        observer.observe(heading);
-    });
+  // 创建交叉观察器
+  const observer = new IntersectionObserver(
+    (entries) => {
+      // 获取所有当前可见的标题元素
+      const visibleHeadings = entries
+        .filter(entry => entry.isIntersecting)
+        .map(entry => entry.target)
 
-    // 平滑滚动
-    document.querySelectorAll('.toc-item a').forEach((link) => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href')?.slice(1);
-            const targetElement = document.getElementById(targetId!);
-            
-            if (targetElement) {
-                
-                // 先设置醒目颜色
-                const originalBackgroundColor = targetElement.style.backgroundColor;
-                targetElement.style.color = '#FF6B6B'; // 使用柔和的珊瑚红色，更加美观
-                targetElement.style.transition = 'color 1s ease'; // 添加过渡效果使颜色变化更平滑
-                
-                // 3秒后恢复原来的颜色
-                setTimeout(() => {
-                    targetElement.style.color = originalBackgroundColor;
-                }, 2000);
-                targetElement.scrollIntoView({
-                    block: 'start',
-                    behavior: 'smooth'
-                });
-                // 等待滚动完成后再偏移
-                setTimeout(() => {
-                    window.scrollBy({
-                        top: -80,
-                        behavior: 'smooth'
-                    }); 
-                }, 800); 
+      if (visibleHeadings.length > 0) {
+        // 按照在视口中的位置排序，选择最靠近顶部的标题
+        const topHeading = Array.from(visibleHeadings).sort((a, b) => {
+          return Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top)
+        })[0]
 
-            }
-        });
-    });
-});
+        const id = topHeading.getAttribute('id')
+
+        // 只有在活跃ID变化时才更新DOM
+        if (id && id !== activeId) {
+          activeId = id
+
+          // 移除所有当前活跃项
+          document.querySelectorAll('.toc-item.active').forEach(item =>
+            item.classList.remove('active'))
+
+          // 添加新的活跃项
+          const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement
+          tocItem?.classList.add('active')
+        }
+      }
+    },
+    // {
+    //     // rootMargin值解释:
+    //     // 顶部-10%: 标题必须至少进入视口10%才被考虑
+    //     // 底部-70%: 忽略视口底部70%区域内的标题
+    //     // 这样可以更好地突出当前阅读区域的标题
+    //     // rootMargin: '-10% 0px -70% 0px'
+    // }
+
+  )
+
+  // 观察所有标题元素
+  document.querySelectorAll('h2, h3').forEach((heading) => {
+    observer.observe(heading)
+  })
+
+  // 平滑滚动
+  document.querySelectorAll('.toc-item a').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault()
+      const targetId = link.getAttribute('href')?.slice(1)
+      const targetElement = document.getElementById(targetId!)
+
+      if (targetElement) {
+        // 先设置醒目颜色
+        const originalBackgroundColor = targetElement.style.backgroundColor
+        targetElement.style.color = '#FF6B6B' // 使用柔和的珊瑚红色，更加美观
+        targetElement.style.transition = 'color 1s ease' // 添加过渡效果使颜色变化更平滑
+
+        // 3秒后恢复原来的颜色
+        setTimeout(() => {
+          targetElement.style.color = originalBackgroundColor
+        }, 2000)
+        targetElement.scrollIntoView({
+          block: 'start',
+          behavior: 'smooth',
+        })
+        // 等待滚动完成后再偏移
+        setTimeout(() => {
+          window.scrollBy({
+            top: -80,
+            behavior: 'smooth',
+          })
+        }, 800)
+      }
+    })
+  })
+})
 </script>

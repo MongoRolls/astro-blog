@@ -1,24 +1,25 @@
 ---
+import type { CollectionEntry } from 'astro:content'
 // 处理contact/about/terms页面
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import MyComment from '../components/MyComment.astro';
+import { getCollection, render } from 'astro:content'
+import MyComment from '../components/MyComment.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
 
 export async function getStaticPaths() {
-    const pages = await getCollection('pages');
-    return pages.map((page) => {
-        console.log('id', page.id);
+    const pages = await getCollection('pages')
+    return pages.map((page: any) => {
+            // console.log('id', page.id)
         return {
             params: { id: page.id },
-            props: { page }
-        };
-    });
+            props: { page },
+        }
+    })
 }
 
-type Props = { page: CollectionEntry<'pages'> };
+type Props = { page: CollectionEntry<'pages'> }
 
-const { page } = Astro.props;
-const { title, seo } = page.data;
+const { page } = Astro.props
+const { title, seo } = page.data
 const { Content } = await render(page);
 ---
 

@@ -30,8 +30,8 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <button 
-        id="search-close" 
+      <button
+        id="search-close"
         class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 bg-white dark:bg-zinc-600 p-2 rounded-full"
         aria-label="关闭搜索"
       >
@@ -51,202 +51,206 @@
 </div>
 
 <script type="module">
-  try {
-    const pagefind = await import('/pagefind/pagefind.js');
-    // 初始化时设置语言偏好为中文
-    pagefind.init({
-      language: "zh"
-    });
-
-  } catch (error) {
-    console.error('Failed to load pagefind:', error);
-  }
+try {
+  // eslint-disable-next-line no-await-in-loop, antfu/no-top-level-await
+  const pagefind = await import('/pagefind/pagefind.js')
+  // 初始化时设置语言偏好为中文
+  pagefind.init({
+    language: 'zh',
+  })
+}
+catch (error) {
+  console.error('Failed to load pagefind:', error)
+}
 </script>
 
 <script type="module">
-    // 节流函数：限制函数执行频率
-    const throttle = (fn, delay) => {
-      let last = 0;
-      return (...args) => {
-        const now = Date.now();
-        if (now - last < delay) return;
-        last = now;
-        return fn(...args);
-      };
-    };
-    
-    // 初始化搜索功能
-    const initSearchFeature = () => {
-        // 元素选择
-        const searchIcon = document.querySelector('#search-icon');
-        const searchBox = document.querySelector('#search-box');
-        const searchBackdrop = document.querySelector('#search-backdrop');
-        const searchContainer = document.querySelector('#search-container');
-        const searchInput = document.querySelector('#search-input');
-        const searchClose = document.querySelector('#search-close');
-        const resultsEl = document.querySelector('#results');
-        
-        if (!searchIcon || !searchBox) return;
-        
-        // 为避免重复绑定事件，先克隆替换搜索图标
-        const newSearchIcon = searchIcon.cloneNode(true);
-        searchIcon.parentNode?.replaceChild(newSearchIcon, searchIcon);
-        newSearchIcon.addEventListener('click', openSearch);
-       
-        document.addEventListener('keydown', (e) => {
-        // 检查是否按下 Ctrl+K 组合键
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-          e.preventDefault(); // 阻止默认行为
-          openSearch(); // 调用打开搜索框的函数
-        }
-      });
-        
-        // 打开搜索框
-        function openSearch() {
-          document.body.style.overflow = 'hidden'; // 防止背景滚动
-          searchBox.classList.remove('hidden');
-          
-          // 使用setTimeout创建淡入效果
-          setTimeout(() => {
-            searchContainer.classList.remove('opacity-0', 'scale-95');
-            searchContainer.classList.add('opacity-100', 'scale-100');
-            searchInput.focus();
-          }, 10);
-        }
-        
-        // 关闭搜索框
-        function closeSearch() {
-          document.body.style.overflow = '';
-          searchContainer.classList.remove('opacity-100', 'scale-100');
-          searchContainer.classList.add('opacity-0', 'scale-95');
-          
-          // 等待过渡效果完成后隐藏
-          setTimeout(() => {
-            searchBox.classList.add('hidden');
-          }, 300);
-        }
-        
-        // 同样处理关闭按钮
-        if (searchClose) {
-            const newSearchClose = searchClose.cloneNode(true);
-            searchClose.parentNode?.replaceChild(newSearchClose, searchClose);
-            newSearchClose.addEventListener('click', closeSearch);
-        }
-        
-        // 背景点击关闭
-        if (searchBackdrop) {
-            const newSearchBackdrop = searchBackdrop.cloneNode(true);
-            searchBackdrop.parentNode?.replaceChild(newSearchBackdrop, searchBackdrop);
-            newSearchBackdrop.addEventListener('click', closeSearch);
-        }
-        
-        // ESC键关闭
-        const handleKeyDown = (e) => {
-          if (e.key === 'Escape' && !searchBox.classList.contains('hidden')) {
-            closeSearch();
-          }
-        };
-        
-        // 移除之前的keydown事件监听，避免重复
-        document.removeEventListener('keydown', handleKeyDown);
-        document.addEventListener('keydown', handleKeyDown);
-        
-        // 搜索功能
-        if (searchInput && resultsEl) {
-            // 移除之前的input事件监听，避免重复
-            const newSearchInput = searchInput.cloneNode(true);
-            searchInput.parentNode?.replaceChild(newSearchInput, searchInput);
-            
-            // 使用节流函数包装handleSearch，限制300ms内最多执行一次
-            newSearchInput.addEventListener('input', throttle(handleSearch, 300));
-        }
-        
-        async function handleSearch(e) {
-            const { value } = e.target;
-            if (!value.trim()) {
-              resultsEl.innerHTML = `
-                <div class="w-full min-h-48 text-5xl text-center flex justify-center items-center select-none">
-                  <div>🔍</div>
-                </div>
-              `;
-              return;
-            }
-            
-            // 显示加载状态
-            resultsEl.innerHTML = `
-              <div class="w-full min-h-48 text-center flex justify-center items-center select-none">
-                <div class="animate-pulse flex flex-col items-center">
-                  <div class="text-3xl mb-2">🔍</div>
-                  <div class="text-sm text-gray-500">搜索中...</div>
-                </div>
-              </div>
-            `;
-            
-            let html = '';
-            try {
-              const pagefind = await import('/pagefind/pagefind.js');
-              
-              // 优化中文搜索参数
-              const search = await pagefind.search(value, {
-                language: "zh",
-                sort: { date: "desc" },
-                filters: {},
-                // 中文搜索优化选项
-                tokenize: true,
-                and_mode: true,
-                expand_results: true,
-                minimum_match_score: 0.2
-              });
-              
-              if (!search || !search.results || search.results.length === 0) {
-                resultsEl.innerHTML = `
-                  <div class="w-full min-h-48 text-xl text-center flex justify-center items-center select-none text-gray-500">
-                    <div>未找到相关结果</div>
-                  </div>
-                `;
-                return;
-              }
-              
-              const results = search.results.map((item) => item.data());
-              const data = await Promise.all(results);
-              
-              // 显示结果数量
-              html += `<div class="text-sm text-gray-500 mb-3 px-1">找到 ${data.length} 条结果</div>`;
-              
-              data.forEach(({ meta: { title }, url, excerpt }) => {
-                // 更改高亮样式，使用不同于标题的颜色
-                const highlightedExcerpt = excerpt.replaceAll('<mark', '<mark class="bg-amber-500/90 text-white dark:text-white px-0.5 py-0.5 rounded"');
-                
-                html += `
-                <div class="bg-white dark:bg-zinc-700 p-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 dark:border-zinc-600">
-                  <a href="${url}" class="text-blue-500 hover:text-blue-600 transition-colors duration-200 font-medium text-lg">${title}</a>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 text-ellipsis mt-1 ml-2">${highlightedExcerpt}</p>
-                </div>
-              `;
-              });
-              resultsEl.innerHTML = html;
-            } catch (error) {
-              console.error('搜索出错:', error);
-              resultsEl.innerHTML = `
-                <div class="w-full min-h-48 text-xl text-center flex flex-col justify-center items-center select-none text-red-500">
-                  <div class="mb-2">搜索出错</div>
-                  <div class="text-sm text-gray-500">${error.message || '未知错误'}</div>
-                </div>
-              `;
-            }
-        }
-    };
-    
-    // 在页面加载和Astro页面切换后初始化搜索功能
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSearchFeature);
-     
-    } else {
-        initSearchFeature();
+// 节流函数：限制函数执行频率
+function throttle(fn, delay) {
+  let last = 0
+  return (...args) => {
+    const now = Date.now()
+    if (now - last < delay)
+      return
+    last = now
+    return fn(...args)
+  }
+}
+
+// 初始化搜索功能
+function initSearchFeature() {
+  // 元素选择
+  const searchIcon = document.querySelector('#search-icon')
+  const searchBox = document.querySelector('#search-box')
+  const searchBackdrop = document.querySelector('#search-backdrop')
+  const searchContainer = document.querySelector('#search-container')
+  const searchInput = document.querySelector('#search-input')
+  const searchClose = document.querySelector('#search-close')
+  const resultsEl = document.querySelector('#results')
+
+  if (!searchIcon || !searchBox)
+    return
+
+  // 为避免重复绑定事件，先克隆替换搜索图标
+  const newSearchIcon = searchIcon.cloneNode(true)
+  searchIcon.parentNode?.replaceChild(newSearchIcon, searchIcon)
+  newSearchIcon.addEventListener('click', openSearch)
+
+  document.addEventListener('keydown', (e) => {
+    // 检查是否按下 Ctrl+K 组合键
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault() // 阻止默认行为
+      openSearch() // 调用打开搜索框的函数
     }
-    
-    // 监听Astro页面切换事件
-    document.addEventListener('astro:after-swap', initSearchFeature);
+  })
+
+  // 打开搜索框
+  function openSearch() {
+    document.body.style.overflow = 'hidden' // 防止背景滚动
+    searchBox.classList.remove('hidden')
+
+    // 使用setTimeout创建淡入效果
+    setTimeout(() => {
+      searchContainer.classList.remove('opacity-0', 'scale-95')
+      searchContainer.classList.add('opacity-100', 'scale-100')
+      searchInput.focus()
+    }, 10)
+  }
+
+  // 关闭搜索框
+  function closeSearch() {
+    document.body.style.overflow = ''
+    searchContainer.classList.remove('opacity-100', 'scale-100')
+    searchContainer.classList.add('opacity-0', 'scale-95')
+
+    // 等待过渡效果完成后隐藏
+    setTimeout(() => {
+      searchBox.classList.add('hidden')
+    }, 300)
+  }
+
+  // 同样处理关闭按钮
+  if (searchClose) {
+    const newSearchClose = searchClose.cloneNode(true)
+    searchClose.parentNode?.replaceChild(newSearchClose, searchClose)
+    newSearchClose.addEventListener('click', closeSearch)
+  }
+
+  // 背景点击关闭
+  if (searchBackdrop) {
+    const newSearchBackdrop = searchBackdrop.cloneNode(true)
+    searchBackdrop.parentNode?.replaceChild(newSearchBackdrop, searchBackdrop)
+    newSearchBackdrop.addEventListener('click', closeSearch)
+  }
+
+  // ESC键关闭
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && !searchBox.classList.contains('hidden')) {
+      closeSearch()
+    }
+  }
+
+  // 移除之前的keydown事件监听，避免重复
+  document.removeEventListener('keydown', handleKeyDown)
+  document.addEventListener('keydown', handleKeyDown)
+
+  // 搜索功能
+  if (searchInput && resultsEl) {
+    // 移除之前的input事件监听，避免重复
+    const newSearchInput = searchInput.cloneNode(true)
+    searchInput.parentNode?.replaceChild(newSearchInput, searchInput)
+
+    // 使用节流函数包装handleSearch，限制300ms内最多执行一次
+    newSearchInput.addEventListener('input', throttle(handleSearch, 300))
+  }
+
+  async function handleSearch(e) {
+    const { value } = e.target
+    if (!value.trim()) {
+      resultsEl.innerHTML = `
+            <div class="w-full min-h-48 text-5xl text-center flex justify-center items-center select-none">
+              <div>🔍</div>
+            </div>
+          `
+      return
+    }
+
+    // 显示加载状态
+    resultsEl.innerHTML = `
+          <div class="w-full min-h-48 text-center flex justify-center items-center select-none">
+            <div class="animate-pulse flex flex-col items-center">
+              <div class="text-3xl mb-2">🔍</div>
+              <div class="text-sm text-gray-500">搜索中...</div>
+            </div>
+          </div>
+        `
+
+    let html = ''
+    try {
+      const pagefind = await import('/pagefind/pagefind.js')
+
+      // 优化中文搜索参数
+      const search = await pagefind.search(value, {
+        language: 'zh',
+        sort: { date: 'desc' },
+        filters: {},
+        // 中文搜索优化选项
+        tokenize: true,
+        and_mode: true,
+        expand_results: true,
+        minimum_match_score: 0.2,
+      })
+
+      if (!search || !search.results || search.results.length === 0) {
+        resultsEl.innerHTML = `
+              <div class="w-full min-h-48 text-xl text-center flex justify-center items-center select-none text-gray-500">
+                <div>未找到相关结果</div>
+              </div>
+            `
+        return
+      }
+
+      const results = search.results.map(item => item.data())
+      const data = await Promise.all(results)
+
+      // 显示结果数量
+      html += `<div class="text-sm text-gray-500 mb-3 px-1">找到 ${data.length} 条结果</div>`
+
+      data.forEach(({ meta: { title }, url, excerpt }) => {
+        // 更改高亮样式，使用不同于标题的颜色
+        const highlightedExcerpt = excerpt.replaceAll('<mark', '<mark class="bg-amber-500/90 text-white dark:text-white px-0.5 py-0.5 rounded"')
+
+        html += `
+            <div class="bg-white dark:bg-zinc-700 p-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 dark:border-zinc-600">
+              <a href="${url}" class="text-blue-500 hover:text-blue-600 transition-colors duration-200 font-medium text-lg">${title}</a>
+              <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 text-ellipsis mt-1 ml-2">${highlightedExcerpt}</p>
+            </div>
+          `
+      })
+      resultsEl.innerHTML = html
+    }
+    catch (error) {
+      console.error('搜索出错:', error)
+      resultsEl.innerHTML = `
+            <div class="w-full min-h-48 text-xl text-center flex flex-col justify-center items-center select-none text-red-500">
+              <div class="mb-2">搜索出错</div>
+              <div class="text-sm text-gray-500">${error.message || '未知错误'}</div>
+            </div>
+          `
+    }
+  }
+}
+
+// 在页面加载和Astro页面切换后初始化搜索功能
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSearchFeature)
+}
+else {
+  initSearchFeature()
+}
+
+// 监听Astro页面切换事件
+document.addEventListener('astro:after-swap', initSearchFeature)
 </script>
 
 <style>
@@ -254,7 +258,7 @@
   #results > div {
     animation: fadeIn 0.3s ease forwards;
   }
-  
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -266,4 +270,3 @@
     }
   }
 </style>
-    

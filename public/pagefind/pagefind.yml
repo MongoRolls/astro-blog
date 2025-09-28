@@ -1,10 +1,10 @@
 language:
-    - code: zh
-      name: Chinese
-      best_match: true
-      support:
-          - code: zh-CN
-            name: '中文 (简体)'
+  - code: zh
+    name: Chinese
+    best_match: true
+    support:
+      - code: zh-CN
+        name: 中文 (简体)
 
 search_mode: smart
 
@@ -16,11 +16,11 @@ tokenize_chinese: true
 
 # 中文分词权重
 language_weights:
-    zh: 1.5
+  zh: 1.5
 
 # 优化中文搜索
 search_options:
-    tokenize: true
-    partial_words: true
-    prefix_searches: true
-    and_mode: true
+  tokenize: true
+  partial_words: true
+  prefix_searches: true
+  and_mode: true

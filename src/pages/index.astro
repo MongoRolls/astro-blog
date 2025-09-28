@@ -1,20 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Button from '../components/Button.astro';
-import siteConfig from '../data/site-config';
-import { sortItemsByDateDesc } from '../utils/data-utils';
-import PostPreview from '../components/PostPreview.astro';
-import { marked } from 'marked';
-import { Image } from 'astro:assets';
-import FormattedDate from '../components/FormattedDate.astro';
-import { getHeroImagePath } from '../utils/imagePath';
-import ArticleCarousel from '../components/ArticleCarousel.astro';
+import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+import { marked } from 'marked'
+import ArticleCarousel from '../components/ArticleCarousel.astro'
+import Button from '../components/Button.astro'
+import FormattedDate from '../components/FormattedDate.astro'
+import PostPreview from '../components/PostPreview.astro'
+import siteConfig from '../data/site-config'
+import BaseLayout from '../layouts/BaseLayout.astro'
+// import { sortItemsByDateDesc } from '../utils/data-utils'
+import { getHeroImagePath } from '../utils/imagePath'
 
-const posts = await getCollection('blog');
-const sortedPosts = posts.sort(sortItemsByDateDesc);
-const featuredPosts = posts.filter(({ data }) => data.isFeatured);
-const randomPosts = posts.sort(() => 0.5 - Math.random()).slice(0, 4);
+const posts = await getCollection('blog')
+// const sortedPosts = posts.sort(sortItemsByDateDesc)
+const featuredPosts = posts.filter(({ data }: any) => data.isFeatured)
+const randomPosts = posts.sort(() => 0.5 - Math.random()).slice(0, 4)
 
 // 硬编码的hero数据
 const heroData = {
@@ -22,23 +22,23 @@ const heroData = {
     text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
     image: {
         src: getHeroImagePath('blog-cover.webp'),
-        alt: '博客临时封面图'
+        alt: '博客临时封面图',
     },
     actions: [
         {
             text: '👋 About Me',
-            href: '/about'
+            href: '/about',
         },
         {
             text: '🪁 To Wiki',
-            href: 'https://www.dgutcs.wiki/'
+            href: 'https://www.dgutcs.wiki/',
         },
         {
             text: '👀 Markdown Style',
-            href: '/style'
-        }
-    ]
-};
+            href: '/style',
+        },
+    ],
+}
 
 // 预先解析markdown以避免在渲染时解析
 const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
@@ -48,24 +48,24 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 <BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
 
     <section class="hero-section w-full mb-8 sm:mb-16">
-        {heroData.title && <h1 class="hero-title w-full">{heroData.title}</h1>}     
+        {heroData.title && <h1 class="hero-title w-full">{heroData.title}</h1>}
         <div class="hero-content-grid w-full max-w-screen-xl mx-auto">
             <div class="hero-content-list w-full flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="hero-text mb-3 flex-1" set:html={parsedText} />
+            <div class="hero-text mb-3 flex-1" set:html={parsedText} />
                 <div class="hero-image-container flex-1">
                     <Image
-                        class="hero-image w-full h-auto"
-                        src={heroData.image.src}
-                        alt={heroData.image.alt || ''}
-                        loading="eager"
-                        fetchpriority="high"
-                        decoding="async"
-                        width={600}
-                        height={315}
+                      class="hero-image w-full h-auto"
+                      src={heroData.image.src}
+                      alt={heroData.image.alt || ''}
+                      loading="eager"
+                      fetchpriority="high"
+                      decoding="async"
+                      width={600}
+                      height={315}
                     />
                 </div>
                 <div class="hero-actions w-full flex flex-col md:flex-row gap-4 justify-start">
-                    {heroData.actions.map((action) => (
+                    {heroData.actions.map(action => (
                         <Button href={action.href} class="w-full md:w-auto">{action.text}</Button>
                     ))}
                 </div>
@@ -73,16 +73,16 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
         </div>
     </section>
 
-    <hr class="my-8 border-dashed border-main">
+    <hr class="my-8 border-dashed border-main" />
     <ArticleCarousel posts={randomPosts} />
-    <hr class="my-8 border-dashed border-main">
+    <hr class="my-8 border-dashed border-main" />
 
-  
+
 
     <section class="w-full mb-8 ">
         <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Posts</h1>
         <div class="flex flex-col space-y-4">
-            {posts.slice(0, 8).map((post) => {
+            {posts.slice(0, 8).map((post: any) => {
                 return (
                     <div class="!mt-3">
                         <span class="pr-5 italic font-serif inline-block w-32 text-gray-500">
@@ -96,7 +96,7 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
         <div class="mt-8">
             <a class="read-more-link font-serif" href="/post">Read More →</a>
         </div>
-        <hr class="my-8 border-dashed border-main">
+        <hr class="my-8 border-dashed border-main" />
     </section>
 
     {
@@ -104,11 +104,11 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
             <div class="mb-16 sm:mb-24 mt-12">
                 <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">Latest posts</h2>
                 <div class="flex flex-col space-y-8">
-                    {featuredPosts.map((post) => (
+                    {featuredPosts.map((post: any) => (
                         <PostPreview post={post} headingLevel="h3" />
                     ))}
                 </div>
-                
+
                 <div class="mt-12 sm:mt-16">
                     <Button href="/blog">View All Posts</Button>
                 </div>
@@ -128,7 +128,7 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
         font-weight: 500;
         position: relative;
         transition: all 0.2s ease;
-        
+
         &::after {
             content: "";
             position: absolute;
@@ -141,17 +141,17 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
-        
+
         &:hover {
             color: rgb(var(--color-text-main) / 1);
             text-decoration-color: transparent;
-            
+
             &::after {
                 transform-origin: left;
                 transform: scaleX(1);
             }
         }
-        
+
         &:visited {
             color: rgb(var(--color-text-main));
         }
@@ -285,7 +285,7 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 
     /* 响应式布局调整 */
     @media (max-width: 1024px) {
-        
+
         .hero-content-grid {
             grid-template-columns: 1fr;
             gap: 20px;
@@ -302,7 +302,7 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
             align-items: flex-start;
             gap: 12px;
         }
-        
+
 
 
         .hero-title {
@@ -328,84 +328,85 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 </style>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        const carouselContainer = document.getElementById('article-carousel');
-        if (!carouselContainer) return;
+document.addEventListener('astro:page-load', () => {
+  const carouselContainer = document.getElementById('article-carousel')
+  if (!carouselContainer)
+    return
 
-        const allSlides = carouselContainer.querySelectorAll('.carousel-slide');
-        const dots = carouselContainer.querySelectorAll('.carousel-dot');
-        let currentSlide = 0;
-        let autoPlayInterval: any;
-        let activeSlides: HTMLElement[] = [];
+  const allSlides = carouselContainer.querySelectorAll('.carousel-slide')
+  const dots = carouselContainer.querySelectorAll('.carousel-dot')
+  let currentSlide = 0
+  let autoPlayInterval: any
+  let activeSlides: HTMLElement[] = []
 
-        // 随机选择4篇文章显示
-        function selectRandomSlides() {
-            // 隐藏所有slides
-            allSlides.forEach(slide => {
-                (slide as HTMLElement).style.display = 'none';
-                slide.classList.remove('active');
-            });
+  // 随机选择4篇文章显示
+  function selectRandomSlides() {
+    // 隐藏所有slides
+    allSlides.forEach((slide) => {
+      (slide as HTMLElement).style.display = 'none'
+      slide.classList.remove('active')
+    })
 
-            // 随机选择4个索引
-            const shuffled = Array.from({length: allSlides.length}, (_, i) => i)
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 4);
+    // 随机选择4个索引
+    const shuffled = Array.from({ length: allSlides.length }, (_, i) => i)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4)
 
-            // 显示选中的slides并加入activeSlides数组
-            activeSlides = shuffled.map(index => {
-                const slide = allSlides[index] as HTMLElement;
-                slide.style.display = 'block';
-                return slide;
-            });
-        }
+    // 显示选中的slides并加入activeSlides数组
+    activeSlides = shuffled.map((index) => {
+      const slide = allSlides[index] as HTMLElement
+      slide.style.display = 'block'
+      return slide
+    })
+  }
 
-        function showSlide(index: number) {
-            activeSlides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-            });
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-        }
+  function showSlide(index: number) {
+    activeSlides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index)
+    })
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index)
+    })
+  }
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % activeSlides.length;
-            showSlide(currentSlide);
-        }
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % activeSlides.length
+    showSlide(currentSlide)
+  }
 
-        function startAutoPlay() {
-            autoPlayInterval = setInterval(nextSlide, 4000);
-        }
+  function startAutoPlay() {
+    autoPlayInterval = setInterval(nextSlide, 4000)
+  }
 
-        function stopAutoPlay() {
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-            }
-        }
+  function stopAutoPlay() {
+    if (autoPlayInterval) {
+      clearInterval(autoPlayInterval)
+    }
+  }
 
-        // 初始化
-        if (allSlides.length > 0) {
-            // 延迟执行随机选择，避免页面闪烁
-            setTimeout(() => {
-                selectRandomSlides();
-                showSlide(0);
-                startAutoPlay();
-            }, 100);
+  // 初始化
+  if (allSlides.length > 0) {
+    // 延迟执行随机选择，避免页面闪烁
+    setTimeout(() => {
+      selectRandomSlides()
+      showSlide(0)
+      startAutoPlay()
+    }, 100)
 
-            // 点击控制
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    currentSlide = index;
-                    showSlide(currentSlide);
-                    stopAutoPlay();
-                    startAutoPlay(); // 重新开始自动播放
-                });
-            });
+    // 点击控制
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        currentSlide = index
+        showSlide(currentSlide)
+        stopAutoPlay()
+        startAutoPlay() // 重新开始自动播放
+      })
+    })
 
-            // 鼠标悬停暂停自动播放
-            carouselContainer.addEventListener('mouseenter', stopAutoPlay);
-            carouselContainer.addEventListener('mouseleave', startAutoPlay);
-        }
-    });
+    // 鼠标悬停暂停自动播放
+    carouselContainer.addEventListener('mouseenter', stopAutoPlay)
+    carouselContainer.addEventListener('mouseleave', startAutoPlay)
+  }
+})
 </script>
 

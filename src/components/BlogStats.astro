@@ -1,13 +1,13 @@
 ---
-import FormattedDate from './FormattedDate.astro';
+import FormattedDate from './FormattedDate.astro'
 
 type Props = {
     stats: {
-        totalPosts: number;
-        totalTags: number;
-        latestPost: any;
-    };
-};
+        totalPosts: number
+        totalTags: number
+        latestPost: any
+    }
+}
 
 const { stats } = Astro.props;
 
@@ -145,15 +145,15 @@ const { stats } = Astro.props;
             max-width: none;
             padding: 16px;
         }
-        
+
         .stats-title {
             font-size: 1rem;
         }
-        
+
         .stat-number {
             font-size: 1.5rem;
         }
-        
+
         .latest-link {
             font-size: 0.875rem;
         }
@@ -167,4 +167,4 @@ const { stats } = Astro.props;
     :global(.dark) .stat-item:hover {
         background: rgb(var(--color-bg) / 0.5);
     }
-</style> 
+</style>

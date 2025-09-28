@@ -1,41 +1,44 @@
 ---
-import { type CollectionEntry } from 'astro:content';
-import ArrowRight from '../icons/ArrowRight.astro';
-import FormattedDate from './FormattedDate.astro';
-import { coverImageExists, fetchAndSaveCoverImage } from '../utils/unsplashCover';
-import { getCoverImagePath } from '../utils/imagePath';
+import type { CollectionEntry } from 'astro:content'
+import ArrowRight from '../icons/ArrowRight.astro'
+import { getCoverImagePath } from '../utils/imagePath'
+import { coverImageExists, fetchAndSaveCoverImage } from '../utils/unsplashCover'
+import FormattedDate from './FormattedDate.astro'
 
-type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
+type Props = { post: CollectionEntry<'blog'>, class?: string, headingLevel?: 'h2' | 'h3' }
 
-const { post, class: className, headingLevel = 'h2' } = Astro.props;
-const { title, publishDate, updatedDate, excerpt } = post.data;
-const TitleTag = headingLevel;
+const { post, class: className, headingLevel = 'h2' } = Astro.props
+const { title, publishDate, excerpt } = post.data
+const TitleTag = headingLevel
 
 // 处理封面图片
-let coverImageUrl = '';
+let coverImageUrl = ''
 
 // 仅在服务器端运行
 // @ts-ignore
 if (import.meta.env.SSR) {
   if (coverImageExists(post.id)) {
-    coverImageUrl = getCoverImagePath(post.id);
-  } else {
+    coverImageUrl = getCoverImagePath(post.id)
+  }
+ else {
     try {
       // 根据文章标题或标签作为搜索关键词
-      const searchQuery = post.data.tags ? post.data.tags.join(' ') : title;
-      coverImageUrl = await fetchAndSaveCoverImage(post.id, searchQuery);
-    } catch (error) {
-      console.error(`获取文章 ${post.id} 的封面图片失败:`, error);
+      const searchQuery = post.data.tags ? post.data.tags.join(' ') : title
+      coverImageUrl = await fetchAndSaveCoverImage(post.id, searchQuery)
+    }
+ catch (error) {
+      console.error(`获取文章 ${post.id} 的封面图片失败:`, error)
     }
   }
-} else {
+}
+ else {
   // 客户端运行时，直接使用路径（假设图片已经在构建时下载）
-  coverImageUrl = getCoverImagePath(post.id);
+  coverImageUrl = getCoverImagePath(post.id)
 }
 ---
 
-<a 
-  class:list={['card group transition-all', className]} 
+<a
+  class:list={['card group transition-all', className]}
   href={`/blog/${post.id}/`}
 >
     <div class="card-shape-wrapper">
@@ -44,7 +47,7 @@ if (import.meta.env.SSR) {
                 <div class="card-content">
                     <div class="card-text">
                         <TitleTag
-                            class="card-title"
+                          class="card-title"
                         >
                             {title}
                         </TitleTag>
@@ -59,7 +62,7 @@ if (import.meta.env.SSR) {
                         </div>
                         {excerpt && <div class="card-excerpt">{excerpt}</div>}
                     </div>
-                    
+
                     <div class="card-action">
                         <span class="read-text">Read Post</span> <ArrowRight class="fill-current w-4 h-4 arrow-icon" />
                     </div>
@@ -85,32 +88,32 @@ if (import.meta.env.SSR) {
         margin: 0;
         transition: transform var(--card-transition);
     }
-    
+
     /* 卡片形状包装器 */
     .card-shape-wrapper {
         @apply relative;
         /* 创建独特的切角效果 */
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 5% 100%, 0% 85%);
     }
-    
+
     @media (max-width: 767px) {
         .card-shape-wrapper {
             clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 8% 100%, 0% 90%);
         }
     }
-    
+
     /* 悬停效果 */
     .card:hover {
         transform: translateY(-4px);
     }
-    
+
     /* 触摸设备交互效果 */
     @media (hover: none) {
         .card:active {
             transform: translateY(-2px);
         }
     }
-    
+
     /* 卡片容器 */
     .card-container {
         @apply w-full flex h-full border-2;
@@ -119,18 +122,18 @@ if (import.meta.env.SSR) {
         border-radius: 10px !important;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     /* 卡片悬停状态 */
     .card:hover .card-container {
         border-color: rgb(var(--color-text-muted));
         box-shadow: var(--card-shadow-hover);
     }
-    
+
     /* 卡片内部容器布局 */
     .card-inner-container {
         @apply flex flex-col md:flex-row w-full relative;
     }
-    
+
     /* 顶部边框效果 */
     .card-border-effect {
         @apply absolute top-0 right-0 h-[3px];
@@ -139,12 +142,12 @@ if (import.meta.env.SSR) {
         transition: width 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         opacity: 0;
     }
-    
+
     .card:hover .card-border-effect {
         width: 100%;
         opacity: 1;
     }
-    
+
     /* 角落装饰效果 */
     .card-corner-accent {
         @apply absolute border-solid opacity-0;
@@ -157,12 +160,12 @@ if (import.meta.env.SSR) {
         transition: opacity 0.3s ease, transform 0.3s ease;
         transform: scale(0);
     }
-    
+
     .card:hover .card-corner-accent {
         opacity: 0.7;
         transform: scale(1.5);
     }
-    
+
     /* 图片容器样式 */
     .card-image {
         @apply relative overflow-hidden;
@@ -170,7 +173,7 @@ if (import.meta.env.SSR) {
         height: 180px;
         order: 2;
     }
-    
+
     @media (min-width: 768px) {
         .card-image {
             width: 45%;
@@ -180,24 +183,24 @@ if (import.meta.env.SSR) {
             clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 10% 0%);
         }
     }
-    
+
     @media (max-width: 767px) {
         .card-image {
             order: 1;
             clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
         }
     }
-    
+
     /* 图片样式 */
     .card-image img {
         @apply absolute inset-0 w-full h-full object-cover;
         transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
-    
+
     .card:hover .card-image img {
         transform: scale(1.05);
     }
-    
+
     /* 图片遮罩层 */
     .card-image-overlay {
         @apply absolute inset-0;
@@ -205,50 +208,50 @@ if (import.meta.env.SSR) {
         opacity: 0.4;
         transition: opacity 0.3s ease, background 0.3s ease;
     }
-    
+
     .card:hover .card-image-overlay {
         opacity: 0.2;
         background: linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.2));
     }
-    
+
     /* 内容区域样式 */
     .card-content {
         @apply p-5 sm:p-6 flex flex-col justify-between grow;
         order: 1;
         position: relative;
     }
-    
+
     @media (min-width: 768px) {
         .card-content {
             max-width: 55%;
         }
     }
-    
+
     @media (max-width: 767px) {
         .card-content {
             order: 2;
             padding: 16px;
         }
     }
-    
+
     /* 日期样式 */
     .card-date {
         @apply text-sm mt-2 mb-3 flex items-center;
         color: rgb(var(--color-text-muted));
         transition: color 0.3s ease;
     }
-    
+
     .date-icon {
         @apply mr-1;
         color: rgb(var(--color-text-muted));
         transition: transform 0.3s ease, color 0.3s ease;
     }
-    
+
     .card:hover .date-icon {
         transform: scale(1.1);
         color: rgb(var(--color-text-main));
     }
-    
+
     /* 标题样式 */
     .card-title {
         @apply text-xl leading-tight font-medium sm:text-2xl relative;
@@ -258,7 +261,7 @@ if (import.meta.env.SSR) {
         font-family: serif;
         font-weight: 900;
     }
-    
+
     .card-title::after {
         content: '';
         position: absolute;
@@ -269,11 +272,11 @@ if (import.meta.env.SSR) {
         background-color: rgb(var(--color-text-main));
         transition: width 0.3s ease;
     }
-    
+
     .card:hover .card-title::after {
         width: 100%;
     }
-    
+
     /* 摘要样式 */
     .card-excerpt {
         @apply mt-3 text-sm leading-relaxed;
@@ -284,14 +287,14 @@ if (import.meta.env.SSR) {
         overflow: hidden;
         transition: color 0.3s ease;
     }
-    
+
     @media (max-width: 767px) {
         .card-excerpt {
             @apply mt-2 text-xs leading-normal;
             -webkit-line-clamp: 2;
         }
     }
-    
+
     /* 底部操作区域 */
     .card-action {
         @apply mt-4 pt-3 text-sm flex items-center gap-1;
@@ -299,21 +302,21 @@ if (import.meta.env.SSR) {
         color: rgb(var(--color-text-main));
         transition: border-color 0.3s ease;
     }
-    
+
     .read-text {
         position: relative;
-        transition: transform 0.3s ease;    
+        transition: transform 0.3s ease;
         padding-left: 5px;
     }
-    
+
     .card:hover .read-text {
         transform: translateX(-3px);
     }
-    
+
     .arrow-icon {
         transition: transform 0.3s ease, opacity 0.3s ease;
     }
-    
+
     .card:hover .arrow-icon {
         transform: translateX(4px);
         opacity: 1;

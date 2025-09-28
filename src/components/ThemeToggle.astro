@@ -1,8 +1,8 @@
 ---
 ---
-<button 
-  id="theme-toggle" 
-  class="theme-toggle-btn" 
+<button
+  id="theme-toggle"
+  class="theme-toggle-btn"
   type="button"
   aria-label="切换主题"
   title="切换主题"
@@ -19,7 +19,7 @@
     <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
     <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
   </svg>
-  
+
   <!-- 月亮图标 -->
   <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -32,113 +32,113 @@
 <script is:inline>
 // 使用 is:inline 确保脚本立即执行而不被 Astro 处理
 // 立即检查并设置主题状态
-(function() {
+(function () {
   // 检查主题状态
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-  
+  const savedTheme = localStorage.getItem('theme')
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+
   // 立即应用主题
   if (isDark) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('dark')
   }
-})();
+  else {
+    document.documentElement.classList.remove('dark')
+  }
+})()
 </script>
 
 <script is:inline>
 // 主题切换处理函数
-const handleThemeToggle = (isDark) => {
-  const html = document.documentElement;
+function handleThemeToggle(isDark) {
+  const html = document.documentElement
   if (isDark) {
-    html.classList.add('dark');
-  } else {
-    html.classList.remove('dark');
+    html.classList.add('dark')
   }
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-};
+  else {
+    html.classList.remove('dark')
+  }
+  localStorage.setItem('theme', isDark ? 'dark' : 'light')
+}
 
-const handleThemeChange = () => {
-  const isDark = !getCurrentThemeState();
-  handleThemeToggle(isDark);
+function handleThemeChange() {
+  const isDark = !getCurrentThemeState()
+  handleThemeToggle(isDark)
   // CSS会自动处理图标状态，不需要手动更新
-};
+}
 
 // 检测当前的主题状态
-const getCurrentThemeState = () => {
+function getCurrentThemeState() {
   // 优先检查 HTML 元素的 class，因为这反映了当前实际的主题状态
   if (document.documentElement.classList.contains('dark')) {
-    return true;
+    return true
   }
-  
+
   // 其次检查本地存储
-  const savedTheme = localStorage.getItem('theme');
+  const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
-    return savedTheme === 'dark';
+    return savedTheme === 'dark'
   }
-  
+
   // 最后检查系统偏好
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
-
-
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
 
 // 初始化主题
-const initializeTheme = () => {
-  const isDark = getCurrentThemeState();
-  
+function initializeTheme() {
+  const isDark = getCurrentThemeState()
+
   // 应用主题（CSS会自动处理图标状态）
-  handleThemeToggle(isDark);
-};
+  handleThemeToggle(isDark)
+}
 
 // 事件绑定
-const setupListeners = () => {
+function setupListeners() {
   // 直接绑定到所有主题切换按钮
-  const themeButtons = document.querySelectorAll('#theme-toggle');
-  themeButtons.forEach(button => {
-    button.addEventListener('click', handleThemeChange);
-  });
-  
+  const themeButtons = document.querySelectorAll('#theme-toggle')
+  themeButtons.forEach((button) => {
+    button.addEventListener('click', handleThemeChange)
+  })
+
   // 监听系统主题变化
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     if (localStorage.getItem('theme') === null) { // 只有当用户没有手动设置主题时才响应
-      const isDark = e.matches;
-      handleThemeToggle(isDark);
+      const isDark = e.matches
+      handleThemeToggle(isDark)
       // CSS会自动处理图标状态
     }
-  });
-};
+  })
+}
 
 // Astro 页面生命周期处理
 document.addEventListener('astro:before-preparation', () => {
   // 确保跳转前保存当前主题状态
-  const isDark = getCurrentThemeState();
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+  const isDark = getCurrentThemeState()
+  localStorage.setItem('theme', isDark ? 'dark' : 'light')
+})
 
 document.addEventListener('astro:page-load', () => {
   // 页面加载完成后立即设置主题和按钮状态
-  initializeTheme();
-  setupListeners();
-});
+  initializeTheme()
+  setupListeners()
+})
 
 document.addEventListener('astro:after-swap', () => {
   // 页面内容交换后，重新设置状态
-  initializeTheme();
-  setupListeners();
-});
+  initializeTheme()
+  setupListeners()
+})
 
 // 立即执行初始化
 document.addEventListener('DOMContentLoaded', () => {
-  initializeTheme();
-  setupListeners();
-});
+  initializeTheme()
+  setupListeners()
+})
 
 // 如果DOM已经加载完成，立即执行
 if (document.readyState !== 'loading') {
-  initializeTheme();
-  setupListeners();
+  initializeTheme()
+  setupListeners()
 }
 </script>
 

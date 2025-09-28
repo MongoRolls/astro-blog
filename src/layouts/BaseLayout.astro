@@ -1,10 +1,12 @@
 ---
-import { ClientRouter } from 'astro:transitions';
-import BaseHead, { type Props as HeadProps } from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Nav from '../components/Nav.astro';
-import TableOfContents from '../components/TableOfContents.astro';
-export type Props = HeadProps & { showHeader?: boolean; headings?: any[] };
+import type { Props as HeadProps } from '../components/BaseHead.astro'
+import { ClientRouter } from 'astro:transitions'
+import BaseHead from '../components/BaseHead.astro'
+import Footer from '../components/Footer.astro'
+import Nav from '../components/Nav.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+
+export type Props = HeadProps & { showHeader?: boolean, headings?: any[] }
 const { headings = [], ...head } = Astro.props;
 // https://flocto.github.io/
 ---
@@ -13,20 +15,21 @@ const { headings = [], ...head } = Astro.props;
 <html lang="zh-CN" class="antialiased break-words">
     <head>
         <BaseHead {...head} />
-         
+
         <script is:inline>
-            // 初始化主题 - 确保在页面加载前应用正确的主题类，避免闪烁
-            // 使用 is:inline 确保此脚本立即执行而不被 Astro 处理
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-            
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        </script>
+// 初始化主题 - 确保在页面加载前应用正确的主题类，避免闪烁
+// 使用 is:inline 确保此脚本立即执行而不被 Astro 处理
+const savedTheme = localStorage.getItem('theme')
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+const isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+
+if (isDark) {
+  document.documentElement.classList.add('dark')
+}
+else {
+  document.documentElement.classList.remove('dark')
+}
+</script>
         <ClientRouter />
     </head>
     <body class="bg-main text-main relative">
@@ -38,7 +41,7 @@ const { headings = [], ...head } = Astro.props;
                     <slot />
                 </div>
                 <div class="hidden lg:block w-40 relative">
-                     <TableOfContents headings={headings}/> 
+                     <TableOfContents headings={headings} />
                 </div>
             </main>
             <Footer />

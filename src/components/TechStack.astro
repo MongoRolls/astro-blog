@@ -9,7 +9,7 @@ const techStacks = [
   { name: 'ESLint', icon: '/tech/eslint.svg', bg: 'bg-indigo-200' },
   { name: 'Python', icon: '/tech/python.svg', bg: 'bg-yellow-100' },
   { name: 'Vue', icon: '/tech/vue.svg', bg: 'bg-emerald-200' },
-];
+]
 
 // 复制一份实现无缝滚动
 const allTechStacks = [...techStacks, ...techStacks];
@@ -20,12 +20,12 @@ const allTechStacks = [...techStacks, ...techStacks];
   <div class="mt-4 overflow-hidden relative">
     <div id="tech-stack" class="flex gap-4 animate-scroll opacity-0">
       {
-        allTechStacks.map((tech) => (
+        allTechStacks.map(tech => (
           <div class={`flex justify-center items-center flex-shrink-0 w-20 h-20 p-4 rounded-lg ${tech.bg}`}>
-            <img 
-              src={tech.icon} 
-              alt={tech.name} 
-              class="w-full h-full object-contain" 
+            <img
+              src={tech.icon}
+              alt={tech.name}
+              class="w-full h-full object-contain"
               loading="lazy"
               decoding="async"
             />
@@ -68,12 +68,12 @@ const allTechStacks = [...techStacks, ...techStacks];
 
 <script>
   document.addEventListener('astro:page-load', () => {
-    const scrollElement: HTMLElement | null = document.querySelector('.animate-scroll');
+    const scrollElement: HTMLElement | null = document.querySelector('.animate-scroll')
     if (scrollElement) {
       // 确保元素加载完成后再显示
       setTimeout(() => {
-        scrollElement.style.opacity = '1';
-      }, 100);
+        scrollElement.style.opacity = '1'
+      }, 100)
     }
-  });
+  })
 </script>
