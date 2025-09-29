@@ -14,7 +14,7 @@ MongoRolls的个人博客
 
 如果你想要搭建一个类似的站点，可直接 [Fork](https://github.com/mongoRolls/astro-blog/fork) 本仓库使用，或者通过 [Vercel](https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=blog&repo-name=blog) 一键部署。
 
-比起 docusaurus, 我更喜欢 astro的轻量, 不用纠结选择哪个blog主题，自己diy随便改。
+比起 docusaurus, 我更喜欢 astro 的轻量, 不用纠结选择哪个 blog 主题，自己 diy 随便改。
 
 ## 特性
 
@@ -112,4 +112,4 @@ public/
 
 ## 构建说明
 
-构建时会自动下载 Unsplash 图片到本地 `public/cover-images/` 目录，但生产环境默认使用 OSS 加速访问。
+封面图需手动维护在 `public/cover-images/` 目录，生产环境可通过 OSS 加速访问。

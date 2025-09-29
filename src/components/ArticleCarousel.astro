@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { getCoverImagePath } from '../utils/unsplashCover'
+import { buildCoverPath } from '../utils/imagePath'
 
 type Props = {
     posts: CollectionEntry<'blog'>[]
@@ -16,7 +16,7 @@ const { posts } = Astro.props;
             <div class="carousel-slide" data-post-id={post.id}>
                 <div class="carousel-link">
                     <img
-                      src={getCoverImagePath(post.id)}
+                      src={buildCoverPath(post.id)}
                       alt={post.data.title}
                       class="carousel-image"
                       loading="lazy"

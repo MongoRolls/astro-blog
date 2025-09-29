@@ -1,6 +1,5 @@
 // 导入统一的类型定义
 import type { Image } from '../types/image'
-import { imageConfig } from '../config/image'
 
 export type { Image }
 
@@ -8,18 +7,6 @@ export interface Link {
   text: string
   href: string
   icon?: string
-}
-
-// Unsplash API配置接口（保留向后兼容）
-export interface UnsplashConfig {
-  accessKey: string
-  searchEndpoint: string
-  perPage: number
-  coverImageFolder: string
-  imageWidth: number
-  imageHeight: number
-  cropMode: string
-  query: string
 }
 
 export interface Friend {
@@ -44,7 +31,6 @@ export interface SiteConfig {
   postsPerPage?: number
   projectsPerPage?: number
   friends: Friend[]
-  unsplash?: UnsplashConfig // 添加Unsplash配置
   author?: string
   language?: string
   locale?: string
@@ -95,14 +81,11 @@ const siteConfig: SiteConfig = {
     //     text: 'Friends',
     //     href: '/friends'
     // },
-    // {
-    //     text: 'About',
-    //     href: '/about'
-    // },
     {
-      text: 'RSS',
-      href: '/rss.xml',
+        text: 'About',
+        href: '/about'
     },
+    
   ],
   socialLinks: [
     {
@@ -113,6 +96,10 @@ const siteConfig: SiteConfig = {
       text: 'QQ',
       href: 'http://wpa.qq.com/msgrd?v=3&uin=1467513807&site=qq&menu=yes',
     },
+    {
+      text: 'RSS',
+      href: '/rss.xml',
+    }
   ],
   postsPerPage: 6,
   projectsPerPage: 4,
@@ -139,8 +126,6 @@ const siteConfig: SiteConfig = {
       github: 'https://github.com/dbinggo',
     },
   ] as Friend[],
-  // Unsplash API配置（使用统一配置）
-  unsplash: imageConfig.unsplash,
 }
 
 export default siteConfig

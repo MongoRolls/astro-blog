@@ -1,0 +1,92 @@
+---
+import TechStack from '../../components/TechStack.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+const title = 'About Me'
+const description = 'Learn more about the person behind the website and embark on a journey of inspiration and shared experiences.'
+const image = {
+  src: '/about.jpeg',
+  alt: 'A person',
+}
+
+const headings = [
+  {
+    depth: 2,
+    slug: 'about-site',
+    text: '关于本站',
+  },
+]
+---
+
+<BaseLayout
+  title={title}
+  headings={headings}
+  description={description}
+  image={image}
+>
+    <div class="prose dark:prose-invert max-w-none">
+    <h2>关于本站</h2>
+
+    <p>博客网站基于 <a class="post-link" href="https://astro.build/">Astro</a> 框架，然后再进行 diy 创作。</p>
+    <p>评论区采用 <a class="post-link" href="https://twikoo.js.org/">Twikoo</a>，连接 MongoDB。</p>
+    <p>二者都部署于 <a class="post-link" href="https://vercel.com/">Vercel</a>，实现零成本建站。</p>
+
+    <h2 class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>关于我</h2>
+
+    <p>👋  I'm Mongorolls</p>
+    <p>🔭  a Front-end development engineer</p>
+    <p>🌱  currently working on NetEase</p>
+    <p>✨  want to be a open source developer</p>
+
+    <h3>🗺️ 足迹</h3>
+
+    <h3>📫 touch me</h3>
+
+    <ul>
+      <li>github: <a href="https://github.com/MongoRolls">MongoRolls</a></li>
+    </ul>
+
+    <div class="my-8 sm:my-16">
+      <TechStack />
+    </div>
+
+    <h3>Final</h3>
+  </div>
+</BaseLayout>
+
+<style lang="scss" scoped>
+    p,h3 {
+        white-space: break-spaces;
+    }
+
+    .post-link {
+        position: relative;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-decoration-thickness: 3px;
+        text-decoration-color: rgb(var(--color-text-main) / 0.4);
+        text-underline-offset: 0.3em;
+        color: rgb(var(--color-text-main) / 0.8);
+        transition: all 0.2s ease;
+        &::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #60a5fa, #e879f9);
+            transform-origin: right;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        &:hover {
+            color: rgb(var(--color-text-main) / 1);
+            text-decoration-color: transparent;
+            &::after {
+                transform-origin: left;
+                transform: scaleX(1);
+            }
+        }
+    }
+</style>

@@ -44,7 +44,7 @@
         /* 背景颜色 */
         --color-bg-main: 29, 31, 32; /* #1d1f20 */
         --color-bg-muted: 36 36 36; /* #242424 */
-        --color-bg-card: 31 41 55; /* gray-800 */
+        --color-bg-card: 55 65 81; /* gray-700 */
 
         /* 边框颜色 */
         --color-border-main: 242 241 236; /* #F2F1EC */

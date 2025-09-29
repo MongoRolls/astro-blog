@@ -1,8 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content'
 import ArrowRight from '../icons/ArrowRight.astro'
-import { getCoverImagePath } from '../utils/imagePath'
-import { coverImageExists, fetchAndSaveCoverImage } from '../utils/unsplashCover'
+import { buildCoverPath } from '../utils/imagePath'
 import FormattedDate from './FormattedDate.astro'
 
 type Props = { post: CollectionEntry<'blog'>, class?: string, headingLevel?: 'h2' | 'h3' }
@@ -12,29 +11,7 @@ const { title, publishDate, excerpt } = post.data
 const TitleTag = headingLevel
 
 // 处理封面图片
-let coverImageUrl = ''
-
-// 仅在服务器端运行
-// @ts-ignore
-if (import.meta.env.SSR) {
-  if (coverImageExists(post.id)) {
-    coverImageUrl = getCoverImagePath(post.id)
-  }
- else {
-    try {
-      // 根据文章标题或标签作为搜索关键词
-      const searchQuery = post.data.tags ? post.data.tags.join(' ') : title
-      coverImageUrl = await fetchAndSaveCoverImage(post.id, searchQuery)
-    }
- catch (error) {
-      console.error(`获取文章 ${post.id} 的封面图片失败:`, error)
-    }
-  }
-}
- else {
-  // 客户端运行时，直接使用路径（假设图片已经在构建时下载）
-  coverImageUrl = getCoverImagePath(post.id)
-}
+const coverImageUrl = buildCoverPath(post.id)
 ---
 
 <a
