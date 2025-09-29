@@ -1,74 +1,78 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/newsreader';
-@import '@fontsource-variable/newsreader/wght-italic.css';
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/newsreader/wght-italic.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-    :root {
-        /* 主题色 - 使用CSS变量便于全局控制和暗色模式适配 */
-        --color-primary: 14, 165, 233; /* sky-500 */
-        --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
-        --color-secondary: 236, 72, 153; /* pink-500 */
+  :root {
+    /* 主题色 - 使用CSS变量便于全局控制和暗色模式适配 */
+    --color-primary: 14, 165, 233; /* sky-500 */
+    --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
+    --color-secondary: 236, 72, 153; /* pink-500 */
 
-        /* 文本颜色 */
-        --color-text-main: 23 23 23; /* #171717 主要文本 */
-        /* --color-text-p: 103 103 103; 段落文本 */
-        --color-text-p: 32 35 40; /* #202328 段落文本 */
-        --color-text-muted: 107 114 128; /* gray-500 次要文本 */
+    /* 文本颜色 */
+    --color-text-main: 23 23 23; /* #171717 主要文本 */
+    /* --color-text-p: 103 103 103; 段落文本 */
+    --color-text-p: 32 35 40; /* #202328 段落文本 */
+    --color-text-muted: 107 114 128; /* gray-500 次要文本 */
 
-        /* 背景颜色 */
-        --color-bg-main: 255 255 255; /* #FFFFFF 主背景 */
-        --color-bg-muted: 240 240 240; /* #F0F0F0 次要背景 */
-        --color-bg-card: 255 255 255; /* 卡片背景 */
+    /* 背景颜色 */
+    --color-bg-main: 255 255 255; /* #FFFFFF 主背景 */
+    --color-bg-muted: 240 240 240; /* #F0F0F0 次要背景 */
+    --color-bg-card: 255 255 255; /* 卡片背景 */
 
-        /* 边框颜色 */
-        --color-border-main: 23 23 23; /* #171717 主边框 */
-        --color-border-card: 209 213 219; /* gray-300 卡片边框 */
+    /* 边框颜色 */
+    --color-border-main: 23 23 23; /* #171717 主边框 */
+    --color-border-card: 209 213 219; /* gray-300 卡片边框 */
 
-        /* 卡片特效 */
-        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
-        --card-transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
+    /* 卡片特效 */
+    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+    --card-transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
 
-    /* 暗色模式变量 */
-    html.dark {
-        /* 文本颜色 */
-        --color-text-main: 242 241 236; /* #F2F1EC */
-        --color-text-p: 242 241 236;
-        --color-text-muted: 156 163 175; /* gray-400 */
-
-        /* 背景颜色 */
-        --color-bg-main: 29, 31, 32; /* #1d1f20 */
-        --color-bg-muted: 36 36 36; /* #242424 */
-        --color-bg-card: 55 65 81; /* gray-700 */
-
-        /* 边框颜色 */
-        --color-border-main: 242 241 236; /* #F2F1EC */
-        --color-border-card: 75 85 99; /* gray-600 */
-
-        /* 卡片特效 */
-        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
+  /* 暗色模式变量 */
+  html.dark {
+    /* 文本颜色 */
+    --color-text-main: 244 246 255;
+    --color-text-p: 214 218 236;
+    --color-text-muted: 148 153 176;
+    /* 背景颜色 */
+    --color-bg-main: 15 15 16;
+    --color-bg-muted: 30 41 59; /* #1e293b */
+    --color-bg-card: 31 31 34;
+    /* 主题色 */
+    --color-primary: 92 124 255;
+    --color-primary-dark: 76 105 220;
+    --color-primary-glow: 140 170 255;
+    /* 边框颜色 */
+    --color-border-main: 48 48 52;
+    --color-border-card: 62 66 76;
+    /* 卡片特效 */
+    --card-shadow: 0 18px 35px rgba(8, 10, 20, 0.55),
+      0 6px 14px rgba(25, 31, 55, 0.35);
+    --card-shadow-hover: 0 24px 50px rgba(6, 8, 18, 0.7),
+      0 10px 22px rgba(40, 50, 95, 0.45);
+    --card-border-blur: 12px;
+  }
 }
 
 @layer components {
-    /* 全局图片样式 */
-    img {
-        @apply rounded-lg; /* 统一圆角 */
-    }
+  /* 全局图片样式 */
+  img {
+    @apply rounded-lg; /* 统一圆角 */
+  }
 
-    /* 侧边栏样式 */
-    aside {
-        @apply bg-gray-50 dark:bg-gray-800 p-3 rounded-lg;
-    }
+  /* 侧边栏样式 */
+  aside {
+    @apply bg-gray-50 dark:bg-gray-800 p-3 rounded-lg;
+  }
 }
 
 /* 全局过渡效果 */
 html {
-    @apply transition-colors duration-300;
+  @apply transition-colors duration-300;
 }

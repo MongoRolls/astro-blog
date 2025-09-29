@@ -15,6 +15,26 @@ const headings = [
     slug: 'about-site',
     text: '关于本站',
   },
+  {
+    depth: 2,
+    slug: 'about-me',
+    text: '关于我',
+  },
+  {
+    depth: 3,
+    slug: 'about-me-footprint',
+    text: '足迹',
+  },
+  {
+    depth: 3,
+    slug: 'about-me-contact',
+    text: '联系方式',
+  },
+  {
+    depth: 3,
+    slug: 'about-me-final',
+    text: 'final',
+  },
 ]
 ---
 
@@ -29,16 +49,26 @@ const headings = [
 
     <p>博客网站基于 <a class="post-link" href="https://astro.build/">Astro</a> 框架，然后再进行 diy 创作。</p>
     <p>评论区采用 <a class="post-link" href="https://twikoo.js.org/">Twikoo</a>，连接 MongoDB。</p>
-    <p>二者都部署于 <a class="post-link" href="https://vercel.com/">Vercel</a>，实现零成本建站。</p>
+    <p>分别都部署于 <a class="post-link" href="https://vercel.com/">Vercel</a>。</p>
 
     <h2 class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>关于我</h2>
 
-    <p>👋  I'm Mongorolls</p>
-    <p>🔭  a Front-end development engineer</p>
-    <p>🌱  currently working on NetEase</p>
-    <p>✨  want to be a open source developer</p>
+    <ul>
+      <li>👋  I'm Mongorolls</li>
+      <li>🔭  a Front-end development engineer</li>
+      <li>🌱  currently working on NetEase</li>
+      <li>✨  want to be a open source developer</li>
+    </ul>
+
+    <div class="my-8 sm:my-16">
+      <p>技术栈</p>
+      <TechStack />
+    </div>
 
     <h3>🗺️ 足迹</h3>
+    <ul>
+      <li>todo...</li>
+    </ul>
 
     <h3>📫 touch me</h3>
 
@@ -46,9 +76,6 @@ const headings = [
       <li>github: <a href="https://github.com/MongoRolls">MongoRolls</a></li>
     </ul>
 
-    <div class="my-8 sm:my-16">
-      <TechStack />
-    </div>
 
     <h3>Final</h3>
   </div>

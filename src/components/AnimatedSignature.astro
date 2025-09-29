@@ -26,7 +26,7 @@ export interface Props {
 }
 
 const {
-  animationDuration = '18s',
+  animationDuration = '25s',
   strokeColor = 'currentColor',
   fillColor = 'currentColor',
   darkStrokeColor = '#fdfdfd',
@@ -160,14 +160,14 @@ const actualDarkFillColor = darkFillColor;
     fill: transparent;
     animation: drawSignature var(--animationDuration) ease-in-out infinite;
   }
-
-  // .path-1 { animation-delay: var(--path1Delay); }
-  // .path-2 { animation-delay: var(--path2Delay); }
-  // .path-3 { animation-delay: var(--path3Delay); }
-  // .path-4 { animation-delay: var(--path4Delay); }
-  // .path-5 { animation-delay: var(--path5Delay); }
-  // .path-6 { animation-delay: var(--path6Delay); }
-  // .path-7 { animation-delay: var(--path7Delay); }
+/*
+  .path-1 { animation-delay: var(--path1Delay); }
+  .path-2 { animation-delay: var(--path2Delay); }
+  .path-3 { animation-delay: var(--path3Delay); }
+  .path-4 { animation-delay: var(--path4Delay); }
+  .path-5 { animation-delay: var(--path5Delay); }
+  .path-6 { animation-delay: var(--path6Delay); }
+  .path-7 { animation-delay: var(--path7Delay); } */
 
   @keyframes drawSignature {
     0% {
@@ -175,23 +175,22 @@ const actualDarkFillColor = darkFillColor;
       fill: transparent;
     }
 
-    11% {
+    15% {
       stroke-dashoffset: 0;
       fill: transparent;
     }
 
-    22% {
+    30% {
       stroke-dashoffset: 0;
       fill: var(--lightFillColor);
     }
 
-    78% {
+    67% {
       stroke-dashoffset: 0;
       fill: var(--lightFillColor);
     }
 
-    89%,
-    100% {
+    92% {
       stroke-dashoffset: 7600;
       fill: transparent;
     }
@@ -203,17 +202,17 @@ const actualDarkFillColor = darkFillColor;
       fill: transparent;
     }
 
-    11% {
+    15% {
       stroke-dashoffset: 0;
       fill: transparent;
     }
 
-    22% {
+    30% {
       stroke-dashoffset: 0;
       fill: var(--actualDarkFillColor);
     }
 
-    78% {
+    67% {
       stroke-dashoffset: 0;
       fill: var(--actualDarkFillColor);
     }

@@ -6,8 +6,8 @@ import Footer from '../components/Footer.astro'
 import Nav from '../components/Nav.astro'
 import TableOfContents from '../components/TableOfContents.astro'
 
-export type Props = HeadProps & { showHeader?: boolean, headings?: any[] }
-const { headings = [], ...head } = Astro.props;
+export type Props = HeadProps & { showHeader?: boolean, headings?: any[], nc?: boolean }
+const { headings = [], nc = true, ...head } = Astro.props;
 // https://flocto.github.io/
 ---
 
@@ -34,6 +34,8 @@ const { headings = [], ...head } = Astro.props;
     <body class="bg-main text-main relative">
         <div class="flex flex-col min-h-screen">
             <Nav />
+            <!-- 正常框架 -->
+            {nc && (
             <main class="flex justify-between w-full max-w-[1012px] max-md:px-5 mx-auto z-0">
                 <div class="hidden lg:block w-40"></div>
                 <div class="w-full max-w-[674px] mx-auto">
@@ -44,6 +46,7 @@ const { headings = [], ...head } = Astro.props;
                 </div>
             </main>
             <Footer />
+            )}
         </div>
     </body>
 </html>

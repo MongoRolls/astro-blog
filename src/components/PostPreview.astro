@@ -64,6 +64,7 @@ const coverImageUrl = buildCoverPath(post.id)
         background-color: rgb(var(--color-bg-card));
         margin: 0;
         transition: transform var(--card-transition);
+        box-shadow: var(--card-shadow);
     }
 
     /* 卡片形状包装器 */
@@ -93,7 +94,7 @@ const coverImageUrl = buildCoverPath(post.id)
 
     /* 卡片容器 */
     .card-container {
-        @apply w-full flex h-full border-2;
+        @apply w-full flex h-full border-2 overflow-hidden;
         border-color: rgb(var(--color-border-card));
         box-shadow: var(--card-shadow);
         border-radius: 10px !important;
@@ -109,15 +110,20 @@ const coverImageUrl = buildCoverPath(post.id)
     /* 卡片内部容器布局 */
     .card-inner-container {
         @apply flex flex-col md:flex-row w-full relative;
+        isolation: isolate;
     }
 
     /* 顶部边框效果 */
     .card-border-effect {
         @apply absolute top-0 right-0 h-[3px];
         background-color: rgb(var(--color-primary));
+        left: 0;
         width: 0;
         transition: width 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         opacity: 0;
+        border-top-left-radius: inherit;
+        border-top-right-radius: inherit;
+        filter: drop-shadow(0 0 6px rgba(var(--color-primary-glow), 0.45));
     }
 
     .card:hover .card-border-effect {
@@ -136,6 +142,7 @@ const coverImageUrl = buildCoverPath(post.id)
         border-color: transparent transparent rgb(var(--color-primary)) transparent;
         transition: opacity 0.3s ease, transform 0.3s ease;
         transform: scale(0);
+        filter: drop-shadow(0 0 4px rgba(var(--color-primary-glow), 0.35));
     }
 
     .card:hover .card-corner-accent {
@@ -298,6 +305,7 @@ const coverImageUrl = buildCoverPath(post.id)
         transform: translateX(4px);
         opacity: 1;
     }
+
 </style>
 
 

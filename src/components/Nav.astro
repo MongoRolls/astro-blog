@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle.astro'
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="nav min-h-12 py-2 mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
+<nav class="nav min-h-12 py-2 mb-10 lg:mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
     {
             navLinks.length > 0 && (
             <div class="w-full max-w-[674px] mx-auto relative px-4 md:px-0">
@@ -28,9 +28,9 @@ const navLinks = siteConfig.headerNavLinks || [];
                             <AnimatedSignature
                               width="117px"
                               height="51px"
-                              animationDuration="8s"
-                            //   strokeColor="#bb3a46"
-                            //   fillColor="#bb3a46"
+                              animationDuration="18s"
+                              // strokeColor="#bb3a46"
+                              // fillColor="#bb3a46"
                               strokeColor="#425bc5"
                               fillColor="#425bc5"
                               strokeWidth={12}

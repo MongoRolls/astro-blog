@@ -41,7 +41,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                 <img src={getCoverImagePath(post.id)} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3" />
                 <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
-                    <div>published: <FormattedDate date={publishDate} /></div>
+                    <div class="text-base">published: <FormattedDate date={publishDate} /></div>
                     {
                         updatedDate && (
                             <>
@@ -52,8 +52,8 @@ const { minutesRead } = remarkPluginFrontmatter;
                             </>
                         )
                     }
-                    <div class="text-gray-500">author: 芒果</div>
-                    <div class="text-gray-500">minutesRead: {minutesRead}</div>
+                    <div class="text-gray-500 text-base">author: 芒果</div>
+                    <div class="text-gray-500 text-base">minutesRead: {minutesRead}</div>
                 </div>
                 <div class="w-full h-[1px] bg-gray-400 my-4" />
             </header>
