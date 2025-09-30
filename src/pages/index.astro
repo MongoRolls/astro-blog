@@ -187,12 +187,17 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 
     .hero-title {
         font-size: 1.8rem;
-        leading-tight: true;
-        font-family: serif;
+        // font-family: serif;
         font-weight: 600;
         margin: 0 0 24px 0;
-        color: rgb(var(--color-text-main));
+        // color: rgb(var(--color-text-main));
         line-height: 1.2;
+        background: linear-gradient(#60a5fa 50%, transparent 50%) center center / 10% 10% fixed;
+        background-clip: text;
+        color: transparent;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-text-stroke: 1px rgb(var(--color-text-main));
     }
 
     .hero-content-grid {

@@ -82,10 +82,10 @@ const siteConfig: SiteConfig = {
     //     href: '/friends'
     // },
     {
-        text: 'About',
-        href: '/about'
+      text: 'About',
+      href: '/about',
     },
-    
+
   ],
   socialLinks: [
     {
@@ -99,7 +99,7 @@ const siteConfig: SiteConfig = {
     {
       text: 'RSS',
       href: '/rss.xml',
-    }
+    },
   ],
   postsPerPage: 6,
   projectsPerPage: 4,

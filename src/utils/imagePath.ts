@@ -24,11 +24,14 @@ export function buildCoverPath(postId: string, options?: ImagePathOptions) {
     if (envConfig.isDev) {
       return '/cover-images/image.png'
     }
-    return `${getCoverPathPrefix('local')}/${postId}.jpg`
+    return '/cover-images/image.png'
+    // return `${getCoverPathPrefix('local')}/${postId}.jpg`
   }
 
   const baseUrl = getImageBaseUrl(source)
-  return `${baseUrl}${getCoverPathPrefix('oss')}/${postId}.jpg`
+  // https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/imageplaceholder.png
+  // return `${baseUrl}${getCoverPathPrefix('oss')}/${postId}.jpg`
+  return `${baseUrl}${getCoverPathPrefix('oss')}/imageplaceholder.png`
 }
 
 /**
