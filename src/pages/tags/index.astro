@@ -8,7 +8,17 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     const postCountTagA = getPostsByTag(posts, tagA.id).length
     const postCountTagB = getPostsByTag(posts, tagB.id).length
     return postCountTagB - postCountTagA
-});
+})
+
+// 计算标签占比数据
+const tagStats = tags.map((tag) => {
+    const postCount = getPostsByTag(posts, tag.id).length
+    return {
+        name: tag.name,
+        value: postCount,
+        id: tag.id,
+    }
+}).filter(t => t.value > 0)
 
 ---
 
@@ -17,23 +27,334 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
   description="Explore tag directory for easy navigation and discovery."
   showHeader={false}
 >
-    <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Tags</h1>
+    <div class="tags-container">
+        <h1 class="tags-title">Tags</h1>
+        <div class="tags-description">
+            标签占比可视化
+        </div>
 
-    <div class="flex flex-col space-y-8">
-        {tags.map((tag) => {
-            const postCount = getPostsByTag(posts, tag.id).length
-            return (
-                <div class="!mt-2">
-                    <span class="tag-link">
-                        <a class="text-gray-500 " href={`/tags/${tag.id}`}>#{tag.name}</a>
-                        <span class="text-gray-500">-- {postCount} posts</span>
-                    </span>
-                </div>
-            )
-        })}
+        <!-- ECharts 图表容器 -->
+        <div class="chart-section">
+            <div class="chart-wrapper">
+                <div id="tagChart" style="width: 100%; height: 400px;"></div>
+            </div>
+            <div class="chart-info">
+                <p>总共 <span class="highlight">{posts.length}</span> 篇文章，分布在 <span class="highlight">{tags.length}</span> 个标签中</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 标签列表 -->
+        <h2 class="section-title">标签列表</h2>
+        <div class="tags-list">
+            {tags.map((tag) => {
+                const postCount = getPostsByTag(posts, tag.id).length
+                return (
+                    <div class="tag-item">
+                        <a href={`/tags/${tag.id}`} class="tag-link">
+                            <span class="tag-name">{`# ${tag.name}`}</span>
+                            <span class="tag-count">{postCount}</span>
+                        </a>
+                    </div>
+                )
+            })}
+        </div>
+
+        {tags.length === 0 && (
+            <div class="empty-state">
+                <p>暂无标签</p>
+            </div>
+        )}
     </div>
 </BaseLayout>
 
-<style lang="scss">
+<!-- ECharts CDN -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
+<script define:vars={{ tagStats }}>
+  document.addEventListener('astro:page-load', () => {
+    const chartDom = document.getElementById('tagChart')
+    if (!chartDom) {
+      return
+    }
+
+    const myChart = echarts.init(chartDom, null, {
+      renderer: 'canvas',
+      useDirtyRect: true,
+    })
+
+    // 检查深色模式
+    const isDark = document.documentElement.classList.contains('dark')
+    const textColor = isDark ? '#fdfdfd' : 'rgb(var(--color-text-main))'
+    const backgroundColor = isDark ? 'transparent' : 'transparent'
+
+    const option = {
+      backgroundColor,
+      tooltip: {
+        trigger: 'item',
+        formatter(params) {
+          if (params.componentSubType === 'pie') {
+            const total = tagStats.reduce((sum, item) => sum + item.value, 0)
+            const percentage = ((params.value / total) * 100).toFixed(1)
+            return `${params.name}<br/>文章数: ${params.value}<br/>占比: ${percentage}%`
+          }
+        },
+        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+        borderColor: isDark ? '#555' : '#ddd',
+        textStyle: {
+          color: textColor,
+        },
+      },
+      legend: {
+        orient: 'vertical',
+        right: 20,
+        textStyle: {
+          color: textColor,
+        },
+        data: tagStats.map(item => item.name),
+      },
+      series: [
+        {
+          name: '文章数',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['45%', '50%'],
+          data: tagStats,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+          labelLine: {
+            show: true,
+            lineStyle: {
+              color: isDark ? '#666' : '#ddd',
+            },
+          },
+          label: {
+            show: true,
+            formatter: '{b}',
+            color: textColor,
+            fontSize: 12,
+          },
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: backgroundColor,
+            borderWidth: 2,
+          },
+        },
+      ],
+    }
+
+    myChart.setOption(option)
+
+    // 响应式调整
+    window.addEventListener('resize', () => {
+      myChart.resize()
+    })
+
+    // 深色模式监听
+    const observer = new MutationObserver(() => {
+      const isDarkNow = document.documentElement.classList.contains('dark')
+      const newTextColor = isDarkNow ? '#fdfdfd' : 'rgb(var(--color-text-main))'
+
+      option.tooltip.backgroundColor = isDarkNow ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)'
+      option.tooltip.borderColor = isDarkNow ? '#555' : '#ddd'
+      option.tooltip.textStyle.color = newTextColor
+      option.legend.textStyle.color = newTextColor
+      option.series[0].label.color = newTextColor
+      option.series[0].labelLine.lineStyle.color = isDarkNow ? '#666' : '#ddd'
+
+      myChart.setOption(option)
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+  })
+</script>
+
+<style lang="scss">
+.tags-container {
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.tags-title {
+    font-size: 1.8rem;
+    font-family: serif;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: rgb(var(--color-text-main));
+    line-height: 1.2;
+}
+
+.tags-description {
+    font-size: 1rem;
+    color: rgb(var(--color-text-main) / 0.6);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.chart-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgb(var(--color-bg-main) / 0.5);
+    border-radius: 12px;
+    border: 1px solid rgb(var(--color-text-main) / 0.1);
+
+    .chart-wrapper {
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-info {
+        text-align: center;
+        color: rgb(var(--color-text-main) / 0.7);
+        font-size: 0.95rem;
+
+        .highlight {
+            color: rgb(var(--color-text-main));
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0 4px;
+        }
+    }
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgb(var(--color-text-main) / 0.2),
+        transparent
+    );
+    margin: 2rem 0;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-family: serif;
+    font-weight: 600;
+    margin: 2rem 0 1.5rem 0;
+    color: rgb(var(--color-text-main));
+}
+
+.tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+
+    @media (max-width: 768px) {
+        gap: 1.5rem;
+    }
+}
+
+.tag-item {
+    position: relative;
+    display: inline-block;
+
+    .tag-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .tag-name {
+            color: rgb(var(--color-text-main) / 0.7);
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #60a5fa, #e879f9);
+                transition: width 0.3s ease;
+            }
+
+            &:hover {
+                color: rgb(var(--color-text-main));
+
+                &::after {
+                    width: 100%;
+                }
+            }
+        }
+
+        .tag-count {
+            color: rgb(var(--color-text-main) / 0.5);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        &:hover {
+            .tag-count {
+                color: rgb(var(--color-text-main) / 0.7);
+            }
+        }
+    }
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: rgb(var(--color-text-main) / 0.5);
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .chart-section {
+        padding: 1rem;
+    }
+
+    .chart-wrapper {
+        height: 300px !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .tags-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tags-description {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tags-list {
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        margin: 1.5rem 0 1rem 0;
+    }
+
+    .chart-section {
+        margin: 1.5rem 0;
+
+        #tagChart {
+            height: 250px !important;
+        }
+    }
+}
 </style>

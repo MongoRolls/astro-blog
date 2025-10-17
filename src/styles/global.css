@@ -76,3 +76,7 @@
 html {
   @apply transition-colors duration-300;
 }
+
+@supports (text-autospace: normal) {  
+  :root {    text-autospace: normal;  }
+}
