@@ -73,13 +73,14 @@ module.exports = {
               },
             },
             'p, li, span': {
+              textAutopace: 'normal',
               color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
               fontWeight: 400,
               fontSize: '1rem',
               letterSpacing: '0.04rem',
-              lineHeight: '1.55rem',
-              marginBottom: '10px!important',
-              marginTop: '10px!important',
+              lineHeight: '1.55em',
+              marginBottom: '1.25em',
+              marginTop: '1.25em',
             },
             'code:not(pre code)': {
               'fontFamily': theme('fontFamily.mono'),
@@ -139,8 +140,16 @@ module.exports = {
               fontWeight: 900,
             },
             'h1,h2,h3': {
-              fontFamily: theme('fontFamily.serif'),
-              fontWeight: 700,
+              'display': 'inline-block',
+              'fontFamily': theme('fontFamily.serif'),
+              'fontWeight': 700,
+              // 测试
+              'background': 'linear-gradient(to bottom right, #374151 50%, #6b7280 50%)',
+              'background-clip': 'text',
+              '-webkit-background-clip': 'text',
+              'color': 'transparent',
+              '-webkit-text-fill-color': 'transparent',
+              'background-size': '100% 150%',
               // color: 'rgb(var(--color-text-main) / <alpha-value>)'
             },
             'summary': {

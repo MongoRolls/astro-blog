@@ -74,6 +74,7 @@
 
 /* 全局过渡效果 */
 html {
+  text-autospace: normal;
   @apply transition-colors duration-300;
 }
 

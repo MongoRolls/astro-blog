@@ -48,7 +48,12 @@ const parsedText = heroData?.text ? marked.parse(heroData.text) : '';
 <BaseLayout description={siteConfig.description} image={siteConfig.image} showHeader={false}>
 
     <section class="hero-section w-full mb-8 sm:mb-16">
-        {heroData.title && <h1 class="hero-title w-full">{heroData.title}</h1>}
+        {heroData.title && <h1 class="hero-title w-full">
+            <span class="background: linear-gradient(to bottom right, #374151 50%, #6b7280 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 100% 150%;">{heroData.title}</span></h1>}
         <div class="hero-content-grid w-full max-w-screen-xl mx-auto">
             <div class="hero-content-list w-full flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="hero-text mb-3 flex-1" set:html={parsedText} />
