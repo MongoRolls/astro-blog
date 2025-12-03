@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content'
 import { getCollection, render } from 'astro:content'
 import Button from '../../components/Button.astro'
 import FormattedDate from '../../components/FormattedDate.astro'
+import Link from '../../components/Link.astro'
 import MyComment from '../../components/MyComment.astro'
 import PostPreview from '../../components/PostPreview.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
@@ -59,7 +60,7 @@ const { minutesRead } = remarkPluginFrontmatter;
             </header>
 
             <div class="max-w-none prose  dark:prose-invert">
-                <Content />
+                <Content components={{ Link }} />
             </div>
 
             <div class="mt-8 flex flex-wrap items-center gap-6 text-sm justify-between sm:mt-12 sm:text-base border-y border-gray-200 py-4">

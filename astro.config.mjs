@@ -7,13 +7,14 @@ import { remarkAlert } from 'remark-github-blockquote-alert'
 import { visualizer } from 'rollup-plugin-visualizer'
 import siteConfig from './src/data/site-config'
 import { remarkReadingTime } from './src/utils/remark-reading-time.mjs'
+import { remarkReplaceLinks } from './src/utils/remark-replace-links.js'
 // https://astro.build/config
 
 export default defineConfig({
   site: siteConfig.website,
   integrations: [
     mdx({
-      remarkPlugins: [remarkReadingTime, remarkAlert],
+      remarkPlugins: [remarkReadingTime, remarkAlert,remarkReplaceLinks],
     }),
     sitemap(),
     tailwind({
