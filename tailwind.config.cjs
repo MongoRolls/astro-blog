@@ -5,8 +5,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      sans: ['ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', ...defaultTheme.fontFamily.sans],
-      serif: ['Merriweather', 'Georgia', ...defaultTheme.fontFamily.serif],
+      sans: ['"Inter"', '"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif', ...defaultTheme.fontFamily.sans],
+      serif: ['"Newsreader"', '"Source Han Serif SC"', '"Noto Serif SC"', 'Georgia', 'serif', ...defaultTheme.fontFamily.serif],
+      mono: ['"Fira Code"', '"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
     },
     extend: {
       colors: {
@@ -35,87 +36,54 @@ module.exports = {
         main: 'rgb(var(--color-border-main) / <alpha-value>)',
       },
       typography: theme => ({
-        mongorolls: {
-          css: {
-            // 自定义
-          },
-        },
         DEFAULT: {
           css: {
             'a': {
-              'position': 'relative',
+              'color': 'rgb(var(--color-text-main) / 0.86)',
               'textDecoration': 'underline',
-              'textDecorationStyle': 'dotted',
-              'textDecorationThickness': '3px',
-              'textDecorationColor': 'rgb(var(--color-text-main) / 0.4)',
-              'textUnderlineOffset': '0.3em',
-              'color': 'rgb(var(--color-text-main) / 0.8)',
-              'transition': 'all 0.2s ease',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-2px',
-                left: '0',
-                width: '100%',
-                height: '2px',
-                background: 'linear-gradient(90deg, #60a5fa, #e879f9)',
-                transformOrigin: 'right',
-                transform: 'scaleX(0)',
-                transition: 'transform 0.3s ease',
-              },
+              'textDecorationThickness': '1.35px',
+              'textDecorationColor': 'rgb(var(--color-text-main) / 0.28)',
+              'textUnderlineOffset': '0.2em',
+              'transition': 'color 0.2s ease, background-color 0.2s ease, text-decoration-color 0.2s ease',
               '&:hover': {
-                'color': 'rgb(var(--color-text-main) / 1)',
-                'textDecorationColor': 'transparent',
-                '&::after': {
-                  transformOrigin: 'left',
-                  transform: 'scaleX(1)',
-                },
+                color: 'rgb(var(--color-text-main) / 1)',
+                backgroundColor: 'rgba(var(--color-bg-muted) / 0.5)',
+                textDecorationColor: 'rgb(var(--color-text-main) / 0.5)',
               },
             },
             'p, li, span': {
-              textAutopace: 'normal',
+              fontFamily: theme('fontFamily.sans'),
               color: 'rgb(var(--color-text-p) / var(--tw-text-opacity, 1))',
               fontWeight: 400,
-              fontSize: '1rem',
-              letterSpacing: '0.04rem',
-              lineHeight: '1.55em',
-              marginBottom: '1.25em',
-              marginTop: '1.25em',
+              fontSize: '1.02rem',
+              letterSpacing: '0.01rem',
+              lineHeight: '1.5rem',
+              marginBottom: '0.85em',
+              marginTop: '0.85em',
+            },
+            'strong': {
+              color: 'rgb(var(--color-text-main) / 0.95)',
+              fontWeight: 700,
+            },
+            'em': {
+              color: 'rgb(var(--color-text-main) / 0.9)',
             },
             'code:not(pre code)': {
               'fontFamily': theme('fontFamily.mono'),
-              'fontSize': '0.875em',
+              'fontSize': '0.92em',
               'fontWeight': 500,
-              'backgroundColor': 'rgba(237, 237, 235)',
-              // color: theme('colors.rose.600'),
-              'color': 'black',
-              'borderRadius': '0.25rem',
-              'padding': '0.15em 0.4em',
-              'margin': '0 0.2em',
-              'transition': 'all 0.2s ease',
+              'backgroundColor': 'rgba(237, 237, 235, 0.9)',
+              'color': '#111827',
+              'borderRadius': '0.3rem',
+              'padding': '0.18em 0.4em',
+              'margin': '0 0.18em',
+              'transition': 'color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
+              'border': '1px solid rgba(0, 0, 0, 0.04)',
               'position': 'relative',
               '.dark &': {
-                backgroundColor: 'rgba(31, 41, 55)',
-                color: theme('colors.indigo.400'),
-                borderColor: 'rgba(75, 85, 99, 0.4)',
-              },
-              '&:nth-of-type(3n+1)': {
-                color: theme('colors.blue.600'),
-              },
-              '&:nth-of-type(3n+2)': {
-                color: theme('colors.pink.500'),
-              },
-              '&:nth-of-type(3n+3)': {
-                color: theme('colors.indigo.600'),
-              },
-              '.dark &:nth-of-type(3n+1)': {
-                color: theme('colors.blue.400'),
-              },
-              '.dark &:nth-of-type(3n+2)': {
-                color: theme('colors.pink.400'),
-              },
-              '.dark &:nth-of-type(3n+3)': {
-                color: theme('colors.indigo.400'),
+                backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                color: theme('colors.blue.200'),
+                borderColor: 'rgba(75, 85, 99, 0.35)',
               },
             },
             ':not(pre) > code': {
@@ -124,98 +92,116 @@ module.exports = {
               },
             },
             'pre': {
-              borderRadius: '0.5rem',
+              borderRadius: '0.6rem',
               padding: '1rem',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              margin: '1.5rem 0',
+              boxShadow: 'none',
+              margin: '1.4rem 0',
               overflow: 'auto',
-              maxHeight: '80vh',
-              border: '1px solid rgba(var(--color-border-main), 0.1)',
+              maxHeight: '75vh',
+              border: '1px solid rgba(var(--color-border-main) / 0.12)',
+              backgroundColor: 'rgba(var(--color-bg-muted) / 0.9)',
+              lineHeight: '1.6',
             },
             'pre code': {
-              fontSize: '0.9em',
-              fontWeight: 400,
+              fontSize: '0.95em',
+              fontWeight: 500,
             },
-            'h1,h2': {
-              fontWeight: 900,
+            'h1, h2, h3': {
+              display: 'block',
+              fontFamily: theme('fontFamily.serif'),
+              color: 'rgb(var(--color-text-main) / 0.95)',
+              letterSpacing: '-0.02em',
+              lineHeight: '1.25',
             },
-            'h1,h2,h3': {
-              'display': 'inline-block',
-              'fontFamily': theme('fontFamily.serif'),
-              'fontWeight': 700,
-              // 测试
-              'background': 'linear-gradient(to bottom right, #374151 50%, #6b7280 50%)',
-              'background-clip': 'text',
-              '-webkit-background-clip': 'text',
-              'color': 'transparent',
-              '-webkit-text-fill-color': 'transparent',
-              'background-size': '100% 150%',
-              // color: 'rgb(var(--color-text-main) / <alpha-value>)'
+            'h1': {
+              fontWeight: 700,
+              fontSize: '2.35rem',
+              marginTop: '1.5em',
+              marginBottom: '0.95em',
+            },
+            'h2': {
+              fontWeight: 650,
+              fontSize: '1.85rem',
+              marginTop: '1.4em',
+              marginBottom: '0.85em',
+            },
+            'h3': {
+              fontWeight: 650,
+              fontSize: '1.45rem',
+              marginTop: '1.2em',
+              marginBottom: '0.75em',
             },
             'summary': {
               'cursor': 'pointer',
-              'color': theme('colors.blue.400'),
+              'color': theme('colors.blue.500'),
               'fontWeight': 500,
               'transition': 'color 0.2s ease',
               '&:hover': {
-                color: theme('colors.purple.300'),
+                color: theme('colors.purple.400'),
               },
             },
-            // 表格相关配置
+            'ul, ol': {
+              paddingLeft: '1.2em',
+              marginTop: '0.6em',
+              marginBottom: '0.6em',
+            },
+            'li > ul, li > ol': {
+              marginTop: '0.35em',
+              marginBottom: '0.35em',
+            },
             'table': {
               width: '100%',
               borderCollapse: 'collapse',
-              marginTop: '1.5rem',
-              marginBottom: '1.5rem',
-              fontSize: '0.9em',
-              lineHeight: '1.5',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', // 增强阴影效果
-              borderRadius: '0.5rem',
+              marginTop: '1.2rem',
+              marginBottom: '1.2rem',
+              fontSize: '0.96em',
+              lineHeight: '1.6',
+              boxShadow: 'none',
+              borderRadius: '0.4rem',
               overflow: 'hidden',
-              border: '1px solid rgba(var(--color-border-main), 0.2)', // 添加边框
+              border: '1px solid rgba(var(--color-border-main) / 0.16)',
             },
             'thead': {
-              backgroundColor: 'rgba(var(--color-bg-muted) / 0.7)', // 增加背景不透明度
-              borderBottom: '2px solid rgba(var(--color-border-main) / 0.3)', // 加重底部边框
+              backgroundColor: 'rgba(var(--color-bg-muted) / 0.6)',
+              borderBottom: '1px solid rgba(var(--color-border-main) / 0.2)',
             },
             'thead th': {
               'fontWeight': 700,
-              'padding': '0.75rem 1rem',
+              'padding': '0.75rem 0.95rem',
               'textAlign': 'left',
-              'color': 'rgb(var(--color-text-main) / 1)',
+              'color': 'rgb(var(--color-text-main) / 0.95)',
               'verticalAlign': 'middle',
-              'fontSize': '0.95em',
-              'textTransform': 'uppercase',
-              'letterSpacing': '0.05em',
-              'borderRight': '1px solid rgba(var(--color-border-main) / 0.2)', // 加重右侧边框
+              'fontSize': '0.98em',
+              'letterSpacing': '0.02em',
+              'borderRight': '1px solid rgba(var(--color-border-main) / 0.16)',
               '&:first-child': {
-                paddingLeft: '1.5rem', // 增加第一列左侧内边距
+                paddingLeft: '1.05rem',
               },
               '&:last-child': {
                 borderRight: 'none',
               },
             },
             'tbody tr': {
-              'borderBottom': '1px solid rgba(var(--color-border-main) / 0.2)', // 加重底部边框
+              'borderBottom': '1px solid rgba(var(--color-border-main) / 0.16)',
               '&:nth-child(even)': {
-                backgroundColor: 'rgba(var(--color-bg-muted) / 0.2)', // 增加偶数行背景不透明度
+                backgroundColor: 'rgba(var(--color-bg-muted) / 0.18)',
               },
               '&:last-child': {
                 borderBottom: 'none',
               },
               '&:hover': {
-                backgroundColor: 'rgba(var(--color-bg-muted) / 0.25)', // 增加悬停效果
+                backgroundColor: 'rgba(var(--color-bg-muted) / 0.22)',
               },
             },
             'tbody td': {
-              'padding': '0.75rem 1rem',
+              'padding': '0.75rem 0.95rem',
               'verticalAlign': 'top',
               'color': 'rgb(var(--color-text-main) / 0.9)',
-              'fontSize': '0.95em',
-              'borderRight': '1px solid rgba(var(--color-border-main) / 0.2)', // 加重右侧边框
+              'fontSize': '0.96em',
+              'borderRight': '1px solid rgba(var(--color-border-main) / 0.16)',
               '&:first-child': {
-                paddingLeft: '1.5rem', // 增加第一列左侧内边距
-                fontWeight: '500', // 第一列文字加粗
+                paddingLeft: '1.05rem',
+                fontWeight: '520',
               },
               '&:last-child': {
                 borderRight: 'none',
@@ -224,17 +210,12 @@ module.exports = {
             'blockquote': {
               fontFamily: theme('fontFamily.serif'),
               fontStyle: 'italic',
-              fontWeight: 'normal',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              borderLeft: '4px solid #29212a',
-              p: {
-                'fontSize': '1.3125em',
-                '&::before': {
-                  content: '""',
-                },
-              },
+              fontWeight: 500,
+              color: 'rgb(var(--color-text-main) / 0.9)',
+              borderLeft: '3px solid rgba(var(--color-border-main) / 0.35)',
+              padding: '0.95rem 1.1rem',
+              backgroundColor: 'rgba(var(--color-bg-muted) / 0.42)',
+              margin: '1.2rem 0',
             },
           },
         },

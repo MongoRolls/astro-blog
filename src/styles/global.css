@@ -1,6 +1,4 @@
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/newsreader";
-@import "@fontsource-variable/newsreader/wght-italic.css";
+/* 字体改为通过 BaseHead 使用 Google Fonts 预加载，无需本地包导入 */
 
 @tailwind base;
 @tailwind components;
@@ -32,6 +30,11 @@
     --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
     --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
     --card-transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+
+    /* 链接颜色（默认） */
+    --link-fg: rgba(23, 23, 23, 0.92);
+    --link-bg-hover: rgba(55, 53, 47, 0.08);
+    --link-bg-active: rgba(55, 53, 47, 0.12);
   }
 
   /* 暗色模式变量 */
@@ -57,6 +60,24 @@
     --card-shadow-hover: 0 24px 50px rgba(6, 8, 18, 0.7),
       0 10px 22px rgba(40, 50, 95, 0.45);
     --card-border-blur: 12px;
+
+    /* 链接颜色（暗色） */
+    --link-fg: rgba(230, 230, 227, 0.95);
+    --link-bg-hover: rgba(255, 255, 255, 0.12);
+    --link-bg-active: rgba(255, 255, 255, 0.18);
+  }
+
+  /* 基础字体设置，确保页面默认使用自定义的中英文字体 */
+  body {
+    @apply font-sans text-main;
+    letter-spacing: 0.01em;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif;
+    letter-spacing: -0.02em;
   }
 }
 

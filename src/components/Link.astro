@@ -1,89 +1,99 @@
 ---
 import type { LinkProps } from '../types/link'
-import { normalizeUrl, isExternalLink, getPageTitle,getFaviconUrl } from '../utils/link-metadata'
+import {
+  getFaviconUrl,
+  getPageTitle,
+  isExternalLink,
+  isValidUrl,
+  normalizeUrl,
+} from '../utils/link-metadata'
 
-// 组件属性
 interface Props extends LinkProps {}
 
 const {
   href,
-  external = true, // 
-  showIcon = true // 是否显示Icon
-} = Astro.props
+  external = true,
+  showIcon = true,
+} = Astro.props as Props
 
-// 获取子内容
 const children = await Astro.slots.render('default')
+const rawHref = (href || '').trim()
+const normalizedUrl = rawHref ? normalizeUrl(rawHref) : ''
+const isUrlValid = normalizedUrl ? isValidUrl(normalizedUrl) : false
 
-// 规范化URL
-const normalizedUrl = normalizeUrl(href)
+const fallbackText = (children || '').toString().trim() || rawHref || '链接'
+let linkText = fallbackText
 
-// 获取链接文本
-const linkText = children || await getPageTitle(normalizedUrl)
+if (!children && isUrlValid) {
+  const title = await getPageTitle(normalizedUrl)
+  linkText = title || fallbackText
+}
 
-// 判断是否为外部链接
-const isExt = isExternalLink(normalizedUrl)
+const isExt = isUrlValid ? isExternalLink(normalizedUrl) : false
+const iconUrl = isUrlValid ? getFaviconUrl(normalizedUrl) : ''
 
-// 获取网站元数据
-let siteMetadata = {
+const siteMetadata = {
   title: linkText,
-  description: `访问 ${normalizedUrl}`,
-  icon: '',
+  description: normalizedUrl ? `访问 ${normalizedUrl}` : linkText,
+  icon: iconUrl,
   type: 'website',
-  url: normalizedUrl
+  url: normalizedUrl,
 }
-
-siteMetadata = {
-  ...siteMetadata,
-  title: linkText,
-  icon: getFaviconUrl(normalizedUrl)
-}
-
 ---
 
-<a 
-  href={normalizedUrl} 
-  class="link"
-  target={external && isExt ? '_blank' : '_self'}
-  rel={external && isExt ? 'noopener noreferrer' : ''}
->
-  {showIcon && siteMetadata.icon && (
-    <img 
-      src={siteMetadata.icon} 
-      alt={`${siteMetadata.title} icon`}
-      class="link__icon"
-      loading="lazy"
-      onerror="this.style.display='none'"
-    />
+{!isUrlValid
+  ? (
+    <span class="link__text link__text--plain">{fallbackText}</span>
+  )
+  : (
+    <a
+      href={normalizedUrl}
+      class="link"
+      target={external && isExt ? '_blank' : '_self'}
+      rel={external && isExt ? 'noopener noreferrer' : ''}
+      aria-label={`打开 ${siteMetadata.title}${normalizedUrl ? ` (${normalizedUrl})` : ''}`}
+      title={siteMetadata.title}
+    >
+      {showIcon && siteMetadata.icon && (
+        <img
+          src={siteMetadata.icon}
+          alt={`${siteMetadata.title} icon`}
+          class="link__icon"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          onerror="this.style.display='none'"
+        />
+      )}
+      <span class="link__text">{linkText}</span>
+    </a>
   )}
-  <span class="link__text">{linkText}</span>
-</a>
 
 <style>
+  /* 行高需与 tailwind.config.cjs 中的 p/div/li 保持一致以对齐基线 */
   .link {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: inherit;
+    color: var(--link-fg, inherit);
     transition: background-color 0.15s ease;
     border-radius: 0.25rem;
-    padding: 0.125rem 0.25rem;
-    margin: 0;
+    margin: 0 !important;
     line-height: 1.5;
     text-decoration: none;
-    vertical-align: baseline;
-    margin: 0 !important;
-    padding: 0 !important;
+    vertical-align: bottom;
+    padding: 0rem 0.38rem !important;
   }
 
   .link:hover {
-    background-color: rgba(55, 53, 47, 0.08);
+    background-color: var(--link-bg-hover, rgba(55, 53, 47, 0.08));
   }
 
   .link:before {content: none !important;}
   .link:after {content: none !important;}
 
   .link:active {
-    background-color: rgba(55, 53, 47, 0.12);
+    background-color: var(--link-bg-active, rgba(55, 53, 47, 0.12));
   }
 
   .link__icon {
@@ -91,9 +101,11 @@ siteMetadata = {
     height: 1rem;
     border-radius: 0.15rem;
     flex-shrink: 0;
-    margin: 0 !important;
+    margin: 0.25rem 0 !important;
     padding: 0 !important;
     object-fit: contain;
+    display: block;
+    align-self: center;
   }
 
   .link__text {
@@ -104,15 +116,23 @@ siteMetadata = {
     white-space: nowrap;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: inherit;
+    line-height: 1.25;
+  }
+
+  .link__text--plain {
+    display: inline-block;
   }
 
   /* 暗色主题适配 */
   :global([data-theme="dark"]) .link {
-    color: inherit;
+    color: var(--link-fg, rgba(230, 230, 227, 0.95));
   }
 
   :global([data-theme="dark"]) .link:hover {
-    background-color: rgba(55, 53, 47, 0.12);
+    background-color: var(--link-bg-hover, rgba(255, 255, 255, 0.12));
+  }
+
+  :global([data-theme="dark"]) .link:active {
+    background-color: var(--link-bg-active, rgba(255, 255, 255, 0.18));
   }
 </style>
