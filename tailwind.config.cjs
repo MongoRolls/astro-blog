@@ -75,7 +75,7 @@ module.exports = {
               'backgroundColor': 'rgba(237, 237, 235, 0.9)',
               'color': '#111827',
               'borderRadius': '0.3rem',
-              'padding': '0.18em 0.4em',
+              'padding': '0.08em 0.4em',
               'margin': '0 0.18em',
               'transition': 'color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
               'border': '1px solid rgba(0, 0, 0, 0.04)',

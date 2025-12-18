@@ -1,0 +1,261 @@
+---
+slug: rendering-modes
+title: 前端渲染模式解析：CSR、SSR 与 SPA
+publishDate: 2025-08-19
+authors: mongorolls
+tags: [认知觉醒, 思考, 前端, SSR, CSR, SPA]
+image: https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/cognition.png
+description: 本文介绍了现代前端开发中常见的客户端渲染（CSR）与服务端渲染（SSR）模式。详细分析了它们的工作原理、优缺点，以及单页面应用（SPA）和水合（hydrate）等相关核心概念，帮助读者理解不同渲染模式的适用场景及技术选型。
+state: finished
+---
+
+## CSR
+
+- 目前国内主流的前端框架，比如 Vue 和 React，基本上都采用了 CSR（Client Side Rendering，客户端渲染）模式。在这种模式下，当用户访问页面时，浏览器首先会请求并获取一个内容几乎为空的 HTML 文件，以及相关的 JS 脚本文件。例如：
+
+  ```html
+  <html>
+    <head>
+      <title>title</title>
+    </head>
+    <body>
+      <div id="root"></div>
+      <script src="./index.js"></script>
+    </body>
+  </html>
+  ```
+  
+
+  - 框架会通过自身的内部机制，将页面内容动态渲染到特定的节点上。简单来说，可以把它理解为：通过类似 document.getElementById("root").innerHTML = "..." 的方式，将内容插入到页面中。
+
+  - 通常在 CSR 模式下，我们点击页面内的导航链接时并不会重新向服务端发起页面请求,比如 React 推荐 `<link>` 去代替 `<a.../>` 通过（如 ReactRouter 等模块，底层为 history,hash 等）重新执行 JS 来处理页面跳转从而进行页面重新渲染。
+
+- 这种方式也被称为 **单页面应用（SPA）**。
+
+> **CSR 优点：**
+>
+> - 页面初始化后，单页应用跳转响应非常快，无需每次都请求服务器即可局部更新页面内容。
+> - 可通过 AJAX 等方式动态获取数据并渲染，提升用户体验。
+>
+> **CSR 缺点：**
+>
+> - 强依赖于 Javascript，需等待 JS 下载和执行
+> - 首屏加载慢，初始 HTML 为空，容易出现白屏。
+> - 对 SEO 不友好，搜索引擎难以抓取实际页面内容。
+
+## SSR
+
+
+- SSR（Server Side Rendering，服务端渲染）以最常见的 Next.js 为例，其特点是在服务端预先将 HTML 内容渲染好并直接返回给客户端。
+
+
+- 需要注意的是，由服务端返回的页面初始时通常不具备交互逻辑(DOM 元素的点击事件等等)，返回的 HTML 依然包含有 script 标签。客户端在加载到这些脚本后，会通过 hydrate（水合）过程，将数据和交互逻辑补充到页面上，此时页面才能实现完整的交互效果。
+
+- 水合（hydrate）后，页面的进一步渲染和路由管理就会由客户端接管。当前主流的 SSR 框架（如基于 React 的 Next.js 和基于 Vue 的 Nuxt.js）都是建立在传统 CSR 框架之上的。
+
+### Q: 为什么需要水合，为什么不能直接将 JS 逻辑在服务端渲染时一起处理？
+
+A: 如 React 和 Vue，它们的组件系统天生不具备“状态序列化”能力。
+依赖于运行时的 JavaScript 执行环境，特别是像闭包、事件处理函数等等。
+
+### hydration
+
+### hydrate 介绍
+
+- Hydration（水合）指的是在服务端渲染（SSR）返回的静态 HTML 页面基础上，客户端 JS 接管页面，并将页面变为可交互的过程。简单来说，就是浏览器加载并执行脚本后，将静态内容“激活”(添加事件监听器等等)，赋予页面动态数据和交互能力。
+
+- 水合通常在“同构/通用”应用中，前后端共享一套渲染逻辑。页面的初始 HTML 在服务端生成，提升首屏渲染速度和 SEO 效果。随后，客户端 JS 加载并将事件绑定、数据状态等补齐，实现完整的用户交互体验。
+
+> 同构可确保客户端与服务端 DOM 一致方便映射处理，否则会导致 hydration 报错（React 也提供如 suppressHydrationWarning 等 API 跳过）。
+
+```javascript
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  // increment 捕获了外部作用域中的状态
+  const increment = () => {
+    setCount(count + 1);
+  };
+
+  return <button onClick={increment}>{count}</button>;
+}
+```
+
+### hydration 难点
+
+Hydration 的难点在于：需要知道要附加哪些事件处理函数，附加在哪些 DOM 节点上，并恢复事件相关的状态。
+
+具体来说，Hydration 需要解决：
+
+- **what**：事件处理函数中往往包含和组件状态相关的闭包，需要 JS 重新执行以恢复这些状态（APP_STATE）。
+- **where**：每个处理函数还要绑定到正确的 DOM 节点和对应的事件类型上。
+
+此外，还需要修复框架内部状态（FRAMEWORK_STATE），比如哪些组件应该重新渲染、哪些数据需要同步。简单来说，Hydration 就是在客户端用 JS 恢复应用和框架的所有状态，并使页面重新拥有交互能力。
+
+> **SSR 优点：**
+>
+> - 不强依赖 JavaScript，禁用 JS 时依然可正常显示内容；
+> - 首屏加载更快，无需等待客户端 JS 下载和执行；
+> - 更有利于 SEO，服务端直接下发完整 HTML，爬虫更友好。
+>
+> **SSR 缺点：**
+>
+> - 必须依赖服务器，无法像纯静态页面一样全量部署到 CDN；
+> - 存在服务端并发和性能压力，需要合理部署和压测；
+> - TTI（可交互时间）可能变长，因为页面需要完成 JS 下载和水合后才能交互。
+
+## SSG
+
+SSG（Static Site Generation，静态站点生成）是 SSR（服务端渲染）的一种拓展方式。它的核心特点是：在项目构建阶段，预先将所有页面内容渲染为纯静态的 HTML 文件，不依赖于运行时的服务端计算，也无需在客户端执行复杂的 JS 逻辑。此外，生成的静态页面可以部署到 CDN，与 SSR 相比能够大幅减轻服务端压力。
+
+典型应用场景包括：文档类网站、博客、官网、产品介绍页面等注重内容展示、交互需求较低的项目。
+
+## ISR
+
+**ISR（Incremental Static Regeneration，增量静态再生成）**
+
+ISR 是一种介于 SSR（服务端渲染）和 SSG（静态站点生成）之间的技术方案。它允许我们像 SSG 一样提前生成静态页面，但又可以根据需要对部分页面进行“按需增量更新”，无需全部重新构建网站。
+
+以 Next.js 为例，开发者可以通过设置 `revalidate` 属性，定义页面在后台重新生成的条件。当指定的 revalidate 时间到达后，下一次有用户访问该页面时，服务端会获取最新数据，重新生成页面，并自动替换原有的静态页面，实现内容的自动更新和同步。这样既兼顾了静态页面的性能、SEO 优势，又保证了数据的时效性和灵活性。
+
+eg：当 CMS 中的文章被更新后，可以通过 on-demand 触发或 revalidate 机制，由服务端向 CMS 请求最新数据，并重新生成对应的静态页面。
+
+```typescript
+// pages/blog/[slug].tsx
+import { GetStaticProps, GetStaticPaths } from "next";
+
+interface Post {
+  slug: string;
+  title: string;
+  content: string;
+}
+
+export default function BlogPost({ post }: { post: Post }) {
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <div>{post.content}</div>
+    </article>
+  );
+}
+
+// 生成静态路径
+export const getStaticPaths: GetStaticPaths = async () => {
+  // 从 API/数据库获取所有文章
+  const posts = await fetch("https://api.example.com/posts").then((r) =>
+    r.json()
+  );
+
+  const paths = posts.map((post: Post) => ({
+    params: { slug: post.slug },
+  }));
+
+  return {
+    paths,
+    fallback: "false",
+  };
+};
+
+// 为每个路径生成静态页面
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const post = await fetch(
+    `https://api.example.com/posts/${params?.slug}`
+  ).then((r) => r.json());
+
+  return {
+    props: { post },
+    // 启用 ISR. 60 minutes
+    revalidate: 60 * 60,
+  };
+};
+```
+
+## Next
+
+#### 基础介绍
+
+[Next.js](https://nextjs.org/) 是由 Vercel 开发的、基于 React 的开源前端框架，专注于服务端渲染（SSR）和静态网站生成（SSG）。它为开发者提供了丰富且简单易用的 API 和工具链，使其能够高效地构建性能优异、SEO 友好并且用户体验出色的 Web 应用。
+
+#### 主要特性
+
+1. 支持服务端渲染（SSR）、静态站点生成（SSG）、增量静态再生（ISR）：开箱即用，提升首屏速度与 SEO，页面可后台自动更新。
+2. 自动路由：文件结构直接映射为路由，无需手工配置，开发迅捷高效。
+3. 前后端一体化：内置 API 路由，前后端代码统一管理，轻松实现全栈开发。
+4. 丰富样式与静态资源支持：原生支持 CSS、Sass 与 CSS-in-JS，静态文件、图片、字体优化集成完善。
+5. 代码分割与高性能：按路由自动分割和懒加载，仅加载必要资源，显著优化性能与体验。
+6. 活跃生态与插件：丰富工具和插件，便捷集成数据获取、状态管理等功能。
+7. 快速灵活部署：支持一键部署到 Vercel，兼容 Node.js 及各大 Serverless 平台。
+
+#### 构建 demo
+
+Next.js 支持两种路由模式：`page route`（页面路由）和 `app route`（应用路由）  
+这里以项目使用比较多的 `page route` 为例，展示一个基本的服务端渲染（SSR）页面写法：
+
+```typescript
+function Home({ serverData }: { serverData: string }) {
+  return (
+    <div>
+      <h1>服务端渲染页面</h1>
+      <p>来自服务端的数据：{serverData}</p>
+    </div>
+  );
+}
+
+export async function getServerSideProps() {
+  // 这里进行服务端数据获取
+  // const data = await fetch(...)
+  const serverData = "Hello, SSR!";
+  // 返回的对象中的 props 会传递给页面组件
+  return {
+    props: { serverData },
+  };
+}
+
+export default Home;
+```
+
+> `getServerSideProps` 是 Next.js 在页面层级用于服务端获取数据的生命周期函数。每次页面请求都会执行该函数，把返回的数据作为 props 传递给页面组件，实现 SSR。
+
+---
+
+Nuxt.js 可以看作是 Vue 生态中的 Next.js，对应于 React 生态里的 Next。
+
+## Qwik
+
+Qwik 是一个 JavaScript 框架，核心特点是[跳过水合](https://www.builder.io/blog/hydration-is-pure-overhead)：在服务端直接将 JavaScript 逻辑和状态序列化到 HTML 中，从而省去传统水合步骤
+
+
+Resumable 的理念概括起来就是**按需下载、执行 JS**
+
+```html
+<!-- Qwik 序列化到 HTML 的核心部分 -->
+<div q:host>
+  <div q:host>
+    <!-- 事件处理函数引用：指向具体的 JS 文件和函数 -->
+    <button on:click="./component_onClick.js#handler">添加</button>
+  </div>
+  <div q:host>
+    <!-- q:obj 用于存储组件状态引用 -->
+    <button q:obj="1" on:click="./component_onClick.js#handler[0]">10</button>
+  </div>
+</div>
+
+<script id="qwikloader">
+  /* qwik 中设置全局事件监听器的代码 */
+</script>
+<script type="qwik/json">
+  /* 事件监听器管理和状态反序列化信息 */
+</script>
+```
+
+**执行流程**：用户首次点击按钮时，Qwik 才下载对应的事件处理函数代码，实现按需加载。后续点击该事件不再下载，直接执行已加载的函数。
+
+Qwik 在 TTI（Time To Interactive，可交互时间）表现上非常出色，能够显著缩短页面从加载到可交互的时间。但其生态不如 Next.js 完善，因此除非对性能有极高要求，一般不使用。
+
+除此之外，也存在诸如 Islands 渲染方式，例如 [Astro](https://docs.astro.build/zh-cn/concepts/islands/) 框架就采用了类似的理念，这里就不展开讨论。
+
+## 总结
+
+- **SSG & ISR**：加载最快（静态 HTML），SEO 最优，成本低，但内容更新需要重建。ISR 支持按需增量更新，适合大规模内容网站。
+- **SSR**：首屏速度快，动态内容更新灵活，SEO 友好，但需要服务器支持，成本相对较高。
+- **CSR**：交互性最好，后期响应迅速，但首屏慢，SEO 一般，需要大量 JS 执行。
