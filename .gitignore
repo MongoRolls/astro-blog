@@ -21,8 +21,16 @@ tmp.mdx
 .env
 .env.production
 
+# article images live on OSS; local copies are staging only
+public/blog/
+
 # macOS-specific files
 .DS_Store
 
 # vscode
 .vscode/
+
+# local AI skills — not committed
+.agents/skills/
+.codex/skills
+.claude/skills
