@@ -1,0 +1,74 @@
+---
+title: 日常 AI 工具
+excerpt: 目前日常开发里常用的几套 AI 工具：Cursor、Claude Code、Codex App、CC Switch 和 DeepSeek
+publishDate: '2026-08-13'
+author: MongoRolls
+tags:
+  - tools
+  - ai
+  - tech
+---
+
+写代码基本离不开 AI。自己现在是这几套叠着用：
+
+| 场景 | 工具 | 怎么用 |
+| --- | --- | --- |
+| IDE | Cursor | 日常写、改文件、看页面 |
+| CLI | Claude Code | 边界清楚、可以异步的长任务 |
+| App | Codex | 桌面 App；旧号土耳其礼品卡约 70 多一个月 |
+| 情报 | [Codex 雷达](https://codexradar.com/) | 看额度、智商、降智、社区体感 |
+| 切换 | CC Switch | 给 Claude Code 换供应商 |
+| API | DeepSeek | 便宜、国内直连，给 CLI / 脚本兜底 |
+
+更早的 Cursor 用法见 [Cursor AI 使用指南](/blog/24-01-17-cursor)。
+
+## Cursor
+
+日常还是 Cursor 最舒服。基于 VS Code，Agent 改多文件、补全、对话都在一个窗口里。用得最多的是 Agent：需求说清楚，让它改，自己审 diff。补全有时会抢思路，需要再开。项目约定写进 `.cursor/rules`，比每次口头强调有效。
+
+官方 Pro 不便宜。国内常见是闲鱼买号、拼车。自己也走过，图的是先把 IDE 用起来。要注意评价和成交，别把唯一工作环境绑在来路不明的共享号上；账号别和主力混用。封号、失效都得自己兜。能接受官方订阅还是更稳。
+
+## Claude Code
+
+Anthropic 的命令行 Agent，项目目录里跑 `claude`。适合丢一件完整的事：修 bug、补测试、按现有风格改一页。人可以先去干别的。
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+官方说明：[Claude Code](https://docs.anthropic.com/en/docs/claude-code)。
+
+和 Cursor 的分工：人还在编辑器里、要盯 UI，用 Cursor；任务边界清楚、可以异步，丢 Claude Code。它会读仓库里的 `CLAUDE.md` / `AGENTS.md`，约定写在文件里比写在聊天记录里有用。
+
+## Codex
+
+自己当 **App** 用，下载登录开仓库都在应用里。仓库：[openai/codex](https://github.com/openai/codex)
+
+订阅走 **土耳其区 Apple 礼品卡**，充值后再买。自己这档大概 **70 多人民币一个月**，差不多官方一半。**新开账户已经没这个价**，是旧号续上的，别按这个数去开新号。礼品卡走靠谱渠道，区和 Apple ID 别跟主力国区混。
+
+用法是 Claude Code 的备胎和第二视角：同一件事两边各跑一遍；Claude 不稳或更想用 OpenAI 口味时切过去。App 走苹果订阅，不用再给 Codex 配 CLI 供应商。
+
+## Codex 雷达
+
+额度够不够、模型有没有降智、社区体感怎么样，自己看 [Codex 雷达](https://codexradar.com/)。Max 推理怎么开、DeepSeek 怎么接到 Codex，那边也有现成说明。
+
+## CC Switch
+
+Claude Code 换供应商以前要改 `~/.claude` 和环境变量，渠道一多就乱。[CC Switch](https://cc-switch.cc/) 是桌面应用，供应商、MCP、Skills 点一下切。GitHub：[farion1231/cc-switch](https://github.com/farion1231/cc-switch)
+
+自己加官方、DeepSeek、GLM，托盘启用。Claude Code 多数能热切换。解决的不是模型更聪明，是**同一套 CLI 换后端**：额度紧了切 DeepSeek，要国产切 GLM，再切回官方。
+
+## DeepSeek 开发者平台
+
+[deepseek.com](https://www.deepseek.com/) 是聊天，[platform.deepseek.com](https://platform.deepseek.com/) 是 API。给工具、脚本、Claude Code 当后端用后者。
+
+接口兼容 OpenAI（`https://api.deepseek.com`）和 Anthropic（`https://api.deepseek.com/anthropic`），改 `base_url` 和 key 就能接。常用 `deepseek-v4-flash` / `deepseek-v4-pro`。国内直连、便宜，官方额度紧时当兜底。Key 存环境变量，文档：[DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/)
+
+## 怎么叠
+
+1. 打开仓库先开 **Cursor**
+2. 任务变长、可以异步，丢 **Claude Code**
+3. 换渠道用 **CC Switch**，DeepSeek 当便宜兜底
+4. 换思路或 Claude 不好用，开 **Codex App**；额度/降智看 [Codex 雷达](https://codexradar.com/)
+
+工具会换。比较稳的是：约定写进规则文件，自己审 diff，不要把「能跑」当成「对」。

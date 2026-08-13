@@ -1,5 +1,6 @@
 ---
 title: Terms of Service
+draft: true
 seo:
   title: Terms of Service
   description: Explore the terms and conditions of mongorolls website for a clear understanding of guidelines and responsibilities.

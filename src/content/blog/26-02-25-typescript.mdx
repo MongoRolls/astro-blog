@@ -1,0 +1,67 @@
+---
+title: TypeScript 技巧
+excerpt: 几个简洁实用的 TypeScript 类型技巧
+publishDate: '2026-02-25'
+---
+
+记录几个常用的 TypeScript 类型技巧，方便快速查阅。
+
+## 工具类型
+
+`Pick` 用于选取字段，`Omit` 用于排除字段：
+
+```typescript
+interface User {
+  id: number
+  name: string
+  password: string
+}
+
+type UserPreview = Pick<User, 'id' | 'name'>
+type SafeUser = Omit<User, 'password'>
+```
+
+## `keyof` 与映射类型
+
+`keyof` 可以获取对象类型的所有键，映射类型则可以批量修改字段：
+
+```typescript
+type Optional<T> = {
+  [K in keyof T]?: T[K]
+}
+```
+
+## 条件类型与 `infer`
+
+条件类型可以根据输入类型返回不同结果，`infer` 用于推断其中的类型：
+
+```typescript
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
+
+type Result = UnwrapPromise<Promise<string>> // string
+```
+
+## `as const`
+
+使用 `as const` 保留字面量类型，并将属性变为只读：
+
+```typescript
+const status = ['pending', 'success', 'error'] as const
+type Status = (typeof status)[number]
+```
+
+## Brand Type
+
+Brand Type 可以区分底层类型相同、业务含义不同的数据：
+
+
+```typescript
+declare const __brand: unique symbol
+type Brand<B> = { readonly [__brand]: B }
+export type Branded<T, B> = T & Brand<B>
+
+type UserId = Branded<string, 'UserId'>
+type OrderId = Branded<string, 'OrderId'>
+```
+
+延伸阅读：[Using Branded Types in TypeScript](https://egghead.io/blog/using-branded-types-in-typescript)、[Branded Types](https://www.learningtypescript.com/articles/branded-types)。
