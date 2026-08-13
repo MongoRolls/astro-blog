@@ -2,13 +2,11 @@
 import type { CollectionEntry } from 'astro:content'
 // 处理contact/about/terms页面
 import { getCollection, render } from 'astro:content'
-import MyComment from '../components/MyComment.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 export async function getStaticPaths() {
-    const pages = await getCollection('pages')
-    return pages.map((page: any) => {
-            // console.log('id', page.id)
+    const pages = await getCollection('pages', page => !page.data.draft)
+    return pages.map((page) => {
         return {
             params: { id: page.id },
             props: { page },
@@ -23,14 +21,13 @@ const { title, seo } = page.data
 const { Content } = await render(page);
 ---
 
-<BaseLayout title={seo?.title ?? title} description={seo?.description} image={seo?.image} showHeader={false}>
-    <article class="mb-16 sm:mb-24">
+<BaseLayout title={seo?.title ?? title} description={seo?.description} image={seo?.image}>
+    <article data-pagefind-body class="mb-16 sm:mb-24">
         <header class="mb-8">
-            <h1 class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+            <h1 data-pagefind-meta="title" class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{title}</h1>
         </header>
-        <div class="max-w-none prose prose-invert">
+        <div class="max-w-none prose dark:prose-invert">
             <Content />
         </div>
-    </article>
-    {page.id === 'about' && <MyComment />}
+      </article>
 </BaseLayout>

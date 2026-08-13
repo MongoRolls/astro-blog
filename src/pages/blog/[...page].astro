@@ -1,15 +1,14 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro'
 import type { CollectionEntry } from 'astro:content'
-import { getCollection } from 'astro:content'
 import Pagination from '../../components/Pagination.astro'
 import PostPreview from '../../components/PostPreview.astro'
 import siteConfig from '../../data/site-config'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { sortItemsByDateDesc } from '../../utils/data-utils'
+import { getPublishedBlogPosts } from '../../utils/data-utils'
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc)
+    const posts = await getPublishedBlogPosts()
     return paginate(posts, { pageSize: siteConfig.postsPerPage || 6 })
 }
 
@@ -20,14 +19,16 @@ const blog = page.data;
 ---
 
 <BaseLayout
-  title="Blog"
-  description="Embark on a journey of personal insights and experiences through my blog"
-  image={{ src: '/blog-cover-1.png', alt: 'The preview of the site' }}
-  showHeader={false}
+  title={page.currentPage > 1 ? `博客 · 第 ${page.currentPage} 页` : '博客'}
+  description={page.currentPage > 1
+    ? `MongoRolls 的博客文章列表，第 ${page.currentPage} 页。`
+    : 'MongoRolls 的博客文章列表，涵盖前端开发、工程化与个人思考。'}
+  prevUrl={page.url.prev}
+  nextUrl={page.url.next}
 >
     <h1 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-6">Blog Archive</h1>
 
-    <div class="flex flex-col space-y-8">
+    <div class="flex flex-col gap-10 sm:gap-12">
         {blog.map(post => (
             <PostPreview post={post} />
         ))}

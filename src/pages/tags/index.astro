@@ -1,31 +1,15 @@
 ---
-import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils'
+import { getAllTags, getPublishedBlogPosts } from '../../utils/data-utils'
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc)
-const tags = getAllTags(posts).sort((tagA, tagB) => {
-    const postCountTagA = getPostsByTag(posts, tagA.id).length
-    const postCountTagB = getPostsByTag(posts, tagB.id).length
-    return postCountTagB - postCountTagA
-})
-
-// 计算标签占比数据
-const tagStats = tags.map((tag) => {
-    const postCount = getPostsByTag(posts, tag.id).length
-    return {
-        name: tag.name,
-        value: postCount,
-        id: tag.id,
-    }
-}).filter(t => t.value > 0)
+const posts = await getPublishedBlogPosts()
+const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
 
 ---
 
 <BaseLayout
-  title="Tags"
-  description="Explore tag directory for easy navigation and discovery."
-  showHeader={false}
+  title="标签"
+  description="按标签浏览 MongoRolls 博客中的前端、工程化与思考类文章。"
 >
     <div class="tags-container">
         <h1 class="tags-title">Tags</h1>
@@ -33,10 +17,19 @@ const tagStats = tags.map((tag) => {
             标签占比可视化
         </div>
 
-        <!-- ECharts 图表容器 -->
         <div class="chart-section">
-            <div class="chart-wrapper">
-                <div id="tagChart" style="width: 100%; height: 400px;"></div>
+            <div class="tag-distribution" aria-label="文章标签分布">
+                {tags.map(tag => (
+                    <div class="tag-distribution-item">
+                        <div class="tag-distribution-label">
+                            <span>{tag.name}</span>
+                            <span>{tag.value}</span>
+                        </div>
+                        <div class="tag-distribution-track">
+                            <span style={`width: ${(tag.value / posts.length) * 100}%`}></span>
+                        </div>
+                    </div>
+                ))}
             </div>
             <div class="chart-info">
                 <p>总共 <span class="highlight">{posts.length}</span> 篇文章，分布在 <span class="highlight">{tags.length}</span> 个标签中</p>
@@ -48,17 +41,14 @@ const tagStats = tags.map((tag) => {
         <!-- 标签列表 -->
         <h2 class="section-title">标签列表</h2>
         <div class="tags-list">
-            {tags.map((tag) => {
-                const postCount = getPostsByTag(posts, tag.id).length
-                return (
-                    <div class="tag-item">
-                        <a href={`/tags/${tag.id}`} class="tag-link">
-                            <span class="tag-name">{`# ${tag.name}`}</span>
-                            <span class="tag-count">{postCount}</span>
-                        </a>
-                    </div>
-                )
-            })}
+            {tags.map(tag => (
+                <div class="tag-item">
+                    <a href={`/tags/${tag.id}`} class="tag-link">
+                        <span class="tag-name">{`# ${tag.name}`}</span>
+                        <span class="tag-count">{tag.value}</span>
+                    </a>
+                </div>
+            ))}
         </div>
 
         {tags.length === 0 && (
@@ -68,115 +58,6 @@ const tagStats = tags.map((tag) => {
         )}
     </div>
 </BaseLayout>
-
-<!-- ECharts CDN -->
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
-<script define:vars={{ tagStats }}>
-  document.addEventListener('astro:page-load', () => {
-    const chartDom = document.getElementById('tagChart')
-    if (!chartDom) {
-      return
-    }
-
-    const myChart = echarts.init(chartDom, null, {
-      renderer: 'canvas',
-      useDirtyRect: true,
-    })
-
-    // 检查深色模式
-    const isDark = document.documentElement.classList.contains('dark')
-    const textColor = isDark ? '#fdfdfd' : 'rgb(var(--color-text-main))'
-    const backgroundColor = isDark ? 'transparent' : 'transparent'
-
-    const option = {
-      backgroundColor,
-      tooltip: {
-        trigger: 'item',
-        formatter(params) {
-          if (params.componentSubType === 'pie') {
-            const total = tagStats.reduce((sum, item) => sum + item.value, 0)
-            const percentage = ((params.value / total) * 100).toFixed(1)
-            return `${params.name}<br/>文章数: ${params.value}<br/>占比: ${percentage}%`
-          }
-        },
-        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
-        borderColor: isDark ? '#555' : '#ddd',
-        textStyle: {
-          color: textColor,
-        },
-      },
-      legend: {
-        orient: 'vertical',
-        right: 20,
-        textStyle: {
-          color: textColor,
-        },
-        data: tagStats.map(item => item.name),
-      },
-      series: [
-        {
-          name: '文章数',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['45%', '50%'],
-          data: tagStats,
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-            },
-          },
-          labelLine: {
-            show: true,
-            lineStyle: {
-              color: isDark ? '#666' : '#ddd',
-            },
-          },
-          label: {
-            show: true,
-            formatter: '{b}',
-            color: textColor,
-            fontSize: 12,
-          },
-          itemStyle: {
-            borderRadius: 10,
-            borderColor: backgroundColor,
-            borderWidth: 2,
-          },
-        },
-      ],
-    }
-
-    myChart.setOption(option)
-
-    // 响应式调整
-    window.addEventListener('resize', () => {
-      myChart.resize()
-    })
-
-    // 深色模式监听
-    const observer = new MutationObserver(() => {
-      const isDarkNow = document.documentElement.classList.contains('dark')
-      const newTextColor = isDarkNow ? '#fdfdfd' : 'rgb(var(--color-text-main))'
-
-      option.tooltip.backgroundColor = isDarkNow ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)'
-      option.tooltip.borderColor = isDarkNow ? '#555' : '#ddd'
-      option.tooltip.textStyle.color = newTextColor
-      option.legend.textStyle.color = newTextColor
-      option.series[0].label.color = newTextColor
-      option.series[0].labelLine.lineStyle.color = isDarkNow ? '#666' : '#ddd'
-
-      myChart.setOption(option)
-    })
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-  })
-</script>
 
 <style lang="scss">
 .tags-container {
@@ -207,10 +88,6 @@ const tagStats = tags.map((tag) => {
     border-radius: 12px;
     border: 1px solid rgb(var(--color-text-main) / 0.1);
 
-    .chart-wrapper {
-        margin-bottom: 1.5rem;
-    }
-
     .chart-info {
         text-align: center;
         color: rgb(var(--color-text-main) / 0.7);
@@ -223,6 +100,34 @@ const tagStats = tags.map((tag) => {
             padding: 0 4px;
         }
     }
+}
+
+.tag-distribution {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tag-distribution-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+    color: rgb(var(--color-text-main) / 0.8);
+}
+
+.tag-distribution-track {
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(var(--color-text-main) / 0.1);
+}
+
+.tag-distribution-track span {
+    display: block;
+    min-width: 0.5rem;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #425bc5, #60a5fa);
 }
 
 .divider {
@@ -323,10 +228,6 @@ const tagStats = tags.map((tag) => {
     .chart-section {
         padding: 1rem;
     }
-
-    .chart-wrapper {
-        height: 300px !important;
-    }
 }
 
 @media (max-width: 640px) {
@@ -351,10 +252,6 @@ const tagStats = tags.map((tag) => {
 
     .chart-section {
         margin: 1.5rem 0;
-
-        #tagChart {
-            height: 250px !important;
-        }
     }
 }
 </style>

@@ -1,8 +1,5 @@
-/* 字体改为通过 BaseHead 使用 Google Fonts 预加载，无需本地包导入 */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../tailwind.config.cjs";
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -96,9 +93,59 @@
 /* 全局过渡效果 */
 html {
   text-autospace: normal;
+  scroll-behavior: smooth;
   @apply transition-colors duration-300;
+}
+
+main :where(h2[id], h3[id]) {
+  scroll-margin-top: 6rem;
+}
+
+.post-link[class] {
+  position: relative;
+  color: rgb(var(--color-text-main) / 0.8);
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--color-text-main) / 0.4);
+  text-decoration-style: dotted;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.3em;
+  transition: all 0.2s ease;
+}
+
+.post-link[class]::after {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, #60a5fa, #e879f9);
+  transition: transform 0.3s ease;
+  transform: scaleX(0);
+  transform-origin: right;
+}
+
+.post-link[class]:hover {
+  color: rgb(var(--color-text-main) / 1);
+  text-decoration-color: transparent;
+}
+
+.post-link[class]:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 @supports (text-autospace: normal) {  
   :root {    text-autospace: normal;  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

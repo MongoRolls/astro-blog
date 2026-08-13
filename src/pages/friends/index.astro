@@ -5,28 +5,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="Friends"
-  description="Friends and links from around the web"
-  showHeader={false}
+  title="友链"
+  description="MongoRolls 的朋友与推荐链接。"
 >
-    <main class="container mx-auto px-4 py-12">
+    <section class="container mx-auto px-4 py-12" aria-labelledby="friends-title">
+        <h1 id="friends-title" class="sr-only">友链</h1>
         <div class="mt-12 max-w-7xl mx-auto">
             <FriendCard friends={siteConfig.friends} />
         </div>
-    </main>
+    </section>
 </BaseLayout>
-
-<style>
-    .prose {
-        max-width: 65ch;
-    }
-    .prose :global(h1) {
-        @apply mb-8;
-    }
-    .prose :global(h2) {
-        @apply mt-12 mb-4;
-    }
-    .prose :global(p) {
-        @apply my-4;
-    }
-</style>

@@ -1,0 +1,121 @@
+---
+import ArrowRight from '../icons/ArrowRight.astro'
+import IconButton from './IconButton.astro'
+---
+
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" data-reading-progress-bar></div>
+</div>
+
+<IconButton
+  class="back-to-top"
+  data-back-to-top
+  type="button"
+  aria-label="回到顶部"
+  aria-hidden="true"
+  tabindex="-1"
+>
+  <ArrowRight class="w-5 h-5 fill-current -rotate-90" aria-hidden="true" />
+</IconButton>
+
+<script>
+let disposeReadingProgress = () => {}
+
+function initReadingProgress() {
+  disposeReadingProgress()
+
+  const bar = document.querySelector<HTMLElement>('[data-reading-progress-bar]')
+  const backToTop = document.querySelector<HTMLButtonElement>('[data-back-to-top]')
+  if (!bar || !backToTop)
+    return
+
+  const progressBar = bar
+  const backToTopButton = backToTop
+  const controller = new AbortController()
+  const listenerOptions = { signal: controller.signal, passive: true }
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  let ticking = false
+
+  function update() {
+    const root = document.documentElement
+    const max = root.scrollHeight - root.clientHeight
+    const progress = max > 0 ? Math.min(window.scrollY / max, 1) : 0
+    progressBar.style.transform = `scaleX(${progress})`
+
+    const visible = window.scrollY > 480
+    backToTopButton.classList.toggle('is-visible', visible)
+    backToTopButton.setAttribute('aria-hidden', String(!visible))
+    backToTopButton.tabIndex = visible ? 0 : -1
+  }
+
+  function onScroll() {
+    if (ticking)
+      return
+    ticking = true
+    requestAnimationFrame(() => {
+      update()
+      ticking = false
+    })
+  }
+
+  update()
+  window.addEventListener('scroll', onScroll, listenerOptions)
+  window.addEventListener('resize', onScroll, listenerOptions)
+  backToTopButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+  }, { signal: controller.signal })
+
+  disposeReadingProgress = () => controller.abort()
+}
+
+document.addEventListener('astro:page-load', initReadingProgress)
+document.addEventListener('astro:before-swap', () => disposeReadingProgress())
+</script>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    width: 100%;
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .reading-progress-bar {
+    width: 100%;
+    height: 100%;
+    background: rgb(var(--color-primary));
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  :global(.back-to-top) {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.5rem;
+    z-index: 40;
+    box-shadow: var(--card-shadow);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease,
+      background-color 150ms ease;
+  }
+
+  :global(.back-to-top.is-visible) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.back-to-top) {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle.astro'
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav class="nav min-h-12 py-2 mb-10 lg:mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
+<nav data-pagefind-ignore class="nav min-h-12 py-2 mb-10 lg:mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
     {
             navLinks.length > 0 && (
             <div class="w-full max-w-[674px] mx-auto relative px-4 md:px-0">
@@ -24,7 +24,7 @@ const navLinks = siteConfig.headerNavLinks || [];
                         </button>
 
                         <ul id="menu-items" class="menu flex items-center gap-6">
-                            <a href="/">
+                            <li class="flex items-center"><a href="/" aria-label="返回首页">
                             {/* 红色 bb3a46 */}
                             <AnimatedSignature
                               width="117px"
@@ -35,7 +35,7 @@ const navLinks = siteConfig.headerNavLinks || [];
                               strokeWidth={12}
                               delayInterval={0.2}
                             />
-                            </a>
+                            </a></li>
                             {navLinks.map(link => (
                                 <li class="py-1">
                                     <NavLink
@@ -60,6 +60,8 @@ const navLinks = siteConfig.headerNavLinks || [];
 </nav>
 
 <style lang="scss">
+    @reference "../styles/global.css";
+
     @media (max-width: 767px) {
         /* 移动端菜单 */
         .menu {
@@ -120,41 +122,41 @@ const navLinks = siteConfig.headerNavLinks || [];
 </style>
 
 <script>
-// 避免重复注册事件处理器
-function setupMenuToggle() {
-  const menu = document.querySelector('.menu')
-  const menuToggleBtn = document.querySelector('.menu-toggle')
+let disposeNavigation = () => {}
 
-  if (!menuToggleBtn)
+function initNavigation() {
+  disposeNavigation()
+  const controller = new AbortController()
+  const menu = document.querySelector<HTMLElement>('.menu')
+  const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle')
+  if (!menu || !toggle)
     return
 
-  // 移除之前的事件处理器，并添加正确的类型断言
-  const newToggleBtn = menuToggleBtn.cloneNode(true) as HTMLButtonElement
-  menuToggleBtn.parentNode?.replaceChild(newToggleBtn, menuToggleBtn)
+  const setOpen = (isOpen: boolean) => {
+    toggle.classList.toggle('is-active', isOpen)
+    toggle.setAttribute('aria-expanded', String(isOpen))
+    toggle.setAttribute('aria-label', isOpen ? 'Close Menu' : 'Open Menu')
+    menu.classList.toggle('is-visible', isOpen)
+  }
 
-  // 添加新的事件处理器
-  newToggleBtn.addEventListener('click', () => {
-    const isMenuExpanded = newToggleBtn.getAttribute('aria-expanded') === 'true'
-    newToggleBtn.classList.toggle('is-active')
-    newToggleBtn.setAttribute('aria-expanded', isMenuExpanded ? 'false' : 'true')
-    newToggleBtn.setAttribute('aria-label', isMenuExpanded ? 'Open Menu' : 'Close Menu')
-    menu?.classList.toggle('is-visible')
+  toggle.addEventListener('click', () => {
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true')
+  }, { signal: controller.signal })
+
+  menu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false), { signal: controller.signal })
   })
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false)
+      toggle.focus()
+    }
+  }, { signal: controller.signal })
+
+  disposeNavigation = () => controller.abort()
 }
 
-// 页面加载和切换后重新初始化菜单
-function initMenu() {
-  setupMenuToggle()
-}
-
-// 初始化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initMenu)
-}
-else {
-  initMenu()
-}
-
-// Astro 页面生命周期
-document.addEventListener('astro:after-swap', initMenu)
+document.addEventListener('astro:page-load', initNavigation)
+document.addEventListener('astro:before-swap', () => disposeNavigation())
 </script>

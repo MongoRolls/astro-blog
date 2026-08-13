@@ -8,13 +8,13 @@ interface Props {
 }
 
 const { headings } = Astro.props
-const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
+const toc = headings.filter(({ depth }) => depth > 1 && depth < 4)
 ---
 
-<nav class="toc hidden lg:block h-full">
+<nav data-pagefind-ignore class="toc hidden lg:block h-full">
     <div class="sticky top-24 max-h-[70vh] overflow-y-auto">
+        <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">Content</h2>
         <ul class="space-y-1 text-xs leading-4 border-l border-gray-200 dark:border-gray-800">
-        {headings.length > 0 && <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">Content</h2>}
         {
                 toc.map(heading => (
                     <li
@@ -40,6 +40,8 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 </nav>
 
 <style>
+    @reference "../styles/global.css";
+
     .toc {
         width: 220px;
         padding-left: 1rem;
@@ -70,7 +72,12 @@ const toc = headings.filter(({ depth }) => depth > 1 && depth < 4);
 </style>
 
 <script>
+let disposeTableOfContents = () => {}
+
 document.addEventListener('astro:page-load', () => {
+  disposeTableOfContents()
+
+  const controller = new AbortController()
   // 记录当前活跃的目录项ID
   let activeId = ''
 
@@ -115,40 +122,15 @@ document.addEventListener('astro:page-load', () => {
   )
 
   // 观察所有标题元素
-  document.querySelectorAll('h2, h3').forEach((heading) => {
+  document.querySelectorAll('main h2[id], main h3[id]').forEach((heading) => {
     observer.observe(heading)
   })
 
-  // 平滑滚动
-  document.querySelectorAll('.toc-item a').forEach((link) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault()
-      const targetId = link.getAttribute('href')?.slice(1)
-      const targetElement = document.getElementById(targetId!)
-
-      if (targetElement) {
-        // 先设置醒目颜色
-        const originalBackgroundColor = targetElement.style.backgroundColor
-        targetElement.style.color = '#FF6B6B' // 使用柔和的珊瑚红色，更加美观
-        targetElement.style.transition = 'color 1s ease' // 添加过渡效果使颜色变化更平滑
-
-        // 3秒后恢复原来的颜色
-        setTimeout(() => {
-          targetElement.style.color = originalBackgroundColor
-        }, 2000)
-        targetElement.scrollIntoView({
-          block: 'start',
-          behavior: 'smooth',
-        })
-        // 等待滚动完成后再偏移
-        setTimeout(() => {
-          window.scrollBy({
-            top: -80,
-            behavior: 'smooth',
-          })
-        }, 800)
-      }
-    })
-  })
+  disposeTableOfContents = () => {
+    controller.abort()
+    observer.disconnect()
+  }
 })
+
+document.addEventListener('astro:before-swap', () => disposeTableOfContents())
 </script>

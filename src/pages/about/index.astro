@@ -2,13 +2,8 @@
 import TechStack from '../../components/TechStack.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 
-const title = 'About Me'
-const description = 'Learn more about the person behind the website and embark on a journey of inspiration and shared experiences.'
-const image = {
-  src: '/about.jpeg',
-  alt: 'A person',
-}
-
+const title = '关于'
+const description = '关于 MongoRolls：前端工程师，关注工程化、开源与个人写作。'
 const headings = [
   {
     depth: 2,
@@ -42,17 +37,17 @@ const headings = [
   title={title}
   headings={headings}
   description={description}
-  image={image}
 >
-    <div class="prose dark:prose-invert max-w-none">
-    <h2>关于本站</h2>
+    <article data-pagefind-body class="prose dark:prose-invert max-w-none">
+    <h1 class="sr-only" data-pagefind-meta="title">{title}</h1>
+    <h2 id="about-site">关于本站</h2>
 
     <p>经过多个方案比较，最后选定</p>
     <p>本站基于 <a class="post-link" href="https://astro.build/">Astro</a> 框架，然后再进行 diy 创作。</p>
     <p>评论区采用 <a class="post-link" href="https://twikoo.js.org/">Twikoo</a>，连接 MongoDB。</p>
     <p>都部署于 <a class="post-link" href="https://vercel.com/">Vercel</a>。</p>
 
-    <h2 class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>关于我</h2>
+    <h2 id="about-me" class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>关于我</h2>
 
     <ul>
       <li>👋  I'm Mongorolls</li>
@@ -66,55 +61,24 @@ const headings = [
       <TechStack />
     </div>
 
-    <h3>🗺️ 足迹</h3>
+    <h3 id="about-me-footprint">🗺️ 足迹</h3>
     <ul>
-      <li>todo...</li>
+      <li>工作与生活足迹持续更新中。</li>
     </ul>
 
-    <h3>📫 touch me</h3>
+    <h3 id="about-me-contact">📫 touch me</h3>
 
     <ul>
       <li>github: <a href="https://github.com/MongoRolls">MongoRolls</a></li>
     </ul>
 
 
-    <h3>Final</h3>
-  </div>
+    <h3 id="about-me-final">Final</h3>
+  </article>
 </BaseLayout>
 
-<style lang="scss" scoped>
+<style scoped>
     p,h3 {
         white-space: break-spaces;
-    }
-
-    .post-link {
-        position: relative;
-        text-decoration: underline;
-        text-decoration-style: dotted;
-        text-decoration-thickness: 3px;
-        text-decoration-color: rgb(var(--color-text-main) / 0.4);
-        text-underline-offset: 0.3em;
-        color: rgb(var(--color-text-main) / 0.8);
-        transition: all 0.2s ease;
-        &::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, #60a5fa, #e879f9);
-            transform-origin: right;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        &:hover {
-            color: rgb(var(--color-text-main) / 1);
-            text-decoration-color: transparent;
-            &::after {
-                transform-origin: left;
-                transform: scaleX(1);
-            }
-        }
     }
 </style>

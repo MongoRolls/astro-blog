@@ -237,14 +237,3 @@ const actualDarkFillColor = darkFillColor;
     animation: drawSignatureDark var(--animationDuration) ease-in-out infinite;
   }
 </style>
-
-<script is:inline>
-document.addEventListener('astro:page-load', () => {
-  const signaturePath = document.querySelectorAll('.signature-path')
-  let maxLength = 0
-  signaturePath.forEach((path) => {
-    maxLength = Math.max(maxLength, path?.getTotalLength())
-  })
-  // console.log('maxLength', maxLength)
-})
-</script>

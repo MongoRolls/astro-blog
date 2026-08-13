@@ -1,21 +1,21 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { getCollection, render } from 'astro:content'
+import { render } from 'astro:content'
 import Button from '../../components/Button.astro'
 import FormattedDate from '../../components/FormattedDate.astro'
 import Link from '../../components/Link.astro'
 import MyComment from '../../components/MyComment.astro'
 import PostPreview from '../../components/PostPreview.astro'
+import { getPostCoverSrc } from '../../config/image'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { slugify } from '../../utils/common-utils'
-import { sortItemsByDateDesc } from '../../utils/data-utils'
-import { getCoverImagePath } from '../../utils/imagePath'
+import { getPublishedBlogPosts } from '../../utils/data-utils'
 
 export async function getStaticPaths() {
-        const posts = (await getCollection('blog')).sort(sortItemsByDateDesc)
+    const posts = await getPublishedBlogPosts()
     const postCount = posts.length
 
-    return posts.map((post: any, index: any) => ({
+    return posts.map((post, index) => ({
         params: { id: post.id },
         props: {
             post,
@@ -25,22 +25,28 @@ export async function getStaticPaths() {
     }))
 }
 
-type Props = { post: CollectionEntry<'blog'>, prevPost: CollectionEntry<'blog'>, nextPost: CollectionEntry<'blog'> }
+type Props = {
+  post: CollectionEntry<'blog'>
+  prevPost: CollectionEntry<'blog'> | null
+  nextPost: CollectionEntry<'blog'> | null
+}
 
 // const { href } = Astro.url
 const { post, prevPost, nextPost } = Astro.props
-const { title, publishDate, updatedDate, excerpt, tags = [], keywords = [], seo } = post.data
+const { title, publishDate, updatedDate, excerpt, description, image, tags = [], keywords = [], seo, author } = post.data
+const summary = seo?.description ?? excerpt ?? description
+const coverImage = seo?.image ?? (image ? { src: image, alt: title } : undefined)
 const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const { minutesRead } = remarkPluginFrontmatter;
 ---
 
-<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" keywords={keywords} author="MongoRolls" headings={headings} showHeader={false}>
+<BaseLayout title={seo?.title ?? title} description={summary} image={coverImage} pageType="article" keywords={keywords} author={author} publishDate={publishDate} updatedDate={updatedDate} tags={tags} headings={headings}>
     <div class="relative lg:flex lg:gap-10">
         <!-- 主要内容 -->
-        <article class="w-full lg:max-w-[674px]">
+        <article data-pagefind-body class="w-full lg:max-w-[674px]">
             <header class="mb-8">
-                <img src={getCoverImagePath(post.id)} alt={`${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3" />
-                <h1 class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+                <img src={getPostCoverSrc(post.data)} alt={coverImage?.alt ?? `${title} - MongoRolls技术博客文章封面`} class="w-full h-auto rounded-lg mb-3" width="1200" height="630" loading="eager" fetchpriority="high" decoding="async" />
+                <h1 data-pagefind-meta="title" class="text-3xl leading-tight font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm">
                     <div class="text-base">published: <FormattedDate date={publishDate} /></div>
                     {
@@ -53,7 +59,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                             </>
                         )
                     }
-                    <div class="text-gray-500 text-base">author: 芒果</div>
+                    <div class="text-gray-500 text-base">author: {author}</div>
                     <div class="text-gray-500 text-base">minutesRead: {minutesRead}</div>
                 </div>
                 <div class="w-full h-[1px] bg-gray-400 my-4" />
@@ -90,10 +96,10 @@ const { minutesRead } = remarkPluginFrontmatter;
 
     {
         (prevPost || nextPost) && (
-            <div class="my-16 sm:my-24">
+            <div data-pagefind-ignore class="my-16 sm:my-24">
                 <h2 class="mb-10 text-2xl font-serif italic md:mb-12 md:text-3xl">Read More</h2>
 
-                <div class="flex flex-col space-y-8">
+                <div class="flex flex-col gap-10 sm:gap-12">
                     {prevPost && <PostPreview post={prevPost} headingLevel="h3" />}
                     {nextPost && <PostPreview post={nextPost} headingLevel="h3" />}
                 </div>
@@ -101,31 +107,44 @@ const { minutesRead } = remarkPluginFrontmatter;
         )
     }
 
-    <MyComment />
+    <div data-pagefind-ignore><MyComment /></div>
 </BaseLayout>
 
 
 <script>
+  let disposeShareButton = () => {}
+
   document.addEventListener('astro:page-load', () => {
+    disposeShareButton()
+    const controller = new AbortController()
+    let resetTimer: number | undefined
     const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement
     copyUrlButton?.addEventListener('click', async () => {
       await copyUrl(copyUrlButton)
-    })
+    }, { signal: controller.signal })
 
     async function copyUrl(button: HTMLButtonElement) {
       const url = button.getAttribute('data-url') || ''
       const label = button.textContent
+      try {
+        await navigator.clipboard.writeText(url)
+        button.textContent = 'Copied'
+      }
+      catch {
+        button.textContent = 'Copy failed'
+      }
 
-      await navigator.clipboard.writeText(url)
-
-      button.textContent = 'Copied'
-
-      setTimeout(() => {
+      resetTimer = window.setTimeout(() => {
         button.textContent = label
       }, 2500)
     }
+
+    disposeShareButton = () => {
+      controller.abort()
+      if (resetTimer)
+        window.clearTimeout(resetTimer)
+    }
   })
+
+  document.addEventListener('astro:before-swap', () => disposeShareButton())
 </script>
-
-
-

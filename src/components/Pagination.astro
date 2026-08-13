@@ -1,10 +1,12 @@
 ---
+import type { Page } from 'astro'
 import ArrowLeft from '../icons/ArrowLeft.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
 import IconButton from './IconButton.astro'
 
-// @ts-ignore:
-const { page, class: className } = Astro.props;
+type Props = { page: Page<unknown>, class?: string }
+
+const { page, class: className } = Astro.props
 ---
 
 <nav aria-label="Pagination" class:list={['px-12 py-2 relative text-center', className]}>

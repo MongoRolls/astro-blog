@@ -1,6 +1,7 @@
 import { glob } from 'astro/loaders'
 
-import { defineCollection, z } from 'astro:content'
+import { z } from 'astro/zod'
+import { defineCollection } from 'astro:content'
 
 const seoSchema = z.object({
   title: z.string().min(5).max(120).optional(),
@@ -20,8 +21,13 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     excerpt: z.string().optional(),
+    description: z.string().optional(),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
+    author: z.string().default('MongoRolls'),
+    image: z.string().optional(),
+    slug: z.string().optional(),
+    draft: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
     tags: z.array(z.string()).default([]),
     keywords: z.array(z.string()).optional(),
@@ -33,19 +39,9 @@ const pages = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/pages' }),
   schema: z.object({
     title: z.string(),
+    draft: z.boolean().default(false),
     seo: seoSchema.optional(),
   }),
 })
 
-const projects = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    publishDate: z.coerce.date(),
-    isFeatured: z.boolean().default(false),
-    seo: seoSchema.optional(),
-  }),
-})
-
-export const collections = { blog, pages, projects }
+export const collections = { blog, pages }

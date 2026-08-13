@@ -1,7 +1,8 @@
-// 导入统一的类型定义
-import type { Image } from '../types/image'
-
-export type { Image }
+export interface Image {
+  src: string
+  alt?: string
+  caption?: string
+}
 
 export interface Link {
   text: string
@@ -22,14 +23,12 @@ export interface SiteConfig {
   logo?: Image
   title: string
   website?: string
-  ossWebsite?: string
   subtitle?: string
   description: string
   image?: Image
   headerNavLinks?: Link[]
   socialLinks?: Link[]
   postsPerPage?: number
-  projectsPerPage?: number
   friends: Friend[]
   author?: string
   language?: string
@@ -41,9 +40,8 @@ export interface SiteConfig {
 const siteConfig: SiteConfig = {
   title: 'MongoRolls',
   website: 'https://mongorolls.cn',
-  ossWebsite: 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/',
   subtitle: 'a Frontend Engineer',
-  description: 'Blog by MongoRolls',
+  description: 'MongoRolls 的前端技术博客，记录 JavaScript、TypeScript、React、工程化实践与个人思考。',
   author: 'MongoRolls',
   language: 'zh-CN',
   locale: 'zh_CN',
@@ -54,7 +52,7 @@ const siteConfig: SiteConfig = {
   },
   image: {
     src: '/logo.png',
-    alt: 'MongoRolls - Astro.js and Tailwind CSS theme',
+    alt: 'MongoRolls 技术博客',
   },
   headerNavLinks: [
     // {
@@ -102,7 +100,6 @@ const siteConfig: SiteConfig = {
     },
   ],
   postsPerPage: 6,
-  projectsPerPage: 4,
   friends: [
     {
       avatar: '/friends/hongshen.png',

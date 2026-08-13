@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { buildCoverPath } from '../utils/imagePath'
+import { getPostCoverSrc } from '../config/image'
 
 type Props = {
     posts: CollectionEntry<'blog'>[]
@@ -12,26 +12,26 @@ const { posts } = Astro.props;
 
 <div class="carousel-container">
     <div class="carousel-wrapper">
-        {posts.map((post, _) => (
-            <div class="carousel-slide" data-post-id={post.id}>
-                <div class="carousel-link">
+        {posts.map(post => (
+            <div class="carousel-slide">
+                <a class="carousel-link" href={`/blog/${post.id}`} aria-label={post.data.title}>
                     <img
-                      src={buildCoverPath(post.id)}
+                      src={getPostCoverSrc(post.data)}
                       alt={post.data.title}
                       class="carousel-image"
                       loading="lazy"
                     />
                     <div class="carousel-overlay">
                         <h3 class="carousel-title">{post.data.title}</h3>
-                        {post.data.excerpt && <p class="carousel-excerpt">{post.data.excerpt}</p>}
+                        {(post.data.excerpt ?? post.data.description) && <p class="carousel-excerpt">{post.data.excerpt ?? post.data.description}</p>}
                     </div>
-                </div>
+                </a>
             </div>
         ))}
     </div>
     <div class="carousel-dots">
         {posts.map((_, index) => (
-            <button class="carousel-dot" data-index={index}></button>
+            <button class="carousel-dot" data-index={index} aria-label={`显示第 ${index + 1} 篇文章`}></button>
         ))}
     </div>
 </div>
@@ -164,11 +164,20 @@ const { posts } = Astro.props;
 </style>
 
 <script>
+  let disposeCarousel = () => {}
+
   document.addEventListener('astro:page-load', () => {
+    disposeCarousel()
+
+    const container = document.querySelector<HTMLElement>('.carousel-container')
+    if (!container)
+      return
+
+    const controller = new AbortController()
     const slides = document.querySelectorAll('.carousel-slide')
     const dots = document.querySelectorAll('.carousel-dot')
     let currentSlide = 0
-    let autoPlayInterval: any
+    let autoPlayInterval: ReturnType<typeof setInterval> | undefined
 
     function showSlide(index: number) {
       slides.forEach((slide, i) => {
@@ -177,6 +186,7 @@ const { posts } = Astro.props;
       })
       dots.forEach((dot, i) => {
         dot.classList.toggle('active', i === index)
+        dot.setAttribute('aria-current', i === index ? 'true' : 'false')
       })
     }
 
@@ -186,12 +196,15 @@ const { posts } = Astro.props;
     }
 
     function startAutoPlay() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || autoPlayInterval)
+        return
       autoPlayInterval = setInterval(nextSlide, 4000)
     }
 
     function stopAutoPlay() {
       if (autoPlayInterval) {
         clearInterval(autoPlayInterval)
+        autoPlayInterval = undefined
       }
     }
 
@@ -200,30 +213,26 @@ const { posts } = Astro.props;
       showSlide(0)
       startAutoPlay()
 
-      // 设置点击事件
-      slides.forEach((slide) => {
-        slide.addEventListener('click', () => {
-          const postId = slide.getAttribute('data-post-id')
-          window.location.href = `/blog/${postId}`
-        })
-      })
-
       // 点击控制
       dots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
           currentSlide = index
           showSlide(currentSlide)
           stopAutoPlay()
-          startAutoPlay() // 重新开始自动播放
-        })
+          startAutoPlay()
+        }, { signal: controller.signal })
       })
 
       // 鼠标悬停暂停自动播放
-      const container = document.querySelector('.carousel-container')
-      if (container) {
-        container.addEventListener('mouseenter', stopAutoPlay)
-        container.addEventListener('mouseleave', startAutoPlay)
-      }
+      container.addEventListener('mouseenter', stopAutoPlay, { signal: controller.signal })
+      container.addEventListener('mouseleave', startAutoPlay, { signal: controller.signal })
+    }
+
+    disposeCarousel = () => {
+      controller.abort()
+      stopAutoPlay()
     }
   })
+
+  document.addEventListener('astro:before-swap', () => disposeCarousel())
 </script>

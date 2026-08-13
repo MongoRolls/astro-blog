@@ -1,11 +1,6 @@
 User-agent: *
 Allow: /
-
-# 禁止爬取搜索索引文件
 Disallow: /pagefind/
+Disallow: /search-index.json
 
-# 站点地图
 Sitemap: https://mongorolls.cn/sitemap-index.xml
-
-# 爬取延迟（可选，对搜索引擎友好）
-Crawl-delay: 1 

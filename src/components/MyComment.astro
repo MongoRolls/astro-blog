@@ -9,24 +9,76 @@
 
 <div id="tcomment"></div>
 
-<!-- 只执行一次，点击其他博客跳转没有触发，可能是视图切换 -->
-<script is:inline>
-function initTwikoo() {
-  twikoo.init({
-    envId: 'https://comment.mongorolls.cn/',
-    el: '#tcomment',
-    emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+<script>
+type TwikooWindow = Window & {
+  twikoo?: {
+    init: (options: { el: string, emotionCDN: string, envId: string }) => void
+  }
+}
+
+const scriptId = 'twikoo-script'
+let twikooPromise: Promise<void> | undefined
+let disposeComments = () => {}
+
+async function loadTwikoo() {
+  const twikooWindow = window as TwikooWindow
+  if (twikooWindow.twikoo)
+    return Promise.resolve()
+
+  twikooPromise ||= new Promise<void>((resolve, reject) => {
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(), { once: true })
+      existingScript.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
+      return
+    }
+
+    const script = document.createElement('script')
+    script.id = scriptId
+    script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0'
+    script.addEventListener('load', () => resolve(), { once: true })
+    script.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
+    document.body.appendChild(script)
+  })
+
+  return twikooPromise.catch((error) => {
+    twikooPromise = undefined
+    throw error
   })
 }
-</script>
 
-<script>
-document.addEventListener('astro:page-load', () => {
-  const script = document.createElement('script')
-  script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0'
-  script.onload = () => {
-    (window as any).initTwikoo()
-  }
-  document.body.appendChild(script)
-})
+function initComments() {
+  disposeComments()
+  const commentRoot = document.querySelector<HTMLElement>('#tcomment')
+  if (!commentRoot)
+    return
+
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some(entry => entry.isIntersecting))
+      return
+    observer.disconnect()
+    void loadTwikoo()
+      .then(() => {
+        if (!commentRoot.isConnected) {
+          return
+        }
+        ;(window as TwikooWindow).twikoo?.init({
+          envId: 'https://comment.mongorolls.cn/',
+          el: '#tcomment',
+          emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+        })
+      })
+      .catch((error) => {
+        console.warn('评论区加载失败:', error)
+        commentRoot.setAttribute('role', 'status')
+        commentRoot.textContent = '评论区暂时无法加载，请稍后重试。'
+      })
+  }, { rootMargin: '400px 0px' })
+
+  observer.observe(commentRoot)
+  disposeComments = () => observer.disconnect()
+}
+
+document.addEventListener('astro:page-load', initComments)
+document.addEventListener('astro:before-swap', () => disposeComments())
 </script>

@@ -20,12 +20,12 @@ const {
         <h3 class="yaml-key">yaml</h3>
     </div>
     <div class="yaml-card-content">
-        <div class="copy-button" title="Copy to clipboard">
+        <button class="copy-button" type="button" title="Copy to clipboard" aria-label="复制本站信息">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
-        </div>
+        </button>
         <div class="yaml-item">
             <span class="yaml-key">title:</span>
             <span class="yaml-value">'{title}'</span>
@@ -195,224 +195,99 @@ const {
     }
 </style>
 
-<script is:inline>
-// 初始化卡片拖拽功能
+<script>
+let disposeFloatingCards = () => {}
+
 function initializeCards() {
-  const cards = document.querySelectorAll('.yaml-card')
+  disposeFloatingCards()
+  const controller = new AbortController()
+  const timers: number[] = []
 
-  cards.forEach((card) => {
-    // 避免重复初始化
-    if (card.dataset.initialized === 'true')
-      return
-    card.dataset.initialized = 'true'
-
-    // Drag state variables
+  document.querySelectorAll<HTMLElement>('.yaml-card').forEach((card) => {
+    const copyButton = card.querySelector<HTMLButtonElement>('.copy-button')
+    const statusBar = card.querySelector<HTMLElement>('.yaml-card-status')
     let isDragging = false
-    let offsetX, offsetY
-    let lastX, lastY
-    let velocityX = 0
-    let velocityY = 0
-    let lastTimestamp = 0
-    let animationFrameId = null
+    let offsetX = 0
+    let offsetY = 0
 
-    // Copy button functionality
-    const copyButton = card.querySelector('.copy-button')
-    const statusBar = card.querySelector('.yaml-card-status')
+    function setPosition(left: number, top: number) {
+      const maxLeft = Math.max(0, window.innerWidth - card.offsetWidth)
+      const maxTop = Math.max(0, window.innerHeight - card.offsetHeight)
+      card.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`
+      card.style.top = `${Math.max(0, Math.min(top, maxTop))}px`
+    }
 
-    copyButton.addEventListener('click', (e) => {
-      // Prevent card dragging when clicking the copy button
-      e.stopPropagation()
-
-      const content = Array.from(card.querySelectorAll('.yaml-item'))
-        .map((item) => {
-          const key = item.querySelector('.yaml-key').textContent
-          const value = item.querySelector('.yaml-value').textContent
-          return `${key} ${value}\n`
-        })
+    copyButton?.addEventListener('click', async (event) => {
+      event.stopPropagation()
+      const content = Array.from(card.querySelectorAll<HTMLElement>('.yaml-item'))
+        .map(item => item.textContent?.trim() ?? '')
         .join('\n')
 
-      navigator.clipboard.writeText(content)
-        .then(() => {
-          // Visual feedback for copy
-          copyButton.style.color = '#4CAF50'
+      try {
+        await navigator.clipboard.writeText(content)
+        copyButton.style.color = '#4CAF50'
+        if (statusBar)
           statusBar.style.width = '100%'
-
-          setTimeout(() => {
-            copyButton.style.color = ''
-            statusBar.style.width = '0'
-          }, 1500)
-        })
-        .catch((err) => {
-          console.error('Failed to copy: ', err)
+      }
+      catch (error) {
+        console.error('复制失败:', error)
+        if (statusBar) {
           statusBar.style.backgroundColor = '#f44336'
           statusBar.style.width = '100%'
-
-          setTimeout(() => {
-            statusBar.style.width = '0'
-            statusBar.style.backgroundColor = '#4CAF50'
-          }, 1500)
-        })
-    })
-
-    // Helper function to apply position with bounds checking
-    function setPosition(left, top) {
-      // Keep within viewport
-      const maxWidth = window.innerWidth - card.offsetWidth
-      const maxHeight = window.innerHeight - card.offsetHeight
-
-      const boundedLeft = Math.max(0, Math.min(left, maxWidth))
-      const boundedTop = Math.max(0, Math.min(top, maxHeight))
-
-      card.style.left = `${boundedLeft}px`
-      card.style.top = `${boundedTop}px`
-
-      return { boundedLeft, boundedTop }
-    }
-
-    // Apply tilt effect based on velocity
-    function applyTilt(velX, velY) {
-      const maxTilt = 1.5 // Maximum tilt in degrees
-      const tiltX = Math.min(maxTilt, Math.max(-maxTilt, velY * 0.05))
-      const tiltY = Math.min(maxTilt, Math.max(-maxTilt, -velX * 0.05))
-
-      card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
-    }
-
-    // 处理惯性动画
-    function applyInertia() {
-      if (Math.abs(velocityX) < 0.5 && Math.abs(velocityY) < 0.5) {
-        // Stop animation when velocity becomes very small
-        cancelAnimationFrame(animationFrameId)
-        card.style.transform = 'rotateX(0deg) rotateY(0deg)'
-        return
+        }
       }
 
-      // Apply friction (deceleration)
-      velocityX *= 0.95
-      velocityY *= 0.95
+      timers.push(window.setTimeout(() => {
+        copyButton.style.color = ''
+        if (statusBar) {
+          statusBar.style.width = '0'
+          statusBar.style.backgroundColor = '#4CAF50'
+        }
+      }, 1500))
+    }, { signal: controller.signal })
 
-      // Get current position
+    card.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || (event.target as Element).closest('.copy-button'))
+        return
       const rect = card.getBoundingClientRect()
-      const { boundedLeft, boundedTop } = setPosition(
-        rect.left + velocityX,
-        rect.top + velocityY,
-      )
-
-      // If we hit the viewport boundaries, reduce velocity more dramatically
-      if (boundedLeft === 0 || boundedLeft >= window.innerWidth - card.offsetWidth) {
-        velocityX *= -0.5 // Bounce effect with energy loss
-      }
-      if (boundedTop === 0 || boundedTop >= window.innerHeight - card.offsetHeight) {
-        velocityY *= -0.5 // Bounce effect with energy loss
-      }
-
-      // Apply tilt based on velocity
-      applyTilt(velocityX, velocityY)
-
-      // Continue animation
-      animationFrameId = requestAnimationFrame(applyInertia)
-    }
-
-    // Drag functionality
-    card.addEventListener('mousedown', (e) => {
-      // Don't trigger drag if clicking the copy button
-      if (e.target.closest('.copy-button'))
-        return
-
-      // Stop any ongoing animation
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-
+      offsetX = event.clientX - rect.left
+      offsetY = event.clientY - rect.top
       isDragging = true
+      card.setPointerCapture(event.pointerId)
       card.classList.add('dragging')
-
-      // Calculate mouse offset from card top-left corner
-      const rect = card.getBoundingClientRect()
-      offsetX = e.clientX - rect.left
-      offsetY = e.clientY - rect.top
-
-      // Initialize last position and timestamp for velocity calculation
-      lastX = e.clientX
-      lastY = e.clientY
-      lastTimestamp = Date.now()
-
-      // Reset velocity
-      velocityX = 0
-      velocityY = 0
-
-      // Remove animation transition during drag
       card.style.transition = 'none'
-      card.style.zIndex = '1000'
-
-      // Prevent text selection while dragging
       document.body.style.userSelect = 'none'
-    })
+    }, { signal: controller.signal })
 
-    document.addEventListener('mousemove', (e) => {
+    card.addEventListener('pointermove', (event) => {
+      if (isDragging)
+        setPosition(event.clientX - offsetX, event.clientY - offsetY)
+    }, { signal: controller.signal })
+
+    const stopDragging = () => {
       if (!isDragging)
         return
-
-      // Calculate time since last move for velocity
-      const now = Date.now()
-      const dt = now - lastTimestamp
-
-      if (dt > 0) {
-        // Calculate instantaneous velocity (pixels per millisecond)
-        velocityX = (e.clientX - lastX) / dt * 16.7 // Scale to roughly pixels per frame at 60fps
-        velocityY = (e.clientY - lastY) / dt * 16.7
-
-        // Update last position and timestamp
-        lastX = e.clientX
-        lastY = e.clientY
-        lastTimestamp = now
-      }
-
-      // Move card position
-      const newLeft = e.clientX - offsetX
-      const newTop = e.clientY - offsetY
-      setPosition(newLeft, newTop)
-
-      // Apply subtle tilt effect while dragging based on velocity
-      applyTilt(velocityX, velocityY)
-    })
-
-    document.addEventListener('mouseup', () => {
-      if (!isDragging)
-        return
-
       isDragging = false
       card.classList.remove('dragging')
-
-      // Restore transition
-      card.style.transition = 'box-shadow 0.3s ease, transform 0.5s ease'
-      card.style.zIndex = '100'
-
-      // Restore text selection
+      card.style.transition = ''
       document.body.style.userSelect = ''
+    }
 
-      // Apply inertia effect if the card was moving
-      if (Math.abs(velocityX) > 0.5 || Math.abs(velocityY) > 0.5) {
-        animationFrameId = requestAnimationFrame(applyInertia)
-      }
-      else {
-        // If not moving fast enough, just reset tilt
-        card.style.transform = 'rotateX(0deg) rotateY(0deg)'
-      }
-    })
-
-    // Handle resize event to ensure card stays in bounds
+    card.addEventListener('pointerup', stopDragging, { signal: controller.signal })
+    card.addEventListener('pointercancel', stopDragging, { signal: controller.signal })
     window.addEventListener('resize', () => {
       const rect = card.getBoundingClientRect()
       setPosition(rect.left, rect.top)
-    })
+    }, { signal: controller.signal })
   })
+
+  disposeFloatingCards = () => {
+    controller.abort()
+    timers.forEach(timer => window.clearTimeout(timer))
+    document.body.style.userSelect = ''
+  }
 }
 
-// 首次加载时初始化
-// document.addEventListener('DOMContentLoaded', initializeCards);
-
-// Astro 页面生命周期处理
 document.addEventListener('astro:page-load', initializeCards)
+document.addEventListener('astro:before-swap', () => disposeFloatingCards())
 </script>
-

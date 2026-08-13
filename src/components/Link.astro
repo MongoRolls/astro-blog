@@ -1,71 +1,36 @@
 ---
-import type { LinkProps } from '../types/link'
-import {
-  getFaviconUrl,
-  getPageTitle,
-  isExternalLink,
-  isValidUrl,
-  normalizeUrl,
-} from '../utils/link-metadata'
-
-interface Props extends LinkProps {}
+interface Props {
+  href: string
+  external?: boolean
+}
 
 const {
   href,
   external = true,
-  showIcon = true,
-} = Astro.props as Props
+} = Astro.props
 
 const children = await Astro.slots.render('default')
 const rawHref = (href || '').trim()
-const normalizedUrl = rawHref ? normalizeUrl(rawHref) : ''
-const isUrlValid = normalizedUrl ? isValidUrl(normalizedUrl) : false
-
 const fallbackText = (children || '').toString().trim() || rawHref || '链接'
-let linkText = fallbackText
-
-if (!children && isUrlValid) {
-  const title = await getPageTitle(normalizedUrl)
-  linkText = title || fallbackText
-}
-
-const isExt = isUrlValid ? isExternalLink(normalizedUrl) : false
-const iconUrl = isUrlValid ? getFaviconUrl(normalizedUrl) : ''
-
-const siteMetadata = {
-  title: linkText,
-  description: normalizedUrl ? `访问 ${normalizedUrl}` : linkText,
-  icon: iconUrl,
-  type: 'website',
-  url: normalizedUrl,
-}
+const normalizedHref = /^(?:[\w-]+\.)+[a-z]{2,}(?:[/:?#]|$)/i.test(rawHref)
+  ? `https://${rawHref}`
+  : rawHref
+const isSafeHref = Boolean(normalizedHref) && !/^(?:javascript|data|vbscript):/i.test(normalizedHref)
+const isExternal = /^https?:\/\//i.test(normalizedHref)
 ---
 
-{!isUrlValid
+{!isSafeHref
   ? (
     <span class="link__text link__text--plain">{fallbackText}</span>
   )
   : (
     <a
-      href={normalizedUrl}
+      href={normalizedHref}
       class="link"
-      target={external && isExt ? '_blank' : '_self'}
-      rel={external && isExt ? 'noopener noreferrer' : ''}
-      aria-label={`打开 ${siteMetadata.title}${normalizedUrl ? ` (${normalizedUrl})` : ''}`}
-      title={siteMetadata.title}
+      target={external && isExternal ? '_blank' : undefined}
+      rel={external && isExternal ? 'noopener noreferrer' : undefined}
     >
-      {showIcon && siteMetadata.icon && (
-        <img
-          src={siteMetadata.icon}
-          alt={`${siteMetadata.title} icon`}
-          class="link__icon"
-          loading="lazy"
-          decoding="async"
-          referrerpolicy="no-referrer"
-          onerror="this.style.display='none'"
-        />
-      )}
-      <span class="link__text">{linkText}</span>
+      <span class="link__text"><slot>{fallbackText}</slot></span>
     </a>
   )}
 
@@ -94,18 +59,6 @@ const siteMetadata = {
 
   .link:active {
     background-color: var(--link-bg-active, rgba(55, 53, 47, 0.12));
-  }
-
-  .link__icon {
-    width: 1rem;
-    height: 1rem;
-    border-radius: 0.15rem;
-    flex-shrink: 0;
-    margin: 0.25rem 0 !important;
-    padding: 0 !important;
-    object-fit: contain;
-    display: block;
-    align-self: center;
   }
 
   .link__text {

@@ -1,0 +1,168 @@
+<script>
+let disposeCodeBlockCopy = () => {}
+
+function fallbackCopy(text: string) {
+  const previouslyFocused = document.activeElement as HTMLElement | null
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  previouslyFocused?.focus()
+  if (!copied)
+    throw new Error('浏览器不支持复制操作')
+}
+
+async function copyText(text: string) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return
+    }
+    catch {
+      // 权限受限时继续尝试兼容方案。
+    }
+  }
+
+  fallbackCopy(text)
+}
+
+function createCopyButton() {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'code-copy-button'
+  button.dataset.pagefindIgnore = 'all'
+  button.setAttribute('aria-label', '复制代码')
+  button.setAttribute('title', '复制代码')
+  button.textContent = '复制'
+  return button
+}
+
+function initCodeBlockCopy() {
+  disposeCodeBlockCopy()
+
+  const controller = new AbortController()
+  const resetTimers = new Set<number>()
+
+  document.querySelectorAll<HTMLElement>('.prose pre').forEach((pre) => {
+    if (pre.parentElement?.classList.contains('code-block-wrapper'))
+      return
+
+    const wrapper = document.createElement('div')
+    wrapper.className = 'code-block-wrapper'
+    pre.before(wrapper)
+    wrapper.append(pre, createCopyButton())
+  })
+
+  document.addEventListener('click', async (event) => {
+    const target = event.target
+    if (!(target instanceof Element))
+      return
+
+    const button = target.closest<HTMLButtonElement>('.code-copy-button')
+    if (!button)
+      return
+
+    const code = button.parentElement?.querySelector('pre code')
+    if (!code)
+      return
+
+    button.disabled = true
+    try {
+      await copyText(code.textContent ?? '')
+      button.textContent = '已复制'
+      button.dataset.state = 'success'
+      button.setAttribute('aria-label', '代码已复制')
+    }
+    catch (error) {
+      console.warn('代码复制失败:', error)
+      button.textContent = '复制失败'
+      button.dataset.state = 'error'
+      button.setAttribute('aria-label', '代码复制失败')
+    }
+
+    const timer = window.setTimeout(() => {
+      button.textContent = '复制'
+      button.disabled = false
+      button.removeAttribute('data-state')
+      button.setAttribute('aria-label', '复制代码')
+      resetTimers.delete(timer)
+    }, 2000)
+    resetTimers.add(timer)
+  }, { signal: controller.signal })
+
+  disposeCodeBlockCopy = () => {
+    controller.abort()
+    resetTimers.forEach(timer => window.clearTimeout(timer))
+    resetTimers.clear()
+  }
+}
+
+document.addEventListener('astro:page-load', initCodeBlockCopy)
+document.addEventListener('astro:before-swap', () => disposeCodeBlockCopy())
+</script>
+
+<style>
+  :global(.prose .code-block-wrapper) {
+    position: relative;
+    margin-block: 1.7142857em;
+  }
+
+  :global(.prose .code-block-wrapper > pre) {
+    margin-block: 0;
+  }
+
+  :global(.code-copy-button) {
+    position: absolute;
+    z-index: 1;
+    top: 0.65rem;
+    right: 0.65rem;
+    min-width: 3.5rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: 0.375rem;
+    background: rgb(39 39 42 / 0.88);
+    color: rgb(244 244 245);
+    font-family: inherit;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    cursor: pointer;
+    opacity: 0.78;
+    transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+  }
+
+  :global(.code-block-wrapper:hover .code-copy-button),
+  :global(.code-copy-button:focus-visible) {
+    opacity: 1;
+  }
+
+  :global(.code-copy-button:focus-visible) {
+    outline: 2px solid rgb(96 165 250);
+    outline-offset: 2px;
+  }
+
+  :global(.code-copy-button[data-state='success']) {
+    border-color: rgb(74 222 128 / 0.6);
+    background: rgb(21 128 61 / 0.92);
+  }
+
+  :global(.code-copy-button[data-state='error']) {
+    border-color: rgb(248 113 113 / 0.65);
+    background: rgb(185 28 28 / 0.92);
+  }
+
+  :global(.code-copy-button:disabled) {
+    cursor: default;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.code-copy-button) {
+      transition: none;
+    }
+  }
+</style>

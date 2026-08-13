@@ -1,0 +1,44 @@
+---
+import Button from '../components/Button.astro'
+import FormattedDate from '../components/FormattedDate.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPublishedBlogPosts } from '../utils/data-utils'
+
+const posts = (await getPublishedBlogPosts()).slice(0, 6)
+---
+
+<BaseLayout
+  title="页面未找到"
+  description="你访问的页面不存在，可以搜索文章、查看最近更新，或返回首页。"
+  robots="noindex, follow"
+>
+  <section class="pb-16 sm:pb-24">
+    <p class="font-serif italic text-gray-500">404</p>
+    <h1 class="mt-2 mb-4 text-3xl leading-tight font-serif font-medium sm:text-5xl">页面未找到</h1>
+    <p class="mb-8 text-gray-500">
+      链接可能已失效，或页面从未存在。可以搜索站内文章，或从最近更新继续阅读。
+    </p>
+    <div class="mb-12 flex flex-wrap gap-3">
+      <Button type="button" data-open-search>搜索文章</Button>
+      <Button href="/">返回首页</Button>
+    </div>
+
+    {
+      posts.length > 0 && (
+        <>
+          <h2 class="mb-6 text-xl font-serif font-medium sm:text-2xl">最近文章</h2>
+          <div class="flex flex-col space-y-4">
+            {posts.map(post => (
+              <div>
+                <span class="pr-5 font-serif inline-block w-32 text-gray-500">
+                  <FormattedDate format="iso" date={post.data.publishDate} />
+                </span>
+                <a class="post-link" href={`/blog/${post.id}`}>{post.data.title}</a>
+              </div>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </section>
+</BaseLayout>

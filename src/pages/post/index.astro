@@ -1,18 +1,14 @@
 ---
-import { getCollection } from 'astro:content'
 import FormattedDate from '../../components/FormattedDate.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { sortItemsByDateDesc } from '../../utils/data-utils'
+import { getPublishedBlogPosts } from '../../utils/data-utils'
 
-const blogPosts = await getCollection('blog')
-const sortedBlogPosts = blogPosts.sort(sortItemsByDateDesc);
+const sortedBlogPosts = await getPublishedBlogPosts()
 ---
 
 <BaseLayout
-  title="Blog Test Page"
-  description="All posts"
-  image={{ src: '/blog-cover-1.png', alt: 'The preview of the site' }}
-  showHeader={false}
+  title="文章列表"
+  description="按时间排列的全部博文，记录知识与思考沿途碰撞的痕迹。"
 >
     <h1 class="text-xl text-center leading-tight font-serif font-bold sm:text-3xl mb-3">Posts</h1>
 
@@ -20,7 +16,7 @@ const sortedBlogPosts = blogPosts.sort(sortItemsByDateDesc);
         记录知识与思考沿途碰撞的痕迹
     </h2>
     <div class="flex flex-col space-y-8 mx-auto max-w-2xl">
-        {sortedBlogPosts.map((post: any) => {
+        {sortedBlogPosts.map((post) => {
             return (
                 <div class="!mt-4">
                     <span class="pr-5 font-serif inline-block w-32"><FormattedDate format="iso" date={post.data.publishDate} /></span>
@@ -29,37 +25,4 @@ const sortedBlogPosts = blogPosts.sort(sortItemsByDateDesc);
             )
         })}
     </div>
-</BaseLayout>
-
-<style lang="scss">
-    .post-link {
-        position: relative;
-        text-decoration: underline;
-        text-decoration-style: dotted;
-        text-decoration-thickness: 3px;
-        text-decoration-color: rgb(var(--color-text-main) / 0.4);
-        text-underline-offset: 0.3em;
-        color: rgb(var(--color-text-main) / 0.8);
-        transition: all 0.2s ease;
-        &::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, #60a5fa, #e879f9);
-            transform-origin: right;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        &:hover {
-            color: rgb(var(--color-text-main) / 1);
-            text-decoration-color: transparent;
-            &::after {
-                transform-origin: left;
-                transform: scaleX(1);
-            }
-        }
-    }
-</style>
+  </BaseLayout>

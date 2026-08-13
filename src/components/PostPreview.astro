@@ -1,17 +1,16 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import { getPostCoverSrc } from '../config/image'
 import ArrowRight from '../icons/ArrowRight.astro'
-import { buildCoverPath } from '../utils/imagePath'
 import FormattedDate from './FormattedDate.astro'
 
 type Props = { post: CollectionEntry<'blog'>, class?: string, headingLevel?: 'h2' | 'h3' }
 
 const { post, class: className, headingLevel = 'h2' } = Astro.props
-const { title, publishDate, excerpt } = post.data
+const { title, publishDate, excerpt, description, seo } = post.data
 const TitleTag = headingLevel
-
-// 处理封面图片
-const coverImageUrl = buildCoverPath(post.id)
+const summary = excerpt ?? description
+const coverImageUrl = getPostCoverSrc(post.data)
 ---
 
 <a
@@ -37,7 +36,7 @@ const coverImageUrl = buildCoverPath(post.id)
                             </svg>
                             <FormattedDate date={publishDate} />
                         </div>
-                        {excerpt && <div class="card-excerpt">{excerpt}</div>}
+                        {summary && <div class="card-excerpt">{summary}</div>}
                     </div>
 
                     <div class="card-action">
@@ -46,7 +45,7 @@ const coverImageUrl = buildCoverPath(post.id)
                 </div>
                 {coverImageUrl && (
                     <div class="card-image">
-                        <img src={coverImageUrl} alt={title} loading="lazy" />
+                        <img src={coverImageUrl} alt={seo?.image?.alt ?? title} loading="lazy" width="1200" height="630" />
                         <div class="card-image-overlay"></div>
                     </div>
                 )}
@@ -58,18 +57,22 @@ const coverImageUrl = buildCoverPath(post.id)
 </a>
 
 <style>
+    @reference "../styles/global.css";
+
     /* 卡片基础样式 */
     .card {
-        @apply relative overflow-hidden w-full block;
+        @apply relative w-full block;
         background-color: rgb(var(--color-bg-card));
         margin: 0;
-        transition: transform var(--card-transition);
+        transition: transform var(--card-transition), box-shadow var(--card-transition);
         box-shadow: var(--card-shadow);
+        border-radius: 10px;
     }
 
     /* 卡片形状包装器 */
     .card-shape-wrapper {
-        @apply relative;
+        @apply relative overflow-hidden;
+        border-radius: 10px;
         /* 创建独特的切角效果 */
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 5% 100%, 0% 85%);
     }
@@ -83,6 +86,7 @@ const coverImageUrl = buildCoverPath(post.id)
     /* 悬停效果 */
     .card:hover {
         transform: translateY(-4px);
+        box-shadow: var(--card-shadow-hover);
     }
 
     /* 触摸设备交互效果 */
@@ -96,21 +100,20 @@ const coverImageUrl = buildCoverPath(post.id)
     .card-container {
         @apply w-full flex h-full border-2 overflow-hidden;
         border-color: rgb(var(--color-border-card));
-        box-shadow: var(--card-shadow);
         border-radius: 10px !important;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: border-color 0.3s ease;
     }
 
     /* 卡片悬停状态 */
     .card:hover .card-container {
         border-color: rgb(var(--color-text-muted));
-        box-shadow: var(--card-shadow-hover);
     }
 
     /* 卡片内部容器布局 */
     .card-inner-container {
         @apply flex flex-col md:flex-row w-full relative;
         isolation: isolate;
+        min-width: 0;
     }
 
     /* 顶部边框效果 */
@@ -154,7 +157,7 @@ const coverImageUrl = buildCoverPath(post.id)
     .card-image {
         @apply relative overflow-hidden;
         width: 100%;
-        height: 180px;
+        aspect-ratio: 16 / 9;
         order: 2;
     }
 
@@ -162,8 +165,9 @@ const coverImageUrl = buildCoverPath(post.id)
         .card-image {
             width: 45%;
             min-width: 300px;
+            aspect-ratio: auto;
             height: auto;
-            min-height: 250px;
+            min-height: 260px;
             clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 10% 0%);
         }
     }
@@ -200,9 +204,11 @@ const coverImageUrl = buildCoverPath(post.id)
 
     /* 内容区域样式 */
     .card-content {
-        @apply p-5 sm:p-6 flex flex-col justify-between grow;
+        @apply flex flex-col justify-between grow;
         order: 1;
         position: relative;
+        min-width: 0;
+        padding: clamp(1.25rem, 4vw, 1.75rem);
     }
 
     @media (min-width: 768px) {
@@ -214,7 +220,7 @@ const coverImageUrl = buildCoverPath(post.id)
     @media (max-width: 767px) {
         .card-content {
             order: 2;
-            padding: 16px;
+            padding-bottom: 1.75rem;
         }
     }
 
@@ -244,6 +250,7 @@ const coverImageUrl = buildCoverPath(post.id)
         display: inline-block;
         font-family: serif;
         font-weight: 900;
+        overflow-wrap: anywhere;
     }
 
     .card-title::after {
@@ -274,8 +281,8 @@ const coverImageUrl = buildCoverPath(post.id)
 
     @media (max-width: 767px) {
         .card-excerpt {
-            @apply mt-2 text-xs leading-normal;
-            -webkit-line-clamp: 2;
+            @apply mt-3 text-sm leading-relaxed;
+            -webkit-line-clamp: 3;
         }
     }
 
@@ -285,6 +292,7 @@ const coverImageUrl = buildCoverPath(post.id)
         border-top: 1px solid rgb(var(--color-border-card));
         color: rgb(var(--color-text-main));
         transition: border-color 0.3s ease;
+        min-height: 2.25rem;
     }
 
     .read-text {
@@ -298,6 +306,7 @@ const coverImageUrl = buildCoverPath(post.id)
     }
 
     .arrow-icon {
+        flex: none;
         transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
@@ -306,6 +315,14 @@ const coverImageUrl = buildCoverPath(post.id)
         opacity: 1;
     }
 
+    @media (max-width: 374px) {
+        .card-title {
+            font-size: 1.125rem;
+        }
+
+        .card-content {
+            padding-inline: 1rem;
+        }
+    }
+
 </style>
-
-

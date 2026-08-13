@@ -68,7 +68,7 @@ const multiple = 10
 const mouseOverContainer = document.querySelector('.card-container')!
 const element = document.querySelector('.card')! as HTMLElement
 
-function transformElement(x: any, y: any) {
+function transformElement(x: number, y: number) {
   const box = element.getBoundingClientRect() as DOMRect
   const calcX = -(y - box.y - box.height / 2) / multiple
   const calcY = (x - box.x - box.width / 2) / multiple
@@ -78,13 +78,14 @@ function transformElement(x: any, y: any) {
   element.style.transform = `rotateX(${calcX}deg) rotateY(${calcY}deg)`
 }
 
-mouseOverContainer.addEventListener('mousemove', (e: any) => {
+mouseOverContainer.addEventListener('mousemove', (event: Event) => {
+  const e = event as MouseEvent
   window.requestAnimationFrame(() => {
     transformElement(e.clientX, e.clientY)
   })
 })
 
-mouseOverContainer.addEventListener('mouseleave', (_: any) => {
+mouseOverContainer.addEventListener('mouseleave', () => {
   window.requestAnimationFrame(() => {
     element.style.transform = 'rotateX(0) rotateY(0)'
   })
