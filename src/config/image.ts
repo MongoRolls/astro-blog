@@ -1,45 +1,39 @@
-/**
- * 图片配置管理
- * 环境感知的图片配置系统
- */
-
 import type { ImageSource } from './env'
-import { envConfig } from './env'
+import { imageSource } from './env'
 
-// OSS配置
-const OSS_BASE_URL = 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com'
-const OSS_COVER_PATH = '/img'
+export const OSS_HOST = 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com'
+export const OSS_PREFIX = 'blog'
 
-// 本地配置
-const LOCAL_COVER_PATH = '/cover-images'
-const LOCAL_PUBLIC_PATH = '/public'
-
-export function getImageBaseUrl(source?: ImageSource): string {
-  const actualSource = source || envConfig.imageSource
-
-  switch (actualSource) {
-    case 'local':
-      return ''
-    case 'oss':
-      return OSS_BASE_URL
-    default:
-      return ''
-  }
+export function ossAsset(...segments: string[]) {
+  const objectPath = [OSS_PREFIX, ...segments]
+    .flatMap(segment => segment.split('/'))
+    .map(segment => segment.replace(/^\/+|\/+$/g, ''))
+    .filter(Boolean)
+    .join('/')
+  return `${OSS_HOST}/${objectPath}`
 }
 
-export function getCoverPathPrefix(source?: ImageSource): string {
-  const actualSource = source || envConfig.imageSource
+const LOCAL_COVER_IMAGE = '/cover-images/image.png'
+const OSS_COVER_IMAGE = ossAsset('cover-images/imageplaceholder.png')
+const OSS_HERO_IMAGE = ossAsset('site/blog-cover.webp')
 
-  switch (actualSource) {
-    case 'local':
-      return LOCAL_COVER_PATH
-    case 'oss':
-      return OSS_COVER_PATH
-    default:
-      return LOCAL_COVER_PATH
-  }
+interface CoverFields {
+  image?: string
+  seo?: { image?: { src: string } }
 }
 
-export function getLocalPublicPath(): string {
-  return LOCAL_PUBLIC_PATH
+function resolveSource(options?: { source?: ImageSource }) {
+  return options?.source ?? imageSource
+}
+
+export function buildCoverPath(options?: { source?: ImageSource }) {
+  return resolveSource(options) === 'local' ? LOCAL_COVER_IMAGE : OSS_COVER_IMAGE
+}
+
+export function getPostCoverSrc(data: CoverFields, options?: { source?: ImageSource }) {
+  return data.seo?.image?.src ?? data.image ?? buildCoverPath(options)
+}
+
+export function getHeroImageSrc(localSrc: string, options?: { source?: ImageSource }) {
+  return resolveSource(options) === 'local' ? localSrc : OSS_HERO_IMAGE
 }
