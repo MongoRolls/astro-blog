@@ -5,9 +5,9 @@ MongoRolls的个人博客
 <p align="center">
 <a href="https://mongorolls.cn">🖥 Online Preview</a>
 <br /><br />
-<a href="https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=astro-blog&repo-name=astro-blog" rel="nofollow"><img src="https://vercel.com/button" /></a>
-<a href="https://app.netlify.com/start/deploy?repository=https://github.com/mongoRolls/astro-blog" rel="nofollow"><img src="https://www.netlify.com/img/deploy/button.svg" /></a>
-<a href="https://stackblitz.com/github/mongoRolls/astro-blog" rel="nofollow"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" /></a>
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/mongoRolls/astro-blog/tree/main&project-name=astro-blog&repo-name=astro-blog" rel="nofollow"><img src="https://vercel.com/button" alt="Deploy with Vercel" /></a>
+<a href="https://app.netlify.com/start/deploy?repository=https://github.com/mongoRolls/astro-blog" rel="nofollow"><img src="https://www.netlify.com/img/deploy/button.svg" alt="Deploy to Netlify" /></a>
+<a href="https://stackblitz.com/github/mongoRolls/astro-blog" rel="nofollow"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" /></a>
 </p>
 
 ## 👋 Introduction
@@ -112,4 +112,4 @@ public/
 
 ## 构建说明
 
-封面图需手动维护在 `public/cover-images/` 目录，生产环境可通过 OSS 加速访问。
+封面图需手动维护在 `public/cover-images/` 目录。OSS 路径、密钥和同步命令见 [`.codex/AGENTS.md`](.codex/AGENTS.md) 的「图片与环境」。
