@@ -1,0 +1,75 @@
+---
+title: CLIProxyAPI
+excerpt: 把 Claude Code、Codex、Gemini、Grok 这些 CLI 订阅，转成本地 OpenAI / Claude / Gemini 兼容接口。
+publishDate: '2026-08-17'
+author: MongoRolls
+tags:
+  - tools
+  - ai
+  - tech
+seo:
+  description: CLIProxyAPI 把 OAuth CLI 订阅暴露成本地兼容 API，给 Cursor、Cline、脚本当后端用。
+  pageType: article
+---
+
+[日常那套](/blog/26-08-13-ai-tools)里，CC Switch 解决的是「同一套 Claude Code 换供应商」。CLIProxyAPI 反过来：订阅已经在 CLI 里登过了，想给 Cursor、Cline、自写脚本当 API 用。
+
+仓库：[router-for-me/CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)。手册：[help.router-for.me](https://help.router-for.me/cn/introduction/quick-start)。桌面端：[EasyCLIProxyAPI](https://github.com/router-for-me/EasyCLIProxyAPI)。
+
+## 它干什么
+
+本机起一个代理。你用各家 CLI 的 OAuth 登录（Claude Code、OpenAI Codex、Google Antigravity / Gemini、Grok Build，也接 Kimi），它对外提供 OpenAI / Gemini / Claude / Codex / Grok 兼容端点。客户端改 `base_url` 指向本机即可。
+
+多账号可以轮询。上游也能配 OpenRouter 这类 OpenAI 兼容服务。流式、工具调用、图文输入都支持。默认监听 **8317**。
+
+和中转站不是一类东西。中转站卖的是别人的 key；这个跑在你机器上，用的是你自己登进去的订阅。
+
+## 安装
+
+macOS 用 Homebrew，服务默认读 `$(brew --prefix)/etc/cliproxyapi.conf`。想继续用家目录配置，先有文件再软链，悬空软链服务会立刻退：
+
+```bash
+brew install cliproxyapi
+mkdir -p ~/.cli-proxy-api
+# 按官方示例准备好 ~/.cli-proxy-api/config.yaml 之后：
+brew_conf="$(brew --prefix)/etc/cliproxyapi.conf"
+ln -sfn "$HOME/.cli-proxy-api/config.yaml" "$brew_conf"
+brew services start cliproxyapi
+```
+
+懒得点命令，装 EasyCLIProxyAPI，托盘里启停、改配置。
+
+Docker：
+
+```bash
+docker run --rm -p 8317:8317 \
+  -v /path/to/config.yaml:/CLIProxyAPI/config.yaml \
+  -v /path/to/auth-dir:/root/.cli-proxy-api \
+  -v /path/to/plugins:/CLIProxyAPI/plugins \
+  eceasy/cli-proxy-api:latest
+```
+
+插件目录要挂进去，不然容器一重启，商店里装的插件就没了。
+
+登录走官方文档里的 OAuth 流程（Claude / Codex / Gemini / Grok 各有一条）。登完，把 Cursor、Cline、OpenCode 的 API 地址指到 `http://127.0.0.1:8317`。
+
+用量统计从 v6.10.0 起不再内置，要看板用 [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper) 或 [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus)。
+
+## 和自己现有工具怎么叠
+
+| 需求 | 用谁 |
+| --- | --- |
+| Claude Code 换 DeepSeek / GLM | [CC Switch](https://cc-switch.cc/) |
+| 订阅当 API，给别的客户端用 | CLIProxyAPI |
+| 只想便宜、国内直连 | DeepSeek 官方 API |
+| 人在仓库里写代码 | Cursor / Claude Code，别把代理当 IDE |
+
+Hermes 自己就能换 provider，不一定非经这层。它更适合「客户端只认 OpenAI / Claude 接口，但你手里是 CLI 订阅」。
+
+## 别当免费午餐
+
+各家订阅条款通常按「官方客户端」算，拿 OAuth 转成通用 API，**可能违 ToS**，封号、限流自己扛。号池、轮询、对外网开端口，风险再加一档。本机 `127.0.0.1`、加访问密钥，别裸奔到公网。
+
+额度窗口还在（Codex 的 5h / 7d 那些），代理不会变出更多配额，只是换了入口。模型名、渠道别名以当前文档为准，README 里的 GPT / Claude / Gemini 版本号更新很快。
+
+自己的用法：官方额度紧、又想在只认标准 API 的工具里蹭已有订阅时再开。日常写代码，还是直接走对应客户端更省事。
