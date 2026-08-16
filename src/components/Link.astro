@@ -1,4 +1,11 @@
 ---
+import {
+  getFaviconCandidates,
+  isExternalLink,
+  isValidUrl,
+  normalizeUrl,
+} from '../utils/link-metadata'
+
 interface Props {
   href: string
   external?: boolean
@@ -13,15 +20,12 @@ const {
 
 const children = await Astro.slots.render('default')
 const rawHref = (href || '').trim()
+const normalizedHref = rawHref ? normalizeUrl(rawHref) : ''
+const isSafeHref = Boolean(normalizedHref) && isValidUrl(normalizedHref) && !/^(?:javascript|data|vbscript):/i.test(normalizedHref)
+const isExt = isSafeHref ? isExternalLink(normalizedHref) : false
+const faviconCandidates = showIcon && isSafeHref && isExt ? getFaviconCandidates(normalizedHref) : []
+const [faviconHref, ...faviconFallbacks] = faviconCandidates
 const fallbackText = (children || '').toString().trim() || rawHref || '链接'
-const normalizedHref = /^(?:[\w-]+\.)+[a-z]{2,}(?:[/:?#]|$)/i.test(rawHref)
-  ? `https://${rawHref}`
-  : rawHref
-const isSafeHref = Boolean(normalizedHref) && !/^(?:javascript|data|vbscript):/i.test(normalizedHref)
-const isExternal = /^https?:\/\//i.test(normalizedHref)
-const faviconHref = isExternal
-  ? `https://www.google.com/s2/favicons?domain=${new URL(normalizedHref).hostname}&sz=32`
-  : ''
 ---
 
 {!isSafeHref
@@ -32,10 +36,11 @@ const faviconHref = isExternal
     <a
       href={normalizedHref}
       class="link"
-      target={external && isExternal ? '_blank' : undefined}
-      rel={external && isExternal ? 'noopener noreferrer' : undefined}
+      target={external && isExt ? '_blank' : undefined}
+      rel={external && isExt ? 'noopener noreferrer' : undefined}
+      title={fallbackText}
     >
-      {showIcon && faviconHref && (
+      {faviconHref && (
         <img
           src={faviconHref}
           alt=""
@@ -44,7 +49,8 @@ const faviconHref = isExternal
           decoding="async"
           referrerpolicy="no-referrer"
           aria-hidden="true"
-          onerror="this.style.display='none'"
+          data-fallbacks={faviconFallbacks.join('|')}
+          onerror="const next=(this.dataset.fallbacks||'').split('|').filter(Boolean);if(next.length){this.src=next.shift();this.dataset.fallbacks=next.join('|')}else{this.remove()}"
         />
       )}
       <span class="link__text"><slot>{fallbackText}</slot></span>
@@ -79,15 +85,18 @@ const faviconHref = isExternal
   }
 
   .link__icon {
-    display: block;
+    display: inline-block;
     width: 1rem;
     height: 1rem;
+    max-width: 1rem !important;
+    max-height: 1rem !important;
     flex-shrink: 0;
     align-self: center;
-    margin: 0.25rem 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     border-radius: 0.15rem;
     object-fit: contain;
+    vertical-align: middle;
   }
 
   .link__text {
@@ -105,16 +114,15 @@ const faviconHref = isExternal
     display: inline-block;
   }
 
-  /* 暗色主题适配 */
-  :global([data-theme="dark"]) .link {
+  :global(html.dark) .link {
     color: var(--link-fg, rgba(230, 230, 227, 0.95));
   }
 
-  :global([data-theme="dark"]) .link:hover {
+  :global(html.dark) .link:hover {
     background-color: var(--link-bg-hover, rgba(255, 255, 255, 0.12));
   }
 
-  :global([data-theme="dark"]) .link:active {
+  :global(html.dark) .link:active {
     background-color: var(--link-bg-active, rgba(255, 255, 255, 0.18));
   }
 </style>

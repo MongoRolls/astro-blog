@@ -101,6 +101,18 @@ main :where(h2[id], h3[id]) {
   scroll-margin-top: 6rem;
 }
 
+/* 正文外链站点图标：避免 prose img 把 16px favicon 撑成块级大图 */
+.prose a.link img.link__icon,
+.prose a.link > img {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  max-width: 1rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 0.15rem;
+}
+
 .post-link[class] {
   position: relative;
   color: rgb(var(--color-text-main) / 0.8);
