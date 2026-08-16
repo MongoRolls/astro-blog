@@ -2,11 +2,13 @@
 interface Props {
   href: string
   external?: boolean
+  showIcon?: boolean
 }
 
 const {
   href,
   external = true,
+  showIcon = true,
 } = Astro.props
 
 const children = await Astro.slots.render('default')
@@ -17,6 +19,9 @@ const normalizedHref = /^(?:[\w-]+\.)+[a-z]{2,}(?:[/:?#]|$)/i.test(rawHref)
   : rawHref
 const isSafeHref = Boolean(normalizedHref) && !/^(?:javascript|data|vbscript):/i.test(normalizedHref)
 const isExternal = /^https?:\/\//i.test(normalizedHref)
+const faviconHref = isExternal
+  ? `https://www.google.com/s2/favicons?domain=${new URL(normalizedHref).hostname}&sz=32`
+  : ''
 ---
 
 {!isSafeHref
@@ -30,6 +35,18 @@ const isExternal = /^https?:\/\//i.test(normalizedHref)
       target={external && isExternal ? '_blank' : undefined}
       rel={external && isExternal ? 'noopener noreferrer' : undefined}
     >
+      {showIcon && faviconHref && (
+        <img
+          src={faviconHref}
+          alt=""
+          class="link__icon"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          aria-hidden="true"
+          onerror="this.style.display='none'"
+        />
+      )}
       <span class="link__text"><slot>{fallbackText}</slot></span>
     </a>
   )}
@@ -59,6 +76,18 @@ const isExternal = /^https?:\/\//i.test(normalizedHref)
 
   .link:active {
     background-color: var(--link-bg-active, rgba(55, 53, 47, 0.12));
+  }
+
+  .link__icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    align-self: center;
+    margin: 0.25rem 0 !important;
+    padding: 0 !important;
+    border-radius: 0.15rem;
+    object-fit: contain;
   }
 
   .link__text {
