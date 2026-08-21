@@ -16,9 +16,9 @@ const { posts, locale = defaultLocale } = Astro.props;
 
 <div class="carousel-container">
     <div class="carousel-wrapper">
-        {posts.map(post => (
-            <div class="carousel-slide">
-                <a class="carousel-link" href={getPostUrl(post)} aria-label={post.data.title}>
+        {posts.map((post, index) => (
+            <div class:list={['carousel-slide', { 'active': index === 0, 'pointer-events-none': index !== 0 }]} aria-hidden={index !== 0 ? 'true' : 'false'}>
+                <a class="carousel-link" href={getPostUrl(post)} aria-label={post.data.title} tabindex={index === 0 ? undefined : -1}>
                     <img
                       src={getPostCoverSrc(post.data)}
                       alt={post.data.title}
@@ -33,11 +33,13 @@ const { posts, locale = defaultLocale } = Astro.props;
             </div>
         ))}
     </div>
-    <div class="carousel-dots">
-        {posts.map((_, index) => (
-            <button class="carousel-dot" data-index={index} aria-label={locale === 'zh-CN' ? `显示第 ${index + 1} 篇文章` : `Show post ${index + 1}`}></button>
-        ))}
-    </div>
+    {posts.length > 1 && (
+        <div class="carousel-dots">
+            {posts.map((_, index) => (
+                <button class:list={['carousel-dot', { active: index === 0 }]} type="button" data-index={index} aria-current={index === 0 ? 'true' : 'false'} aria-label={locale === 'zh-CN' ? `显示第 ${index + 1} 篇文章` : `Show post ${index + 1}`}></button>
+            ))}
+        </div>
+    )}
 </div>
 
 <style>
@@ -92,6 +94,11 @@ const { posts, locale = defaultLocale } = Astro.props;
 
     .carousel-link:hover .carousel-image {
         transform: scale(1.05);
+    }
+
+    .carousel-link:focus-visible {
+        outline: 3px solid rgb(var(--color-primary));
+        outline-offset: -3px;
     }
 
     .carousel-overlay {
@@ -187,6 +194,8 @@ const { posts, locale = defaultLocale } = Astro.props;
       slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === index)
         slide.classList.toggle('pointer-events-none', i !== index)
+        slide.setAttribute('aria-hidden', i === index ? 'false' : 'true')
+        slide.querySelector('a')?.setAttribute('tabindex', i === index ? '0' : '-1')
       })
       dots.forEach((dot, i) => {
         dot.classList.toggle('active', i === index)
@@ -200,7 +209,7 @@ const { posts, locale = defaultLocale } = Astro.props;
     }
 
     function startAutoPlay() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || autoPlayInterval)
+      if (slides.length <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches || autoPlayInterval)
         return
       autoPlayInterval = setInterval(nextSlide, 4000)
     }

@@ -78,13 +78,21 @@ document.addEventListener('astro:before-swap', () => disposeThemeToggle())
   height: 100%;
   border-radius: 50%;
   border: none;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.08s ease-in-out;
+  transition: color 150ms ease, background-color 150ms ease, transform 80ms ease-in-out;
   padding: 4px;
 }
 
 .theme-toggle-btn:hover {
+  color: rgb(var(--color-primary));
+  background: rgb(var(--color-text-main) / 0.08);
   transform: scale(1.05);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
 }
 
 .theme-toggle-btn:active {
@@ -127,11 +135,11 @@ document.addEventListener('astro:before-swap', () => disposeThemeToggle())
 /* 图标颜色适应主题 */
 .sun-icon,
 .moon-icon {
-  color: #000000;
+  color: currentColor;
 }
 
 :global(.dark) .sun-icon,
 :global(.dark) .moon-icon {
-  color: #ffffff;
+  color: currentColor;
 }
 </style>

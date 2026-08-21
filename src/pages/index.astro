@@ -73,26 +73,30 @@ const heroData = {
         </div>
     </section>
 
-    <hr class="my-8 border-dashed border-main" />
-    <ArticleCarousel posts={carouselPosts} locale={locale} />
-    <hr class="my-8 border-dashed border-main" />
+    {carouselPosts.length > 0 && (
+        <>
+            <hr class="my-8 border-dashed border-main" />
+            <ArticleCarousel posts={carouselPosts} locale={locale} />
+            <hr class="my-8 border-dashed border-main" />
+        </>
+    )}
 
 
 
     <section class="w-full mb-8 ">
         <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">{locale === 'zh-CN' ? '文章' : 'Posts'}</h2>
-        <div class="flex flex-col space-y-4">
+        <ul class="post-list flex flex-col">
             {posts.slice(0, 8).map((post) => {
                 return (
-                    <div class="!mt-3">
-                        <span class="pr-5 italic font-serif inline-block w-32 text-gray-500">
+                    <li class="post-row">
+                        <span class="post-date italic font-serif text-gray-500">
                             <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
                         </span>
                         <a class="post-link" href={getPostUrl(post)}>{post.data.title}</a>
-                    </div>
+                    </li>
                 )
             })}
-        </div>
+        </ul>
         <div class="mt-8">
             <a class="read-more-link font-serif" href={localizedPath(locale, '/post/')}>{locale === 'zh-CN' ? '阅读更多' : 'Read more'} →</a>
         </div>
@@ -156,9 +160,32 @@ const heroData = {
     }
 
     .hero-title-text {
-        background: linear-gradient(to bottom right, #374151 50%, #6b7280 50%);
+        background: linear-gradient(to bottom right, rgb(var(--color-text-main)) 50%, rgb(var(--color-text-muted)) 50%);
         background-clip: text;
         color: transparent;
+    }
+
+    .post-list {
+        gap: 0.25rem;
+    }
+
+    .post-row {
+        display: grid;
+        grid-template-columns: 8rem minmax(0, 1fr);
+        align-items: baseline;
+        gap: 0.75rem;
+        padding: 0.55rem 0.5rem;
+        margin-inline: -0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 150ms ease;
+    }
+
+    .post-row:hover {
+        background: rgb(var(--color-text-main) / 0.05);
+    }
+
+    .post-date {
+        white-space: nowrap;
     }
 
     .hero-content-grid {
@@ -287,6 +314,11 @@ const heroData = {
         .hero-actions :global(a) {
             flex: 1;
             text-align: center;
+        }
+
+        .post-row {
+            grid-template-columns: 1fr;
+            gap: 0.15rem;
         }
     }
 

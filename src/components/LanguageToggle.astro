@@ -21,6 +21,7 @@ const label = exactMatch ? t.language.switchTo : t.language.unavailable
   aria-label={label}
   title={label}
   hreflang={localeInfo[targetLocale].htmlLang}
+  data-exact-match={exactMatch ? 'true' : 'false'}
   data-astro-reload
 >
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -28,6 +29,7 @@ const label = exactMatch ? t.language.switchTo : t.language.unavailable
     <path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3Z"></path>
   </svg>
   <span>{localeInfo[targetLocale].shortLabel}</span>
+  {!exactMatch && <span class="translation-status" aria-hidden="true"></span>}
 </a>
 
 <style>
@@ -40,8 +42,12 @@ const label = exactMatch ? t.language.switchTo : t.language.unavailable
     height: 2rem;
     border-radius: 999px;
     color: rgb(var(--color-text-main));
-    font-family: serif;
+    position: relative;
+    padding: 0 0.45rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
     font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     line-height: 1;
     transition: color 150ms ease, background-color 150ms ease;
   }
@@ -63,5 +69,19 @@ const label = exactMatch ? t.language.switchTo : t.language.unavailable
     fill: none;
     stroke: currentColor;
     stroke-width: 1.5;
+  }
+
+  .language-toggle[data-exact-match='false'] {
+    border: 1px dashed rgb(var(--color-border-main) / 0.45);
+  }
+
+  .translation-status {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.2rem;
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 999px;
+    background: rgb(var(--color-primary));
   }
 </style>
