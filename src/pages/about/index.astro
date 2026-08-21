@@ -1,29 +1,35 @@
 ---
+import type { Locale } from '../../i18n/config'
 import TechStack from '../../components/TechStack.astro'
+import { defaultLocale } from '../../i18n/config'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 
-const title = '关于'
-const description = '关于 MongoRolls：前端工程师，关注工程化、开源与个人写作。'
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const title = locale === 'zh-CN' ? '关于' : 'About'
+const description = locale === 'zh-CN'
+  ? '关于 MongoRolls：前端工程师，关注工程化、开源与个人写作。'
+  : 'About MongoRolls, a frontend engineer interested in web tooling, open source, and writing.'
 const headings = [
   {
     depth: 2,
     slug: 'about-site',
-    text: '关于本站',
+    text: locale === 'zh-CN' ? '关于本站' : 'About this site',
   },
   {
     depth: 2,
     slug: 'about-me',
-    text: '关于我',
+    text: locale === 'zh-CN' ? '关于我' : 'About me',
   },
   {
     depth: 3,
     slug: 'about-me-footprint',
-    text: '足迹',
+    text: locale === 'zh-CN' ? '足迹' : 'Footprints',
   },
   {
     depth: 3,
     slug: 'about-me-contact',
-    text: '联系方式',
+    text: locale === 'zh-CN' ? '联系方式' : 'Contact',
   },
   {
     depth: 3,
@@ -34,39 +40,53 @@ const headings = [
 ---
 
 <BaseLayout
+  locale={locale}
   title={title}
   headings={headings}
   description={description}
 >
     <article data-pagefind-body class="prose dark:prose-invert max-w-none">
     <h1 class="sr-only" data-pagefind-meta="title">{title}</h1>
-    <h2 id="about-site">关于本站</h2>
+    <h2 id="about-site">{locale === 'zh-CN' ? '关于本站' : 'About this site'}</h2>
 
-    <p>经过多个方案比较，最后选定</p>
-    <p>本站基于 <a class="post-link" href="https://astro.build/">Astro</a> 框架，然后再进行 diy 创作。</p>
-    <p>评论区采用 <a class="post-link" href="https://twikoo.js.org/">Twikoo</a>，连接 MongoDB。</p>
-    <p>都部署于 <a class="post-link" href="https://vercel.com/">Vercel</a>。</p>
+    {locale === 'zh-CN'
+? (
+      <>
+        <p>经过多个方案比较，最终选择了现在这套技术栈。</p>
+        <p>本站基于 <a class="post-link" href="https://astro.build/">Astro</a> 构建，并在此基础上持续定制。</p>
+        <p>评论区采用 <a class="post-link" href="https://twikoo.js.org/">Twikoo</a>，数据存储于 MongoDB。</p>
+        <p>网站部署在 <a class="post-link" href="https://vercel.com/">Vercel</a>。</p>
+      </>
+    )
+: (
+      <>
+        <p>After comparing several approaches, I settled on the stack that powers this site today.</p>
+        <p>The blog is built with <a class="post-link" href="https://astro.build/">Astro</a> and continuously customized as the site evolves.</p>
+        <p>Comments are powered by <a class="post-link" href="https://twikoo.js.org/">Twikoo</a> with MongoDB storage.</p>
+        <p>The site is deployed on <a class="post-link" href="https://vercel.com/">Vercel</a>.</p>
+      </>
+    )}
 
-    <h2 id="about-me" class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>关于我</h2>
+    <h2 id="about-me" class="flex items-center align-center"><span class="mr-2 font-bold text-[#425bc5] text-3xl">#</span>{locale === 'zh-CN' ? '关于我' : 'About me'}</h2>
 
     <ul>
-      <li>👋  I'm Mongorolls</li>
-      <li>🔭  a Front-end development engineer</li>
-      <li>🌱  currently working on NetEase</li>
-      <li>✨  want to be a open source developer</li>
+      <li>👋 {locale === 'zh-CN' ? '我是 MongoRolls' : 'I’m MongoRolls'}</li>
+      <li>🔭 {locale === 'zh-CN' ? '一名前端开发工程师' : 'A frontend engineer'}</li>
+      <li>🌱 {locale === 'zh-CN' ? '目前就职于网易' : 'Currently working at NetEase'}</li>
+      <li>✨ {locale === 'zh-CN' ? '希望持续参与并贡献开源' : 'Working toward contributing more to open source'}</li>
     </ul>
 
     <div class="my-8 sm:my-16">
-      <p>技术栈</p>
+      <p>{locale === 'zh-CN' ? '技术栈' : 'Tech stack'}</p>
       <TechStack />
     </div>
 
-    <h3 id="about-me-footprint">🗺️ 足迹</h3>
+    <h3 id="about-me-footprint">🗺️ {locale === 'zh-CN' ? '足迹' : 'Footprints'}</h3>
     <ul>
-      <li>工作与生活足迹持续更新中。</li>
+      <li>{locale === 'zh-CN' ? '工作与生活足迹持续更新中。' : 'Notes from work and life are continually being added.'}</li>
     </ul>
 
-    <h3 id="about-me-contact">📫 touch me</h3>
+    <h3 id="about-me-contact">📫 {locale === 'zh-CN' ? '联系方式' : 'Contact'}</h3>
 
     <ul>
       <li>github: <a href="https://github.com/MongoRolls">MongoRolls</a></li>

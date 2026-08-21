@@ -1,26 +1,31 @@
 ---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+
 interface Props {
     title?: string
     description?: string
     website?: string
     avatar?: string
+    locale?: Locale
 }
 
 const {
     title = 'MongoRolls',
     description = 'MongoRolls',
-    website = 'https://mongorolls.com',
-    avatar = 'https://mongorolls.com/logo.png',
+    website = 'https://mongorolls.cn',
+    avatar = 'https://mongorolls.cn/logo.png',
+    locale = defaultLocale,
 } = Astro.props;
 ---
 
 <div class="yaml-card">
     <div class="yaml-card-header">
-        <h3 class="font-serif">本站信息</h3>
+        <h3 class="font-serif">{locale === 'zh-CN' ? '本站信息' : 'Site information'}</h3>
         <h3 class="yaml-key">yaml</h3>
     </div>
     <div class="yaml-card-content">
-        <button class="copy-button" type="button" title="Copy to clipboard" aria-label="复制本站信息">
+        <button class="copy-button" type="button" title="Copy to clipboard" aria-label={locale === 'zh-CN' ? '复制本站信息' : 'Copy site information'}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>

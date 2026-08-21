@@ -1,17 +1,23 @@
 ---
+import type { Locale } from '../../i18n/config'
 import FriendCard from '../../components/FriendCard.astro'
 import siteConfig from '../../data/site-config'
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import { defaultLocale } from '../../i18n/config'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
 ---
 
 <BaseLayout
-  title="友链"
-  description="MongoRolls 的朋友与推荐链接。"
+  locale={locale}
+  title={locale === 'zh-CN' ? '友链' : 'Friends'}
+  description={locale === 'zh-CN' ? 'MongoRolls 的朋友与推荐链接。' : 'Friends and recommended links from MongoRolls.'}
 >
     <section class="container mx-auto px-4 py-12" aria-labelledby="friends-title">
-        <h1 id="friends-title" class="sr-only">友链</h1>
+        <h1 id="friends-title" class="sr-only">{locale === 'zh-CN' ? '友链' : 'Friends'}</h1>
         <div class="mt-12 max-w-7xl mx-auto">
-            <FriendCard friends={siteConfig.friends} />
+            <FriendCard friends={siteConfig.friends} locale={locale} />
         </div>
     </section>
 </BaseLayout>

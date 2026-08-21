@@ -1,3 +1,20 @@
+---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
+---
+
+<div
+  hidden
+  data-code-copy-label={t.common.codeCopy}
+  data-code-copied-label={t.common.codeCopied}
+  data-code-copy-failed-label={t.common.codeCopyFailed}
+></div>
+
 <script>
 let disposeCodeBlockCopy = () => {}
 
@@ -33,13 +50,15 @@ async function copyText(text: string) {
 }
 
 function createCopyButton() {
+  const labels = document.querySelector<HTMLElement>('[data-code-copy-label]')?.dataset
+  const copyLabel = labels?.codeCopyLabel ?? 'Copy code'
   const button = document.createElement('button')
   button.type = 'button'
   button.className = 'code-copy-button'
   button.dataset.pagefindIgnore = 'all'
-  button.setAttribute('aria-label', '复制代码')
-  button.setAttribute('title', '复制代码')
-  button.textContent = '复制'
+  button.setAttribute('aria-label', copyLabel)
+  button.setAttribute('title', copyLabel)
+  button.textContent = copyLabel
   return button
 }
 
@@ -48,6 +67,10 @@ function initCodeBlockCopy() {
 
   const controller = new AbortController()
   const resetTimers = new Set<number>()
+  const labels = document.querySelector<HTMLElement>('[data-code-copy-label]')?.dataset
+  const copyLabel = labels?.codeCopyLabel ?? 'Copy code'
+  const copiedLabel = labels?.codeCopiedLabel ?? 'Copied'
+  const failedLabel = labels?.codeCopyFailedLabel ?? 'Copy failed'
 
   document.querySelectorAll<HTMLElement>('.prose pre').forEach((pre) => {
     if (pre.parentElement?.classList.contains('code-block-wrapper'))
@@ -75,22 +98,22 @@ function initCodeBlockCopy() {
     button.disabled = true
     try {
       await copyText(code.textContent ?? '')
-      button.textContent = '已复制'
+      button.textContent = copiedLabel
       button.dataset.state = 'success'
-      button.setAttribute('aria-label', '代码已复制')
+      button.setAttribute('aria-label', copiedLabel)
     }
     catch (error) {
       console.warn('代码复制失败:', error)
-      button.textContent = '复制失败'
+      button.textContent = failedLabel
       button.dataset.state = 'error'
-      button.setAttribute('aria-label', '代码复制失败')
+      button.setAttribute('aria-label', failedLabel)
     }
 
     const timer = window.setTimeout(() => {
-      button.textContent = '复制'
+      button.textContent = copyLabel
       button.disabled = false
       button.removeAttribute('data-state')
-      button.setAttribute('aria-label', '复制代码')
+      button.setAttribute('aria-label', copyLabel)
       resetTimers.delete(timer)
     }, 2000)
     resetTimers.add(timer)

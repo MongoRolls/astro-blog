@@ -1,12 +1,16 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import type { Locale } from '../i18n/config'
 import { getPostCoverSrc } from '../config/image'
+import { defaultLocale } from '../i18n/config'
+import { getPostUrl } from '../utils/data-utils'
 
 type Props = {
     posts: CollectionEntry<'blog'>[]
+    locale?: Locale
 }
 
-const { posts } = Astro.props;
+const { posts, locale = defaultLocale } = Astro.props;
 
 ---
 
@@ -14,7 +18,7 @@ const { posts } = Astro.props;
     <div class="carousel-wrapper">
         {posts.map(post => (
             <div class="carousel-slide">
-                <a class="carousel-link" href={`/blog/${post.id}`} aria-label={post.data.title}>
+                <a class="carousel-link" href={getPostUrl(post)} aria-label={post.data.title}>
                     <img
                       src={getPostCoverSrc(post.data)}
                       alt={post.data.title}
@@ -31,7 +35,7 @@ const { posts } = Astro.props;
     </div>
     <div class="carousel-dots">
         {posts.map((_, index) => (
-            <button class="carousel-dot" data-index={index} aria-label={`显示第 ${index + 1} 篇文章`}></button>
+            <button class="carousel-dot" data-index={index} aria-label={locale === 'zh-CN' ? `显示第 ${index + 1} 篇文章` : `Show post ${index + 1}`}></button>
         ))}
     </div>
 </div>

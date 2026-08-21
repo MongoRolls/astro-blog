@@ -1,18 +1,24 @@
 ---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 ---
 
 <div class="flex items-center gap-2">
-    <span class="font-serif text-sm">访问量：</span>
+    <span class="font-serif text-sm">{t.common.visits}</span>
     <span id="twikoo_visitors" class="font-serif text-sm">0</span>
 </div>
 
-<div id="tcomment"></div>
+<div id="tcomment" data-unavailable-message={t.common.commentsUnavailable}></div>
 
 <script>
 type TwikooWindow = Window & {
   twikoo?: {
-    init: (options: { el: string, emotionCDN: string, envId: string }) => void
+    init: (options: { el: string, emotionCDN: string, envId: string, lang: string }) => void
   }
 }
 
@@ -66,12 +72,13 @@ function initComments() {
           envId: 'https://comment.mongorolls.cn/',
           el: '#tcomment',
           emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+          lang: document.documentElement.lang === 'en' ? 'en' : 'zh-CN',
         })
       })
       .catch((error) => {
         console.warn('评论区加载失败:', error)
         commentRoot.setAttribute('role', 'status')
-        commentRoot.textContent = '评论区暂时无法加载，请稍后重试。'
+        commentRoot.textContent = commentRoot.dataset.unavailableMessage ?? 'Comments are temporarily unavailable.'
       })
   }, { rootMargin: '400px 0px' })
 

@@ -1,28 +1,44 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro'
 import type { CollectionEntry } from 'astro:content'
+import type { Locale } from '../../i18n/config'
 import Pagination from '../../components/Pagination.astro'
 import PostPreview from '../../components/PostPreview.astro'
 import siteConfig from '../../data/site-config'
+import { alternateLocale, defaultLocale, localizedPath, stripLocalePrefix } from '../../i18n/config'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getPublishedBlogPosts } from '../../utils/data-utils'
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = await getPublishedBlogPosts()
+    const posts = await getPublishedBlogPosts(defaultLocale)
     return paginate(posts, { pageSize: siteConfig.postsPerPage || 6 })
 }
 
-type Props = { page: Page<CollectionEntry<'blog'>> }
+type Props = { page: Page<CollectionEntry<'blog'>>, locale?: Locale }
 
-const { page } = Astro.props
-const blog = page.data;
+const { page, locale = defaultLocale } = Astro.props
+const blog = page.data
+const targetLocale = alternateLocale(locale)
+const targetPostCount = (await getPublishedBlogPosts(targetLocale)).length
+const targetLastPage = Math.max(1, Math.ceil(targetPostCount / (siteConfig.postsPerPage || 6)))
+const alternateUrls = {
+    [locale]: page.url.current,
+    ...(page.currentPage <= targetLastPage
+        ? { [targetLocale]: localizedPath(targetLocale, `${stripLocalePrefix(page.url.current).replace(/\/$/, '')}/`) }
+        : {}),
+}
 ---
 
 <BaseLayout
-  title={page.currentPage > 1 ? `博客 · 第 ${page.currentPage} 页` : '博客'}
-  description={page.currentPage > 1
-    ? `MongoRolls 的博客文章列表，第 ${page.currentPage} 页。`
-    : 'MongoRolls 的博客文章列表，涵盖前端开发、工程化与个人思考。'}
+  locale={locale}
+  alternateUrls={alternateUrls}
+  languageFallbackPath="/blog/"
+  title={locale === 'zh-CN'
+    ? (page.currentPage > 1 ? `博客 · 第 ${page.currentPage} 页` : '博客')
+    : (page.currentPage > 1 ? `Blog · Page ${page.currentPage}` : 'Blog')}
+  description={locale === 'zh-CN'
+    ? (page.currentPage > 1 ? `MongoRolls 的博客文章列表，第 ${page.currentPage} 页。` : 'MongoRolls 的博客文章列表，涵盖前端开发、工程化与个人思考。')
+    : (page.currentPage > 1 ? `MongoRolls blog posts, page ${page.currentPage}.` : 'Frontend engineering, web tooling, AI, and personal notes from MongoRolls.')}
   prevUrl={page.url.prev}
   nextUrl={page.url.next}
 >
@@ -30,9 +46,9 @@ const blog = page.data;
 
     <div class="flex flex-col gap-10 sm:gap-12">
         {blog.map(post => (
-            <PostPreview post={post} />
+        <PostPreview post={post} locale={locale} />
         ))}
     </div>
 
-    <Pagination page={page} class="my-16 sm:my-24" />
+    <Pagination page={page} locale={locale} class="my-16 sm:my-24" />
 </BaseLayout>

@@ -1,5 +1,6 @@
 ---
 import type { Props as HeadProps } from '../components/BaseHead.astro'
+import type { Locale } from '../i18n/config'
 import { ClientRouter } from 'astro:transitions'
 import BaseHead from '../components/BaseHead.astro'
 import CodeBlockCopy from '../components/CodeBlockCopy.astro'
@@ -7,6 +8,7 @@ import Footer from '../components/Footer.astro'
 import Nav from '../components/Nav.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
 import TableOfContents from '../components/TableOfContents.astro'
+import { alternateLocale, defaultLocale, getDefaultAlternates, localizedPath, stripLocalePrefix } from '../i18n/config'
 
 interface Heading {
   depth: number
@@ -14,16 +16,22 @@ interface Heading {
   text: string
 }
 
-export type Props = HeadProps & { headings?: Heading[] }
-const { headings = [], ...head } = Astro.props
+export type Props = HeadProps & { headings?: Heading[], languageFallbackPath?: string }
+const { headings = [], languageFallbackPath, ...head } = Astro.props
+const locale: Locale = head.locale ?? defaultLocale
+const alternateUrls = head.alternateUrls ?? getDefaultAlternates(Astro.url.pathname)
+const targetLocale = alternateLocale(locale)
+const exactAlternateUrl = alternateUrls[targetLocale]
+const languageUrl = exactAlternateUrl
+  ?? localizedPath(targetLocale, languageFallbackPath ?? stripLocalePrefix(Astro.url.pathname))
 const hasTableOfContents = headings.some(({ depth }) => depth === 2 || depth === 3)
 // https://flocto.github.io/
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="antialiased break-words">
+<html lang={locale} class="antialiased break-words">
     <head>
-        <BaseHead {...head} />
+        <BaseHead {...head} locale={locale} alternateUrls={alternateUrls} />
         <script is:inline>
         // 初始化主题 - 确保在页面加载前应用正确的主题类，避免闪烁
         // 使用 is:inline 确保此脚本立即执行而不被 Astro 处理
@@ -42,7 +50,7 @@ const hasTableOfContents = headings.some(({ depth }) => depth === 2 || depth ===
     </head>
     <body class="bg-main text-main relative">
         <div class="flex flex-col min-h-screen">
-            <Nav />
+            <Nav locale={locale} languageUrl={languageUrl} exactLanguageMatch={Boolean(exactAlternateUrl)} />
             <!-- 正常框架 -->
             <main class="flex justify-between w-full max-w-[1012px] max-md:px-5 mx-auto z-0">
                 <div class="hidden lg:block w-40"></div>
@@ -50,12 +58,12 @@ const hasTableOfContents = headings.some(({ depth }) => depth === 2 || depth ===
                     <slot />
                 </div>
                 <div class="hidden lg:block w-40 relative">
-                    {hasTableOfContents && <TableOfContents headings={headings} />}
+                    {hasTableOfContents && <TableOfContents headings={headings} locale={locale} />}
                 </div>
             </main>
-            <Footer />
+            <Footer locale={locale} />
         </div>
-        <ReadingProgress />
-        <CodeBlockCopy />
+        <ReadingProgress locale={locale} />
+        <CodeBlockCopy locale={locale} />
     </body>
 </html>

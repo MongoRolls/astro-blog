@@ -1,0 +1,118 @@
+import type { Locale } from './config'
+
+const messages = {
+  'zh-CN': {
+    nav: {
+      post: '文章',
+      blog: '博客',
+      tags: '标签',
+      about: '关于',
+      home: '返回首页',
+      openMenu: '打开菜单',
+      closeMenu: '关闭菜单',
+    },
+    language: {
+      switchTo: '切换到 English',
+      unavailable: '当前页面暂无英文版，前往对应的英文栏目',
+    },
+    theme: '切换主题',
+    search: {
+      button: '搜索',
+      dialog: '站内搜索',
+      placeholder: '搜索文章',
+      input: '搜索关键词',
+      close: '关闭搜索',
+      loading: '搜索中…',
+      noResults: '未找到相关结果',
+      unavailable: '搜索暂时不可用',
+      resultCount: (count: number) => `找到 ${count} 条结果`,
+    },
+    pagination: {
+      label: '分页导航',
+      status: (current: number, total: number) => `第 ${current} 页，共 ${total} 页`,
+      goTo: (page: number, total: number) => `前往第 ${page} 页，共 ${total} 页`,
+    },
+    post: {
+      published: '发布于',
+      updated: '更新于',
+      author: '作者',
+      minutesRead: '分钟阅读',
+      readPost: '阅读全文',
+      readMore: '继续阅读',
+      share: '分享',
+      copyLink: '复制链接',
+      copied: '已复制',
+      copyFailed: '复制失败',
+      coverAlt: (title: string) => `${title} - MongoRolls 技术博客文章封面`,
+    },
+    common: {
+      content: '目录',
+      backToTop: '回到顶部',
+      visits: '访问量：',
+      commentsUnavailable: '评论区暂时无法加载，请稍后重试。',
+      allRightsReserved: '版权所有。',
+      codeCopy: '复制代码',
+      codeCopied: '已复制',
+      codeCopyFailed: '复制失败',
+    },
+  },
+  'en': {
+    nav: {
+      post: 'Posts',
+      blog: 'Blog',
+      tags: 'Tags',
+      about: 'About',
+      home: 'Back to home',
+      openMenu: 'Open menu',
+      closeMenu: 'Close menu',
+    },
+    language: {
+      switchTo: '切换到中文',
+      unavailable: 'This page is not available in Chinese. Go to the corresponding Chinese section.',
+    },
+    theme: 'Toggle theme',
+    search: {
+      button: 'Search',
+      dialog: 'Site search',
+      placeholder: 'Search posts',
+      input: 'Search keywords',
+      close: 'Close search',
+      loading: 'Searching…',
+      noResults: 'No results found',
+      unavailable: 'Search is temporarily unavailable',
+      resultCount: (count: number) => `${count} result${count === 1 ? '' : 's'} found`,
+    },
+    pagination: {
+      label: 'Pagination',
+      status: (current: number, total: number) => `Page ${current} of ${total}`,
+      goTo: (page: number, total: number) => `Go to page ${page} of ${total}`,
+    },
+    post: {
+      published: 'Published',
+      updated: 'Updated',
+      author: 'Author',
+      minutesRead: 'min read',
+      readPost: 'Read post',
+      readMore: 'Read more',
+      share: 'Share',
+      copyLink: 'Copy link',
+      copied: 'Copied',
+      copyFailed: 'Copy failed',
+      coverAlt: (title: string) => `${title} — MongoRolls blog post cover`,
+    },
+    common: {
+      content: 'Contents',
+      backToTop: 'Back to top',
+      visits: 'Views: ',
+      commentsUnavailable: 'Comments are temporarily unavailable. Please try again later.',
+      allRightsReserved: 'All rights reserved.',
+      codeCopy: 'Copy code',
+      codeCopied: 'Copied',
+      codeCopyFailed: 'Copy failed',
+    },
+  },
+} as const
+
+export function useTranslations(locale: Locale) {
+  return messages[locale]
+}

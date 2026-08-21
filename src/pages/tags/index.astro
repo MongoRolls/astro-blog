@@ -1,24 +1,29 @@
 ---
+import type { Locale } from '../../i18n/config'
+import { defaultLocale, localizedPath } from '../../i18n/config'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getAllTags, getPublishedBlogPosts } from '../../utils/data-utils'
 
-const posts = await getPublishedBlogPosts()
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const posts = await getPublishedBlogPosts(locale)
 const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
 
 ---
 
 <BaseLayout
-  title="标签"
-  description="按标签浏览 MongoRolls 博客中的前端、工程化与思考类文章。"
+  locale={locale}
+  title={locale === 'zh-CN' ? '标签' : 'Tags'}
+  description={locale === 'zh-CN' ? '按标签浏览 MongoRolls 博客中的前端、工程化与思考类文章。' : 'Browse MongoRolls blog posts by topic.'}
 >
     <div class="tags-container">
         <h1 class="tags-title">Tags</h1>
         <div class="tags-description">
-            标签占比可视化
+            {locale === 'zh-CN' ? '标签占比可视化' : 'Topic distribution'}
         </div>
 
         <div class="chart-section">
-            <div class="tag-distribution" aria-label="文章标签分布">
+            <div class="tag-distribution" aria-label={locale === 'zh-CN' ? '文章标签分布' : 'Post tag distribution'}>
                 {tags.map(tag => (
                     <div class="tag-distribution-item">
                         <div class="tag-distribution-label">
@@ -32,18 +37,18 @@ const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
                 ))}
             </div>
             <div class="chart-info">
-                <p>总共 <span class="highlight">{posts.length}</span> 篇文章，分布在 <span class="highlight">{tags.length}</span> 个标签中</p>
+                <p>{locale === 'zh-CN' ? '总共' : 'A total of'} <span class="highlight">{posts.length}</span> {locale === 'zh-CN' ? '篇文章，分布在' : `post${posts.length === 1 ? '' : 's'} across`} <span class="highlight">{tags.length}</span> {locale === 'zh-CN' ? '个标签中' : `tag${tags.length === 1 ? '' : 's'}`}</p>
             </div>
         </div>
 
         <div class="divider"></div>
 
         <!-- 标签列表 -->
-        <h2 class="section-title">标签列表</h2>
+        <h2 class="section-title">{locale === 'zh-CN' ? '标签列表' : 'All tags'}</h2>
         <div class="tags-list">
             {tags.map(tag => (
                 <div class="tag-item">
-                    <a href={`/tags/${tag.id}`} class="tag-link">
+                    <a href={localizedPath(locale, `/tags/${tag.id}/`)} class="tag-link">
                         <span class="tag-name">{`# ${tag.name}`}</span>
                         <span class="tag-count">{tag.value}</span>
                     </a>
@@ -53,7 +58,7 @@ const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
 
         {tags.length === 0 && (
             <div class="empty-state">
-                <p>暂无标签</p>
+                <p>{locale === 'zh-CN' ? '暂无标签' : 'No tags yet'}</p>
             </div>
         )}
     </div>

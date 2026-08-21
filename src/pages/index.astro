@@ -1,40 +1,47 @@
 ---
+import type { Locale } from '../i18n/config'
 import heroCover from '../assets/blog-cover.webp'
 import ArticleCarousel from '../components/ArticleCarousel.astro'
 import Button from '../components/Button.astro'
 import FormattedDate from '../components/FormattedDate.astro'
 import PostPreview from '../components/PostPreview.astro'
 import { getHeroImageSrc } from '../config/image'
-import siteConfig from '../data/site-config'
+import { getSiteConfig } from '../data/site-config'
+import { defaultLocale, localizedPath } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPublishedBlogPosts } from '../utils/data-utils'
+import { getPostUrl, getPublishedBlogPosts } from '../utils/data-utils'
 
-const posts = await getPublishedBlogPosts()
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const siteConfig = getSiteConfig(locale)
+const posts = await getPublishedBlogPosts(locale)
 const featuredPosts = posts.filter(({ data }) => data.isFeatured)
 const carouselPosts = posts.slice(0, 4)
 
 const heroData = {
-    title: 'Hi There & Welcome to My Blog',
-    text: '在这里我会分享各类技术问题&有趣的算法&生活分享， 欢迎你阅读这些文章，并希望这些文章对你有所启发',
+    title: locale === 'zh-CN' ? '你好，欢迎来到我的博客' : 'Hi there, welcome to my blog',
+    text: locale === 'zh-CN'
+        ? '在这里我会分享技术问题、工程实践、算法与生活思考。欢迎阅读，希望这些文章能给你带来启发。'
+        : 'I write about frontend engineering, web tooling, AI, algorithms, and the occasional personal reflection. I hope you find something useful here.',
     image: {
         src: getHeroImageSrc(heroCover.src),
-        alt: '博客封面图',
+        alt: locale === 'zh-CN' ? '博客封面图' : 'Blog cover',
     },
     actions: [
         {
-            text: '👋 About Me',
-            href: '/about',
+            text: locale === 'zh-CN' ? '👋 关于我' : '👋 About me',
+            href: localizedPath(locale, '/about/'),
         },
         {
-            text: '👀 Markdown Style',
-            href: '/style',
+            text: locale === 'zh-CN' ? '👀 Markdown 样式' : '👀 Markdown style',
+            href: localizedPath(locale, '/style/'),
         },
     ],
 }
 
 ---
 
-<BaseLayout description={siteConfig.description} image={siteConfig.image} title="前端技术博客">
+<BaseLayout locale={locale} description={siteConfig.description} image={siteConfig.image} title={locale === 'zh-CN' ? '前端技术博客' : 'Frontend Engineering Blog'}>
 
     <section class="hero-section w-full mb-8 sm:mb-16">
         {heroData.title && (
@@ -67,27 +74,27 @@ const heroData = {
     </section>
 
     <hr class="my-8 border-dashed border-main" />
-    <ArticleCarousel posts={carouselPosts} />
+    <ArticleCarousel posts={carouselPosts} locale={locale} />
     <hr class="my-8 border-dashed border-main" />
 
 
 
     <section class="w-full mb-8 ">
-        <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">Posts</h2>
+        <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">{locale === 'zh-CN' ? '文章' : 'Posts'}</h2>
         <div class="flex flex-col space-y-4">
             {posts.slice(0, 8).map((post) => {
                 return (
                     <div class="!mt-3">
                         <span class="pr-5 italic font-serif inline-block w-32 text-gray-500">
-                            <FormattedDate format="iso" date={post.data.publishDate} />
+                            <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
                         </span>
-                        <a class="post-link" href={`/blog/${post.id}`}>{post.data.title}</a>
+                        <a class="post-link" href={getPostUrl(post)}>{post.data.title}</a>
                     </div>
                 )
             })}
         </div>
         <div class="mt-8">
-            <a class="read-more-link font-serif" href="/post">Read More →</a>
+            <a class="read-more-link font-serif" href={localizedPath(locale, '/post/')}>{locale === 'zh-CN' ? '阅读更多' : 'Read more'} →</a>
         </div>
         <hr class="my-8 border-dashed border-main" />
     </section>
@@ -95,15 +102,15 @@ const heroData = {
     {
         featuredPosts?.length > 0 && (
             <div class="mb-16 sm:mb-24 mt-12">
-                <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">Latest posts</h2>
+                <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">{locale === 'zh-CN' ? '精选文章' : 'Featured posts'}</h2>
                 <div class="flex flex-col gap-10 sm:gap-12">
                     {featuredPosts.map(post => (
-                        <PostPreview post={post} headingLevel="h3" />
+                        <PostPreview post={post} headingLevel="h3" locale={locale} />
                     ))}
                 </div>
 
                 <div class="mt-12 sm:mt-16">
-                    <Button href="/blog">View All Posts</Button>
+                    <Button href={localizedPath(locale, '/blog/')}>{locale === 'zh-CN' ? '查看全部文章' : 'View all posts'}</Button>
                 </div>
             </div>
         )

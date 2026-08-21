@@ -1,6 +1,13 @@
 ---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 import ArrowRight from '../icons/ArrowRight.astro'
 import IconButton from './IconButton.astro'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 ---
 
 <div class="reading-progress" aria-hidden="true">
@@ -11,7 +18,7 @@ import IconButton from './IconButton.astro'
   class="back-to-top"
   data-back-to-top
   type="button"
-  aria-label="回到顶部"
+  aria-label={t.common.backToTop}
   aria-hidden="true"
   tabindex="-1"
 >

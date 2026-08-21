@@ -1,14 +1,16 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro'
 import type { CollectionEntry } from 'astro:content'
+import type { Locale } from '../../../i18n/config'
 import Pagination from '../../../components/Pagination.astro'
 import PostPreview from '../../../components/PostPreview.astro'
 import siteConfig from '../../../data/site-config'
+import { alternateLocale, defaultLocale, localizedPath, stripLocalePrefix } from '../../../i18n/config'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { getAllTags, getPostsByTag, getPublishedBlogPosts } from '../../../utils/data-utils'
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = await getPublishedBlogPosts()
+    const posts = await getPublishedBlogPosts(defaultLocale)
     const tags = getAllTags(posts)
 
     return tags.flatMap((tag) => {
@@ -21,15 +23,28 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     })
 }
 
-type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string }
+type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string, locale?: Locale }
 
-const { page, tagName } = Astro.props
+const { page, tagName, locale = defaultLocale } = Astro.props
 const blog = page.data
+const targetLocale = alternateLocale(locale)
+const tagId = Astro.params.id ?? ''
+const targetPosts = getPostsByTag(await getPublishedBlogPosts(targetLocale), tagId)
+const targetLastPage = Math.ceil(targetPosts.length / (siteConfig.postsPerPage || 4))
+const alternateUrls = {
+    [locale]: page.url.current,
+    ...(targetLastPage > 0 && page.currentPage <= targetLastPage
+        ? { [targetLocale]: localizedPath(targetLocale, `${stripLocalePrefix(page.url.current).replace(/\/$/, '')}/`) }
+        : {}),
+}
 ---
 
 <BaseLayout
-  title={page.currentPage > 1 ? `${tagName} · 第 ${page.currentPage} 页` : tagName}
-  description={`标签「${tagName}」下的博客文章。`}
+  locale={locale}
+  alternateUrls={alternateUrls}
+  languageFallbackPath="/tags/"
+  title={page.currentPage > 1 ? (locale === 'zh-CN' ? `${tagName} · 第 ${page.currentPage} 页` : `${tagName} · Page ${page.currentPage}`) : tagName}
+  description={locale === 'zh-CN' ? `标签「${tagName}」下的博客文章。` : `Blog posts tagged “${tagName}”.`}
   prevUrl={page.url.prev}
   nextUrl={page.url.next}
 >
@@ -37,9 +52,9 @@ const blog = page.data
 
     <div class="flex flex-col gap-10 sm:gap-12">
         {blog.map(post => (
-            <PostPreview post={post} />
+            <PostPreview post={post} locale={locale} />
         ))}
     </div>
 
-    <Pagination page={page} class="my-16 sm:my-24" />
+    <Pagination page={page} locale={locale} class="my-16 sm:my-24" />
 </BaseLayout>

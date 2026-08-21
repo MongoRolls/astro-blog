@@ -1,12 +1,15 @@
 ---
 import type { Friend } from '../data/site-config'
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
 import FloatingCard from './FloatingCard.astro'
 
 interface Props {
     friends: Friend[]
+    locale?: Locale
 }
 
-const { friends } = Astro.props;
+const { friends, locale = defaultLocale } = Astro.props;
 
 ---
 
@@ -18,5 +21,5 @@ const { friends } = Astro.props;
             <h3 class="text-lg font-bold">{friend.name}</h3>
         </div>
     ))}
-    <FloatingCard />
+    <FloatingCard locale={locale} />
 </div>

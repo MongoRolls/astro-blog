@@ -1,3 +1,6 @@
+import type { Locale } from '../i18n/config'
+import { localizedPath } from '../i18n/config'
+
 export interface Image {
   src: string
   alt?: string
@@ -123,6 +126,56 @@ const siteConfig: SiteConfig = {
       github: 'https://github.com/dbinggo',
     },
   ] as Friend[],
+}
+
+const localizedMetadata = {
+  'zh-CN': {
+    subtitle: '一名前端工程师',
+    description: 'MongoRolls 的前端技术博客，记录 JavaScript、TypeScript、React、工程化实践与个人思考。',
+    language: 'zh-CN',
+    locale: 'zh_CN',
+    keywords: ['前端开发', '技术博客', 'JavaScript', 'React', 'Vue', 'Node.js'],
+    imageAlt: 'MongoRolls 技术博客',
+  },
+  'en': {
+    subtitle: 'a Frontend Engineer',
+    description: 'MongoRolls is a frontend engineering blog about JavaScript, TypeScript, React, web tooling, AI, and personal notes.',
+    language: 'en',
+    locale: 'en_US',
+    keywords: ['frontend development', 'engineering blog', 'JavaScript', 'TypeScript', 'React', 'web development'],
+    imageAlt: 'MongoRolls frontend engineering blog',
+  },
+} as const satisfies Record<Locale, {
+  subtitle: string
+  description: string
+  language: string
+  locale: string
+  keywords: string[]
+  imageAlt: string
+}>
+
+export function getSiteConfig(locale: Locale): SiteConfig {
+  const metadata = localizedMetadata[locale]
+  return {
+    ...siteConfig,
+    subtitle: metadata.subtitle,
+    description: metadata.description,
+    language: metadata.language,
+    locale: metadata.locale,
+    keywords: [...metadata.keywords],
+    image: siteConfig.image
+      ? { ...siteConfig.image, alt: metadata.imageAlt }
+      : undefined,
+    headerNavLinks: [
+      { text: locale === 'zh-CN' ? '文章' : 'Posts', href: localizedPath(locale, '/post/') },
+      { text: locale === 'zh-CN' ? '博客' : 'Blog', href: localizedPath(locale, '/blog/') },
+      { text: locale === 'zh-CN' ? '标签' : 'Tags', href: localizedPath(locale, '/tags/') },
+      { text: locale === 'zh-CN' ? '关于' : 'About', href: localizedPath(locale, '/about/') },
+    ],
+    socialLinks: siteConfig.socialLinks?.map(link => link.text === 'RSS'
+      ? { ...link, href: localizedPath(locale, '/rss.xml') }
+      : link),
+  }
 }
 
 export default siteConfig

@@ -1,19 +1,25 @@
 ---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
+
 interface Props {
     headings: {
         depth: number
         slug: string
         text: string
     }[]
+    locale?: Locale
 }
 
-const { headings } = Astro.props
+const { headings, locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 const toc = headings.filter(({ depth }) => depth > 1 && depth < 4)
 ---
 
 <nav data-pagefind-ignore class="toc hidden lg:block h-full">
     <div class="sticky top-24 max-h-[70vh] overflow-y-auto">
-        <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">Content</h2>
+        <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">{t.common.content}</h2>
         <ul class="space-y-1 text-xs leading-4 border-l border-gray-200 dark:border-gray-800">
         {
                 toc.map(heading => (

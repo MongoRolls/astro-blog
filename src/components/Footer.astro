@@ -1,7 +1,13 @@
 ---
-import siteConfig from '../data/site-config'
+import type { Locale } from '../i18n/config'
+import { getSiteConfig } from '../data/site-config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 
-const socialLinks = siteConfig.socialLinks || [];
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
+const socialLinks = getSiteConfig(locale).socialLinks || [];
 ---
 
 <footer data-pagefind-ignore class="w-full max-w-[674px] mx-auto pt-12 pb-10 sm:pt-24 sm:pb-14">
@@ -28,7 +34,7 @@ const socialLinks = siteConfig.socialLinks || [];
         )
     }
         <p class="text-sm md:text-left max-md:text-center">
-            &copy; {new Date().getFullYear()}&nbsp; All rights reserved.
+            &copy; {new Date().getFullYear()}&nbsp; {t.common.allRightsReserved}
         </p>
     </div>
 </footer>

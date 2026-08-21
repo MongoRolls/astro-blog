@@ -1,0 +1,88 @@
+---
+title: How AI Text Watermarks Hide in Plain Text
+excerpt: Text has no pixels or persistent metadata. AI watermarks live in the statistical pattern created by a model's repeated word choices.
+publishDate: '2026-08-21'
+author: MongoRolls
+lang: en
+route: 26-08-21-ai-text-watermarking
+translationKey: 26-08-21-ai-text-watermarking
+tags:
+  - AI
+  - technology
+seo:
+  description: "How AI text watermarks are written, detected, weakened by editing, and interpreted without overstating what a match can prove."
+  pageType: article
+---
+
+> This article adapts and reorganizes James Padolsey’s interactive guide, [How AI text watermarking works: a visual guide](https://declaude.org/watermarking/). Its diagrams and parameters explain the idea; they do not describe any vendor’s production implementation.
+
+How can plain text carry a watermark?
+
+Text has no pixels in which to hide data, and copying it does not preserve file metadata. Every character remains visible. The answer is that a watermark is not hidden in the characters themselves. It is encoded in the model’s repeated decisions about **which token to choose next**.
+
+Google began applying SynthID to Gemini-generated text in 2024. New Claude models also add text watermarks at the model level. These signals are invisible to readers, survive copy and paste, and are unrelated to the zero-width-character tricks often discussed online.
+
+## Language models are already rolling weighted dice
+
+A language model does not compose an entire sentence before emitting it. At every step it assigns probabilities to possible next tokens and samples from those candidates.
+
+Consider this sentence:
+
+> The result of this study is highly ____.
+
+“Important,” “significant,” “notable,” and “promising” could all fit, although the model will not consider them equally likely. Generation is therefore much like rolling a weighted die: likely words occupy larger faces, but the outcome is not always fixed.
+
+A long article contains hundreds or thousands of these forks. At many of them, several choices preserve the meaning. That freedom is where a watermark can be written.
+
+## A secret key gently nudges the die
+
+One classic technique uses a secret key to divide candidate tokens into temporary “green” and “red” groups, then slightly raises the probability of the green group.
+
+The adjustment must be subtle. Red tokens remain possible, and the meaning and reading experience should not noticeably change. No individual word proves that a watermark exists. Across enough text, however, green tokens appear a little more often than chance predicts.
+
+Crucially, a token does not belong permanently to one group. The system usually combines the secret key with several preceding tokens to recalculate the partition. “Significant” might be green after one context and red after another. The accumulated signal is a weak statistical preference across the entire document.
+
+Implementations differ. The classic KGW method biases candidate probabilities; Google’s SynthID-Text uses more elaborate sampling and scoring; other designs let a key control the random number generator. They share one principle: **the watermark lives in a statistical pattern of word choices, not in an attached hidden label.**
+
+## Detection recounts tokens instead of judging style
+
+A detector with the same key and rules can replay the grouping decision at every position in a text.
+
+Without a watermark—or with the wrong key—the share of green tokens should resemble random chance. With two groups, that is roughly equivalent to a series of fair coin flips. If the correct key reveals an unusually persistent surplus of green tokens across a long document, the detector can report statistical evidence of a watermark.
+
+This creates two important limits:
+
+1. **Short text is difficult to classify.** A small deviation across a few dozen words may be ordinary luck. Statistical confidence needs length.
+2. **Constrained text carries less signal.** Code, quotations, and fixed factual lists offer fewer reasonable choices, leaving less room for a model to encode a pattern.
+
+Padolsey’s guide uses an intentionally exaggerated teaching example: moving the green share from an expected 50% to about 55% across 1,500 words can become statistically meaningful. Real production parameters are private, so that number is not a detection threshold for Claude or Gemini.
+
+## Editing dilutes a watermark but may not erase it immediately
+
+When a token’s group depends on its recent context, detection relies on stretches of wording that remain unchanged.
+
+Changing one word disrupts the evidence at that position and in the short window that follows it. The rest of the untouched text can still be counted. Correcting typos, adjusting a few phrases, or applying a light edit will usually weaken the signal rather than make it vanish.
+
+Research reports a similar pattern: paraphrasing dilutes statistical watermarks, but a detector may still accumulate enough evidence when a long text preserves many original passages. Rebuilding an article from its meaning or outline, without retaining the original sequences of words, is much more likely to push the signal toward randomness.
+
+There is an important boundary to these claims. Most public evidence comes from papers and open implementations. Anthropic has not published the full algorithm and parameters used in Claude’s production systems, so outside researchers cannot reproduce them exactly.
+
+## What does a detected watermark actually prove?
+
+Detection results are easy to overstate.
+
+- **Only a party with the key can perform genuine watermark detection.** A school, editor, or generic “AI detector” cannot reproduce a vendor’s keyed test unless the vendor provides an official service.
+- **Text watermarking is not style detection.** Tools such as GPTZero estimate origin from writing patterns; watermark detectors look for a signal deliberately inserted during generation.
+- **A positive result shows that a model processed the text, not necessarily that it originated the ideas.** Human writing sent through a model for translation or editing may acquire a watermark in the output.
+- **A negative result does not prove that AI was absent.** The model might not support watermarking, the text might be too short, or later edits might have removed too much of the signal.
+- **The result is probabilistic, not an identity test.** A watermark should not encode a specific user, organization, or conversation, and a match alone does not establish plagiarism or misconduct.
+
+Text watermarking is best understood as one source signal indicating that content passed through a particular class of generation system. It can improve transparency, but it cannot replace context, evidence of the creative process, or careful human judgment.
+
+## References
+
+- James Padolsey, [How AI text watermarking works: a visual guide](https://declaude.org/watermarking/)
+- Google DeepMind, [Watermarking AI-generated text and video with SynthID](https://deepmind.google/blog/watermarking-ai-generated-text-and-video-with-synthid/)
+- Kirchenbauer et al., [A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226) (ICML 2023)
+- Kirchenbauer et al., [On the Reliability of Watermarks for Large Language Models](https://arxiv.org/abs/2306.04634) (ICLR 2024)
+- Anthropic, [How Claude marks AI-generated content](https://support.claude.com/en/articles/16266773-how-claude-marks-ai-generated-content)

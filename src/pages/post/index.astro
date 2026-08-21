@@ -1,26 +1,31 @@
 ---
+import type { Locale } from '../../i18n/config'
 import FormattedDate from '../../components/FormattedDate.astro'
+import { defaultLocale } from '../../i18n/config'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getPublishedBlogPosts } from '../../utils/data-utils'
+import { getPostUrl, getPublishedBlogPosts } from '../../utils/data-utils'
 
-const sortedBlogPosts = await getPublishedBlogPosts()
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const sortedBlogPosts = await getPublishedBlogPosts(locale)
 ---
 
 <BaseLayout
-  title="文章列表"
-  description="按时间排列的全部博文，记录知识与思考沿途碰撞的痕迹。"
+  locale={locale}
+  title={locale === 'zh-CN' ? '文章列表' : 'All Posts'}
+  description={locale === 'zh-CN' ? '按时间排列的全部博文，记录知识与思考沿途碰撞的痕迹。' : 'All posts in chronological order, documenting discoveries in technology and thought.'}
 >
     <h1 class="text-xl text-center leading-tight font-serif font-bold sm:text-3xl mb-3">Posts</h1>
 
     <h2 class="text-lg text-center leading-tight font-serif font-medium sm:text-xl my-8">
-        记录知识与思考沿途碰撞的痕迹
+        {locale === 'zh-CN' ? '记录知识与思考沿途碰撞的痕迹' : 'Notes from the intersection of knowledge and thought'}
     </h2>
     <div class="flex flex-col space-y-8 mx-auto max-w-2xl">
         {sortedBlogPosts.map((post) => {
             return (
                 <div class="!mt-4">
-                    <span class="pr-5 font-serif inline-block w-32"><FormattedDate format="iso" date={post.data.publishDate} /></span>
-                    <a class="post-link" href={`/blog/${post.id}`}>{post.data.title}</a>
+                    <span class="pr-5 font-serif inline-block w-32"><FormattedDate format="iso" date={post.data.publishDate} locale={locale} /></span>
+                    <a class="post-link" href={getPostUrl(post)}>{post.data.title}</a>
                 </div>
             )
         })}

@@ -1,0 +1,67 @@
+---
+import type { Locale } from '../i18n/config'
+import { alternateLocale, localeInfo } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
+
+type Props = {
+  locale: Locale
+  href: string
+  exactMatch?: boolean
+}
+
+const { locale, href, exactMatch = true } = Astro.props
+const targetLocale = alternateLocale(locale)
+const t = useTranslations(locale)
+const label = exactMatch ? t.language.switchTo : t.language.unavailable
+---
+
+<a
+  href={href}
+  class="language-toggle"
+  aria-label={label}
+  title={label}
+  hreflang={localeInfo[targetLocale].htmlLang}
+  data-astro-reload
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9"></circle>
+    <path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3Z"></path>
+  </svg>
+  <span>{localeInfo[targetLocale].shortLabel}</span>
+</a>
+
+<style>
+  .language-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-width: 2.75rem;
+    height: 2rem;
+    border-radius: 999px;
+    color: rgb(var(--color-text-main));
+    font-family: serif;
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: color 150ms ease, background-color 150ms ease;
+  }
+
+  .language-toggle:hover,
+  .language-toggle:focus-visible {
+    color: rgb(var(--color-primary));
+    background: rgb(var(--color-text-main) / 0.08);
+  }
+
+  .language-toggle:focus-visible {
+    outline: 2px solid rgb(var(--color-primary));
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+</style>

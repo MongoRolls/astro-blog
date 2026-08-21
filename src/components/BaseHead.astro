@@ -1,5 +1,7 @@
 ---
-import siteConfig from '../data/site-config'
+import type { Locale } from '../i18n/config'
+import { getSiteConfig } from '../data/site-config'
+import { defaultLocale, localeInfo, localizedPath } from '../i18n/config'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/newsreader'
 import '@fontsource/fira-code/400.css'
@@ -21,21 +23,26 @@ export type Props = {
     robots?: string
     prevUrl?: string
     nextUrl?: string
+    locale?: Locale
+    alternateUrls?: Partial<Record<Locale, string>>
 }
 
 const {
-    description = siteConfig.description,
-    image = siteConfig.image,
+    locale = defaultLocale,
     pageType = 'website',
-    keywords = siteConfig.keywords ?? [],
-    author = siteConfig.author,
     publishDate,
     updatedDate,
     tags = [],
     robots,
     prevUrl,
     nextUrl,
+    alternateUrls,
 } = Astro.props
+const siteConfig = getSiteConfig(locale)
+const description = Astro.props.description ?? siteConfig.description
+const image = Astro.props.image ?? siteConfig.image
+const keywords = Astro.props.keywords ?? siteConfig.keywords ?? []
+const author = Astro.props.author ?? siteConfig.author
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ')
 const resolvedImage = image?.src
     ? {
@@ -62,6 +69,7 @@ function toAbsoluteURL(path: string) {
 
 const canonical = formatCanonicalURL(canonicalURL)
 const indexable = !robots?.includes('noindex')
+const alternateEntries = Object.entries(alternateUrls ?? {}) as [Locale, string][]
 const personSchema = {
     '@type': 'Person',
     'name': author || siteConfig.author,
@@ -116,10 +124,17 @@ function toJsonLd(data: unknown) {
  <!-- ico 更换后记得强制刷新不然会有缓存 -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <link rel="sitemap" href="/sitemap-index.xml" />
-<link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS`} href={new URL('/rss.xml', Astro.site).toString()} />
+<link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS`} href={new URL(localizedPath(locale, '/rss.xml'), Astro.site).toString()} />
+<link rel="alternate" type="text/plain" title={`${siteConfig.title} LLM index`} href={new URL(localizedPath(locale, '/llms.txt'), Astro.site).toString()} />
 
 <!-- Page Metadata -->
 {indexable && <link rel="canonical" href={canonical} />}
+{indexable && alternateEntries.map(([alternateLocale, url]) => (
+  <link rel="alternate" hreflang={localeInfo[alternateLocale].htmlLang} href={toAbsoluteURL(url)} />
+))}
+{indexable && alternateUrls?.[defaultLocale] && (
+  <link rel="alternate" hreflang="x-default" href={toAbsoluteURL(alternateUrls[defaultLocale])} />
+)}
 {prevUrl && <link rel="prev" href={toAbsoluteURL(prevUrl)} />}
 {nextUrl && <link rel="next" href={toAbsoluteURL(nextUrl)} />}
 <meta name="description" content={description} />
@@ -135,6 +150,9 @@ function toJsonLd(data: unknown) {
 <meta property="og:description" content={description} />
 <meta property="og:site_name" content={siteConfig.title} />
 <meta property="og:locale" content={siteConfig.locale || 'zh_CN'} />
+{alternateEntries.filter(([alternateLocale]) => alternateLocale !== locale).map(([alternateLocale]) => (
+  <meta property="og:locale:alternate" content={localeInfo[alternateLocale].ogLocale} />
+))}
 {resolvedImage?.src && <meta property="og:image" content={resolvedImage.src} />}
 {resolvedImage?.src && <meta property="og:image:width" content="1200" />}
 {resolvedImage?.src && <meta property="og:image:height" content="630" />}

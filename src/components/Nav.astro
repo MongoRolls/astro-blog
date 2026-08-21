@@ -1,11 +1,18 @@
 ---
-import siteConfig from '../data/site-config'
+import type { Locale } from '../i18n/config'
+import { getSiteConfig } from '../data/site-config'
+import { defaultLocale, localizedPath } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 import AnimatedSignature from './AnimatedSignature.astro'
+import LanguageToggle from './LanguageToggle.astro'
 import NavLink from './NavLink.astro'
 import Search from './Search.astro'
 import ThemeToggle from './ThemeToggle.astro'
 
-const navLinks = siteConfig.headerNavLinks || [];
+type Props = { locale?: Locale, languageUrl: string, exactLanguageMatch?: boolean }
+const { locale = defaultLocale, languageUrl, exactLanguageMatch = true } = Astro.props
+const t = useTranslations(locale)
+const navLinks = getSiteConfig(locale).headerNavLinks || [];
 ---
 
 <nav data-pagefind-ignore class="nav min-h-12 py-2 mb-10 lg:mb-20 sm:min-h-14 backdrop-blur-sm bg-gray-300/30 dark:bg-gray-800/30 w-full">
@@ -16,15 +23,17 @@ const navLinks = siteConfig.headerNavLinks || [];
                     <div class="flex items-center">
                         <button
                           class="menu-toggle w-8 h-8 flex items-center justify-center relative z-30 md:hidden mr-3"
-                          aria-label="Open Menu"
+                          aria-label={t.nav.openMenu}
                           aria-expanded="false"
                           aria-controls="menu-items"
+                          data-label-open={t.nav.openMenu}
+                          data-label-close={t.nav.closeMenu}
                         >
                             <span class="menu-toggle-icon w-6 h-px relative bg-current" />
                         </button>
 
                         <ul id="menu-items" class="menu flex items-center gap-6">
-                            <li class="flex items-center"><a href="/" aria-label="返回首页">
+                            <li class="flex items-center"><a href={localizedPath(locale, '/')} aria-label={t.nav.home}>
                             {/* 红色 bb3a46 */}
                             <AnimatedSignature
                               width="117px"
@@ -49,9 +58,10 @@ const navLinks = siteConfig.headerNavLinks || [];
                         </ul>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8"><Search /></div>
-                        <div class="w-8 h-8"><ThemeToggle /></div>
+                    <div class="flex items-center gap-1 sm:gap-2">
+                        <div class="w-8 h-8"><Search locale={locale} /></div>
+                        <LanguageToggle locale={locale} href={languageUrl} exactMatch={exactLanguageMatch} />
+                        <div class="w-8 h-8"><ThemeToggle locale={locale} /></div>
                     </div>
                 </div>
             </div>
@@ -133,9 +143,11 @@ function initNavigation() {
     return
 
   const setOpen = (isOpen: boolean) => {
+    const openLabel = toggle.dataset.labelOpen ?? 'Open menu'
+    const closeLabel = toggle.dataset.labelClose ?? 'Close menu'
     toggle.classList.toggle('is-active', isOpen)
     toggle.setAttribute('aria-expanded', String(isOpen))
-    toggle.setAttribute('aria-label', isOpen ? 'Close Menu' : 'Open Menu')
+    toggle.setAttribute('aria-label', isOpen ? closeLabel : openLabel)
     menu.classList.toggle('is-visible', isOpen)
   }
 

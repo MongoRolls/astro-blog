@@ -3,6 +3,8 @@ import { glob } from 'astro/loaders'
 import { z } from 'astro/zod'
 import { defineCollection } from 'astro:content'
 
+const localeSchema = z.enum(['zh-CN', 'en'])
+
 const seoSchema = z.object({
   title: z.string().min(5).max(120).optional(),
   description: z.string().min(5).max(160).optional(),
@@ -27,10 +29,13 @@ const blog = defineCollection({
     author: z.string().default('MongoRolls'),
     image: z.string().optional(),
     slug: z.string().optional(),
+    route: z.string().optional(),
     draft: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
     tags: z.array(z.string()).default([]),
     keywords: z.array(z.string()).optional(),
+    lang: localeSchema.default('zh-CN'),
+    translationKey: z.string().optional(),
     seo: seoSchema.optional(),
   }),
 })
@@ -40,6 +45,10 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     draft: z.boolean().default(false),
+    lang: localeSchema.default('zh-CN'),
+    slug: z.string().optional(),
+    route: z.string().optional(),
+    translationKey: z.string().optional(),
     seo: seoSchema.optional(),
   }),
 })

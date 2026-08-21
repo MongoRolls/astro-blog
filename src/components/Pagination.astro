@@ -1,33 +1,37 @@
 ---
 import type { Page } from 'astro'
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 import ArrowLeft from '../icons/ArrowLeft.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
 import IconButton from './IconButton.astro'
 
-type Props = { page: Page<unknown>, class?: string }
+type Props = { page: Page<unknown>, class?: string, locale?: Locale }
 
-const { page, class: className } = Astro.props
+const { page, class: className, locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 ---
 
-<nav aria-label="Pagination" class:list={['px-12 py-2 relative text-center', className]}>
+<nav aria-label={t.pagination.label} class:list={['px-12 py-2 relative text-center', className]}>
     {
         page.url.prev && (
             <IconButton
               class="absolute left-0 top-1/2 -translate-y-1/2"
               href={page.url.prev}
-              aria-label={`Go to page ${page.currentPage - 1} of ${page.lastPage}`}
+              aria-label={t.pagination.goTo(page.currentPage - 1, page.lastPage)}
             >
                 <ArrowLeft class="w-5 h-5 fill-current" />
             </IconButton>
         )
     }
-    <span class="text-sm" aria-current="page">Page {page.currentPage} of {page.lastPage}</span>
+    <span class="text-sm" aria-current="page">{t.pagination.status(page.currentPage, page.lastPage)}</span>
     {
         page.url.next && (
             <IconButton
               class="absolute right-0 top-1/2 -translate-y-1/2"
               href={page.url.next}
-              aria-label={`Go to page ${page.currentPage + 1} of ${page.lastPage}`}
+              aria-label={t.pagination.goTo(page.currentPage + 1, page.lastPage)}
             >
                 <ArrowRight class="w-5 h-5 fill-current" />
             </IconButton>

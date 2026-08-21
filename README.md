@@ -28,6 +28,7 @@ MongoRolls的个人博客
 - 🎯 代码高亮
 - 🌈 自定义主题色
 - 🔄 平滑页面转换
+- 🌐 中文与英文双语路由、搜索和 RSS
 
 ## 技术栈
 
@@ -66,6 +67,23 @@ pnpm preview
 │   └── styles/         # 样式
 ├── astro.config.mjs    # Astro 配置
 └── package.json
+```
+
+## 双语内容
+
+中文保留现有根路径，英文页面使用 `/en/` 前缀。英文文章和独立页面分别放在：
+
+```text
+src/content/blog/en/
+src/content/pages/en/
+```
+
+英文内容需在 frontmatter 中设置 `lang: en`。使用相同的 `translationKey` 关联中英文版本；当英文文件名需要与中文文件名区分时，用 `route` 保持对外 URL 一致，例如：
+
+```yaml
+lang: en
+route: example-post
+translationKey: example-post
 ```
 
 ## License

@@ -1,11 +1,30 @@
-<button type="button" class="flex items-center justify-center w-full h-full text-main hover:text-blue-500 cursor-pointer transition-colors duration-200 mr-2" id="search-icon" aria-label="搜索">
+---
+import type { Locale } from '../i18n/config'
+import { defaultLocale, localizedPath } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
+---
+
+<button type="button" class="flex items-center justify-center w-full h-full text-main hover:text-blue-500 cursor-pointer transition-colors duration-200 mr-2" id="search-icon" aria-label={t.search.button}>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
     <circle cx="11" cy="11" r="8"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
   </svg>
 </button>
 
-<div class="hidden" id="search-box">
+<div
+  class="hidden"
+  id="search-box"
+  data-index-url={localizedPath(locale, '/search-index.json')}
+  data-loading-message={t.search.loading}
+  data-no-results-message={t.search.noResults}
+  data-unavailable-message={t.search.unavailable}
+  data-result-one={t.search.resultCount(1)}
+  data-result-template={t.search.resultCount(123).replace('123', '{count}')}
+>
   <div
     id="search-backdrop"
     class="fixed z-[1000] left-0 top-0 backdrop-blur-xl h-screen w-screen overflow-hidden flex justify-center items-start bg-zinc-900/30 dark:bg-zinc-600/30"
@@ -16,15 +35,15 @@
     id="search-container"
     role="dialog"
     aria-modal="true"
-    aria-label="站内搜索"
+    aria-label={t.search.dialog}
   >
     <div class="p-4 relative">
       <input
         id="search-input"
         class="w-full p-3 pl-10 border-2 border-blue-500 rounded-lg focus:ring-0 focus:border-blue-500 outline-none bg-white/90 dark:bg-zinc-700/90 dark:text-white"
         type="text"
-        placeholder="搜索文档"
-        aria-label="搜索关键词"
+        placeholder={t.search.placeholder}
+        aria-label={t.search.input}
         autocomplete="off"
         autofocus
       />
@@ -37,7 +56,7 @@
       <button
         id="search-close"
         class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 bg-white dark:bg-zinc-600 p-2 rounded-full"
-        aria-label="关闭搜索"
+        aria-label={t.search.close}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -72,8 +91,8 @@ interface Pagefind {
 let disposeSearch = () => {}
 let pagefindPromise: Promise<Pagefind> | undefined
 
-async function loadFallbackSearch(): Promise<Pagefind> {
-  const response = await fetch('/search-index.json')
+async function loadFallbackSearch(indexUrl: string): Promise<Pagefind> {
+  const response = await fetch(indexUrl)
   if (!response.ok)
     throw new Error(`搜索索引加载失败: ${response.status}`)
   const items = await response.json() as SearchResult[]
@@ -99,11 +118,11 @@ async function loadPagefindEngine(): Promise<Pagefind> {
   return pagefind
 }
 
-function loadPagefind() {
+function loadPagefind(indexUrl: string) {
   pagefindPromise ||= loadPagefindEngine().catch((error) => {
     if (import.meta.env.DEV)
       console.warn('Pagefind 不可用，已回退到本地搜索索引。先运行 pnpm build 可启用完整搜索。', error)
-    return loadFallbackSearch()
+    return loadFallbackSearch(indexUrl)
   })
   return pagefindPromise
 }
@@ -124,6 +143,12 @@ function initSearchFeature() {
 
   const searchResults = resultsElement
   const input = searchInput
+  const indexUrl = searchBox.dataset.indexUrl ?? '/search-index.json'
+  const loadingMessage = searchBox.dataset.loadingMessage ?? 'Searching…'
+  const noResultsMessage = searchBox.dataset.noResultsMessage ?? 'No results found'
+  const unavailableMessage = searchBox.dataset.unavailableMessage ?? 'Search is temporarily unavailable'
+  const resultOne = searchBox.dataset.resultOne ?? '1 result found'
+  const resultTemplate = searchBox.dataset.resultTemplate ?? '{count} results found'
   const controller = new AbortController()
   const listenerOptions = { signal: controller.signal }
   let previouslyFocused: HTMLElement | null = null
@@ -169,7 +194,7 @@ function initSearchFeature() {
     const fragment = document.createDocumentFragment()
     const count = document.createElement('div')
     count.className = 'text-sm text-gray-500 mb-3 px-1'
-    count.textContent = `找到 ${data.length} 条结果`
+    count.textContent = data.length === 1 ? resultOne : resultTemplate.replace('{count}', String(data.length))
     fragment.appendChild(count)
 
     data.forEach(({ excerpt, meta, url }) => {
@@ -216,17 +241,17 @@ function initSearchFeature() {
     }
 
     searchResults.setAttribute('aria-busy', 'true')
-    renderMessage('搜索中...')
+    renderMessage(loadingMessage)
 
     try {
-      const pagefind = await loadPagefind()
+      const pagefind = await loadPagefind(indexUrl)
       const search = await pagefind.search(value)
       const data = await Promise.all(search.results.map(item => item.data()))
       if (currentRequest !== requestId || input.value.trim() !== value)
         return
 
       if (data.length === 0) {
-        renderMessage('未找到相关结果')
+        renderMessage(noResultsMessage)
         return
       }
 
@@ -235,7 +260,7 @@ function initSearchFeature() {
     catch (error) {
       console.error('搜索出错:', error)
       if (currentRequest === requestId)
-        renderMessage('搜索暂时不可用', 'text-red-500')
+        renderMessage(unavailableMessage, 'text-red-500')
     }
     finally {
       if (currentRequest === requestId)

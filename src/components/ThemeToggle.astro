@@ -1,11 +1,19 @@
 ---
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 ---
+
 <button
   id="theme-toggle"
   class="theme-toggle-btn"
   type="button"
-  aria-label="切换主题"
-  title="切换主题"
+  aria-label={t.theme}
+  title={t.theme}
 >
   <!-- 太阳图标 -->
   <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">

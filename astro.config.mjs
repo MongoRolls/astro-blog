@@ -30,6 +30,13 @@ const redirectPaths = new Set(Object.keys(redirects))
 
 export default defineConfig({
   site: siteConfig.website,
+  i18n: {
+    locales: ['zh-CN', 'en'],
+    defaultLocale: 'zh-CN',
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   redirects,
   markdown: {
     processor: unified({
@@ -39,6 +46,13 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
+      i18n: {
+        defaultLocale: 'zh-CN',
+        locales: {
+          'zh-CN': 'zh-CN',
+          'en': 'en-US',
+        },
+      },
       filter: (page) => {
         const pathname = normalizePathname(page)
         if (redirectPaths.has(pathname))
@@ -49,11 +63,12 @@ export default defineConfig({
       },
       serialize(item) {
         const pathname = normalizePathname(item.url)
-        if (pathname === '/')
+        const routePathname = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
+        if (routePathname === '/')
           return { ...item, changefreq: 'weekly', priority: 1 }
-        if (pathname === '/blog' || pathname === '/post' || pathname === '/tags' || pathname === '/about')
+        if (routePathname === '/blog' || routePathname === '/post' || routePathname === '/tags' || routePathname === '/about')
           return { ...item, changefreq: 'weekly', priority: 0.8 }
-        if (pathname.startsWith('/blog/'))
+        if (routePathname.startsWith('/blog/'))
           return { ...item, changefreq: 'monthly', priority: 0.7 }
         return { ...item, changefreq: 'monthly', priority: 0.5 }
       },
