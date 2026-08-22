@@ -16,76 +16,120 @@ const t = useTranslations(locale)
 <div id="tcomment" data-unavailable-message={t.common.commentsUnavailable}></div>
 
 <script>
+interface TwikooInitOptions {
+  el: string
+  emotionCDN: string
+  envId: string
+  lang: string
+}
+
 type TwikooWindow = Window & {
   twikoo?: {
-    init: (options: { el: string, emotionCDN: string, envId: string, lang: string }) => void
+    init: (options: TwikooInitOptions) => void | Promise<void>
+  }
+  __twikooComments?: {
+    init: () => void
+    dispose: () => void
   }
 }
 
+const commentsGlobal = window as TwikooWindow
 const scriptId = 'twikoo-script'
-let twikooPromise: Promise<void> | undefined
-let disposeComments = () => {}
 
-async function loadTwikoo() {
-  const twikooWindow = window as TwikooWindow
-  if (twikooWindow.twikoo)
-    return Promise.resolve()
+function createCommentsController() {
+  let twikooPromise: Promise<void> | undefined
+  let disposeObserver = () => {}
+  let mountGeneration = 0
 
-  twikooPromise ||= new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null
-    if (existingScript) {
-      existingScript.addEventListener('load', () => resolve(), { once: true })
-      existingScript.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
+  async function loadTwikoo() {
+    if (commentsGlobal.twikoo)
       return
+
+    twikooPromise ||= new Promise<void>((resolve, reject) => {
+      const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(), { once: true })
+        existingScript.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
+        if (commentsGlobal.twikoo)
+          resolve()
+        return
+      }
+
+      const script = document.createElement('script')
+      script.id = scriptId
+      script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0'
+      script.addEventListener('load', () => resolve(), { once: true })
+      script.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
+      document.body.appendChild(script)
+    })
+
+    try {
+      await twikooPromise
+    }
+    catch (error) {
+      twikooPromise = undefined
+      throw error
     }
 
-    const script = document.createElement('script')
-    script.id = scriptId
-    script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js?v=1.0.0'
-    script.addEventListener('load', () => resolve(), { once: true })
-    script.addEventListener('error', () => reject(new Error('Twikoo 加载失败')), { once: true })
-    document.body.appendChild(script)
-  })
+    if (!commentsGlobal.twikoo)
+      throw new Error('Twikoo 加载失败')
+  }
 
-  return twikooPromise.catch((error) => {
-    twikooPromise = undefined
-    throw error
-  })
-}
-
-function initComments() {
-  disposeComments()
-  const commentRoot = document.querySelector<HTMLElement>('#tcomment')
-  if (!commentRoot)
-    return
-
-  const observer = new IntersectionObserver((entries) => {
-    if (!entries.some(entry => entry.isIntersecting))
+  async function mountComments(commentRoot: HTMLElement) {
+    const generation = ++mountGeneration
+    await loadTwikoo()
+    if (generation !== mountGeneration || !commentRoot.isConnected)
       return
-    observer.disconnect()
-    void loadTwikoo()
-      .then(() => {
-        if (!commentRoot.isConnected) {
-          return
-        }
-        ;(window as TwikooWindow).twikoo?.init({
-          envId: 'https://comment.mongorolls.cn/',
-          el: '#tcomment',
-          emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
-          lang: document.documentElement.lang === 'en' ? 'en' : 'zh-CN',
-        })
-      })
-      .catch((error) => {
+
+    const twikoo = commentsGlobal.twikoo
+    if (!twikoo)
+      throw new Error('Twikoo 加载失败')
+
+    await twikoo.init({
+      envId: 'https://comment.mongorolls.cn/',
+      el: '#tcomment',
+      emotionCDN: 'https://mongorolls.cn/owo.json?v=1.0.0',
+      lang: document.documentElement.lang === 'en' ? 'en' : 'zh-CN',
+    })
+  }
+
+  function init() {
+    dispose()
+    const commentRoot = document.querySelector<HTMLElement>('#tcomment')
+    if (!commentRoot)
+      return
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting))
+        return
+      observer.disconnect()
+      void mountComments(commentRoot).catch((error) => {
         console.warn('评论区加载失败:', error)
+        if (!commentRoot.isConnected)
+          return
         commentRoot.setAttribute('role', 'status')
         commentRoot.textContent = commentRoot.dataset.unavailableMessage ?? 'Comments are temporarily unavailable.'
       })
-  }, { rootMargin: '400px 0px' })
+    }, { rootMargin: '400px 0px' })
 
-  observer.observe(commentRoot)
-  disposeComments = () => observer.disconnect()
+    observer.observe(commentRoot)
+    disposeObserver = () => observer.disconnect()
+  }
+
+  function dispose() {
+    mountGeneration++
+    disposeObserver()
+    disposeObserver = () => {}
+  }
+
+  return { init, dispose }
 }
 
-document.addEventListener('astro:page-load', initComments)
-document.addEventListener('astro:before-swap', () => disposeComments())
+if (!commentsGlobal.__twikooComments) {
+  commentsGlobal.__twikooComments = createCommentsController()
+  document.addEventListener('astro:page-load', () => commentsGlobal.__twikooComments?.init())
+  document.addEventListener('astro:before-swap', () => commentsGlobal.__twikooComments?.dispose())
+}
+
+commentsGlobal.__twikooComments.init()
 </script>
