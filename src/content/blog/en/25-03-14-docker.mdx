@@ -1,0 +1,59 @@
+---
+title: Docker
+excerpt: Docker is a container technology.
+publishDate: 2025-03-14
+author: MongoRolls
+lang: en
+route: 25-03-14-docker
+translationKey: 25-03-14-docker
+tags:
+  - tech
+---
+
+## Introduction
+
+Docker 🐳 is a container technology. It **isolates only an application's runtime environment, while containers can share the same operating system**. You can think of it as a lighter-weight *virtual machine* that uses the host operating system.
+
+For frontend projects, Docker is also easy to integrate into CI environments for development, testing, and deployment. A pipeline can contain tasks such as *Lint/Test/Security/Audit/Deploy/Artifact*, making project quality easier to control.
+
+> For example:  
+> If you use different systems such as macOS, Windows, and Linux, you only need to install Docker to run the same application on each system.  
+> Likewise, if several people need to run the project in different environments, they only need Docker to run the same application.
+
+![alt text](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/25-03-14-docker/image.png)
+
+## Concepts
+
+**1. Image**: Similar to a virtual machine image, an image is a read-only template for the Docker engine that contains a filesystem. Every application needs an environment to run in, and an image provides that environment. For example, an Ubuntu image is a template containing an Ubuntu operating-system environment. Installing Apache on that image produces an Apache image.
+
+**2. Container**: A container is similar to a lightweight sandbox. It can be viewed as a minimal Linux environment—including root privileges, process space, user space, and network space—along with the application running inside it. The Docker engine uses containers to run and isolate applications. A container is an application instance created from an image; it can be created, started, stopped, and deleted. Containers are isolated from one another and do not affect each other. _The image itself is read-only. When Docker starts a container from an image, it creates a writable layer above the image; the image remains unchanged._
+
+**3. Repository**: Similar to a code repository, an image repository is a place where Docker stores image files centrally. Note the difference from a registry: a registry stores repositories and usually contains many of them, while a repository stores images. A repository usually contains one family of images, distinguished by tags—for example, an Ubuntu repository may contain Ubuntu images for several versions such as 12.04 and 14.04.
+
+## Dockerfiles
+
+```docker
+# Use node:14-alpine as the base image
+# The alpine-tagged base image uses the minimal Alpine OS and is smaller
+FROM node:14-alpine
+
+ENV PROJECT_ENV production
+
+# Many packages change their behavior according to this environment variable
+# Webpack also uses it for build optimizations, although create-react-app
+# hard-codes the variable during its build
+# Note: this variable can sometimes cause problems
+# ENV NODE_ENV production# Set the working directory
+WORKDIR
+
+# Copy local files into the image
+COPY ..
+
+# Expose a port
+EXPOSE 3000
+
+#
+CMD ['','']
+```
+
+[Dockerfile best practices](https://shanyue.tech/op/dockerfile-practice.html#%E5%AE%B9%E5%99%A8%E5%BA%94%E8%AF%A5%E6%98%AF%E7%9F%AD%E6%9A%82%E7%9A%84)

@@ -1,0 +1,69 @@
+---
+title: TypeScript Tips
+excerpt: A few concise and practical TypeScript type tricks.
+publishDate: '2026-02-25'
+lang: en
+route: 26-02-25-typescript
+translationKey: 26-02-25-typescript
+---
+
+Here are a few commonly used TypeScript type tricks for quick reference.
+
+## Utility types
+
+`Pick` selects fields, while `Omit` excludes fields:
+
+```typescript
+interface User {
+  id: number
+  name: string
+  password: string
+}
+
+type UserPreview = Pick<User, 'id' | 'name'>
+type SafeUser = Omit<User, 'password'>
+```
+
+## `keyof` and mapped types
+
+`keyof` gets all keys of an object type, while mapped types can modify fields in bulk:
+
+```typescript
+type Optional<T> = {
+  [K in keyof T]?: T[K]
+}
+```
+
+## Conditional types and `infer`
+
+Conditional types can return different results based on the input type. `infer` is used to infer a type inside the condition:
+
+```typescript
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
+
+type Result = UnwrapPromise<Promise<string>> // string
+```
+
+## `as const`
+
+Use `as const` to preserve literal types and make properties read-only:
+
+```typescript
+const status = ['pending', 'success', 'error'] as const
+type Status = (typeof status)[number]
+```
+
+## Brand types
+
+Brand types can distinguish values that have the same underlying type but different business meanings:
+
+```typescript
+declare const __brand: unique symbol
+type Brand<B> = { readonly [__brand]: B }
+export type Branded<T, B> = T & Brand<B>
+
+type UserId = Branded<string, 'UserId'>
+type OrderId = Branded<string, 'OrderId'>
+```
+
+Further reading: [Using Branded Types in TypeScript](https://egghead.io/blog/using-branded-types-in-typescript), [Branded Types](https://www.learningtypescript.com/articles/branded-types).

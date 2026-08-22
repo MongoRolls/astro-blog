@@ -1,0 +1,71 @@
+---
+title: CSS demos
+excerpt: CSS demos
+description: CSS demos
+publishDate: 2025-06-27
+lang: en
+route: 25-06-27-demo
+translationKey: 25-06-27-demo
+---
+
+import AnimatedSignature from '../../../components/AnimatedSignature.astro';
+import Typing from '../../../components/css/typing.astro';
+import Card3d from '../../../components/css/card3d.astro';
+import Load from '../../../components/css/load.astro';
+
+## Signature animation
+
+The result:
+
+<AnimatedSignature width="150" height="150" fillColor="blue" strokeColor="blue" />
+
+Steps:
+
+1. Generate a nice handwritten image with [Signature](https://signaturely.com/online-signature/type/).
+2. Use a free online service to convert PNG to SVG.
+3. Write the code.
+
+SVG attributes:
+
+- [stroke-dasharray](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Reference/Attribute/stroke-dasharray) defines the lengths of dashes and gaps; they alternate.
+- [stroke-dashoffset](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Reference/Attribute/stroke-dashoffset) defines where the dash pattern starts.
+
+For the animation, set `dashArray` to the length of the drawn stroke, then use `dashOffset` to control the blank space at the beginning. Change `dashOffset` in keyframes to reset it and create the drawing effect.
+
+Tip: remember to get the length of the longest path.
+
+## Typewriter effect
+
+<Typing text="Hello, world!" />
+
+Steps:
+
+1. Use animation steps.
+2. Use `ch` and a monospace font.
+
+## 3D card
+
+<Card3d />
+
+Steps:
+
+1. `transform-style: preserve-3d;`
+2. `perspective`
+3. `mix-blend-mode: color-dodge;`
+4. Use JavaScript to track the mouse.
+5. `transform: rotateX, rotateY`
+
+Link: [Pokemon](https://pokemon-tcg-pocket.wiki/)
+
+## Loading animation
+
+<div style="transform: scale(0.2); width: 0px; height: 0px;">
+  <Load />
+</div>
+
+<div style="height: 160px;"></div>
+
+Steps:
+
+1. Calculate values with SCSS variables and custom functions.
+2. Use `mask`, `mask-position`, `mask-size`, and `mask-repeat`.

@@ -1,0 +1,110 @@
+---
+title: SSR
+excerpt: SSR stands for Server-Side Rendering, a technique for building dynamic web pages.
+publishDate: "2025-04-07"
+lang: en
+route: 25-04-07-ssr
+translationKey: 25-04-07-ssr
+tags:
+  - tech
+---
+
+One older project did not have Next.js at the time, so it implemented its own SSR framework.
+
+### References
+
+- [SSR blog](https://juejin.cn/post/6844903881390964744)
+- [Vite SSR](https://cn.vite.dev/guide/ssr.html)
+
+### Concept
+
+Server-Side Rendering means that the server directly generates a complete HTML page and returns it to the browser. The client receives **content that can be rendered directly**, rather than an empty page or JSON data. Unlike Client-Side Rendering (CSR), SSR performs core logic such as data requests and template assembly on the server.
+
+Next.js and Nuxt are both popular SSR frameworks.
+
+The CSR process returns simple HTML, downloads JavaScript, executes it to modify DOM nodes, and finally presents the page.
+
+SSR pre-renders the page on the server and returns complete HTML directly, so it provides a better **first-screen load**.
+
+**Advantages of SSR**
+
+- Better SEO.
+- Faster first-screen loading.
+- Performance optimization and caching, reducing client-side pressure.
+- Better compatibility . . . . . .
+
+> `react-dom/server`'s `renderToString` can directly turn a JSX component into a string.
+
+```js
+// server/index.js
+import express from "express";
+import { renderToString } from "react-dom/server";
+import Home from "./containers/Home";
+
+const app = express();
+const content = renderToString(<Home />);
+app.get("/", function (req, res) {
+  res.send(
+    `
+    <html>
+      <head>
+        <title>ssr</title>
+      </head>
+      <body>
+        <div id="root">${content}</div>
+      </body>
+    </html>
+   `
+  );
+});
+app.listen(3001, () => {
+  // console.log('listen:3001');
+});
+```
+
+### Isomorphism
+
+Isomorphism is an important SSR concept. In simple terms, the same code runs on the client and server and produces consistent results.
+
+Why introduce this concept? If our JSX code has event handlers, we discover that the output returned by `renderToString` contains no event bindings.
+
+That clearly does not work. The solution is to add a script tag to handle them.
+
+React provides the client API [**_hydrateRoot_**](https://react.dev/reference/react-dom/client/hydrateRoot) for this purpose.
+
+> A common error is a hydration error: the client and server produce different DOM nodes, which can cause mounting to fail. (This is related to React's virtual DOM and needs further verification.)
+> ~~You can add `suppressHydrationWarning` to a div to hide the warning.~~
+
+## Problems introduced by isomorphism
+
+### Routing
+
+Routing is an important issue in an isomorphic application. Both the client and server must understand and process the same routing logic to ensure that pages render correctly.
+
+React applications commonly use React Router for routing. In an SSR environment, use `StaticRouter` instead of `BrowserRouter`.
+
+### Redux
+
+![image.png](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2019/7/4/16bbc59406a49fad~tplv-t2oaga2asx-jj-mark:3024:0:0:0:q75.awebp)
+
+In an isomorphic project, connecting the store has two parts: connecting the client store and connecting the server store. Both pass the store through the `Provider` in react-redux.
+
+The server store also needs special handling; otherwise every exported instance will be the same store.
+
+### State injection
+
+Initialize the store and save the state on the global `window` object.
+
+### Data hydration and dehydration
+
+Handling asynchronous data requests…
+
+### Rendering nested routes
+
+### The Node middle layer
+
+### Server-side CSS rendering
+
+### SEO
+
+react-helmet

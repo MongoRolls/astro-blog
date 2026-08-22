@@ -1,0 +1,40 @@
+---
+title: Code Quality and Conventions
+excerpt: Code quality and conventions are an important part of frontend development. They improve development efficiency, reduce repetitive work, and raise code quality.
+publishDate: '2025-04-01'
+lang: en
+route: 25-04-01-format
+translationKey: 25-04-01-format
+tags:
+  - tech
+---
+
+## References
+
+[Enterprise code conventions, formatting, and Git commit conventions for React + TypeScript](https://juejin.cn/post/7101596844181962788)
+
+This frontend-engineering setup follows the original author's article, with changes and personal optimizations where the original versions were outdated or otherwise unsuitable.
+
+### Code formatting and syntax checks
+
+- VS Code or Cursor: standardize the frontend editor used by the team.
+- EditorConfig: standardize the default configuration for the team's VS Code editors.
+- Prettier: automatically **format code** when files are saved.
+- ESLint: **check code conventions and errors**.
+- lint-staged: check only files in the staging area to speed up ESLint checks.
+
+### Git commit conventions
+
+- Husky: listen for Git hooks and perform tasks at the corresponding hook stage.
+- pre-commit: one of the Git hooks; run `tsc` and ESLint before a commit to check syntax.
+- commit-msg: one of the Git hooks; check the commit message before a commit.
+- commitlint: check commit messages during the `pre-commit` stage of Git hooks.
+
+## Changes
+
+For ESLint and Prettier, I also tried the newer and increasingly popular **Biome**.
+
+- The speed improvement is genuinely significant.
+- It still does not support HTML, Astro, Markdown, and other formats, which is a shame.
+
+## Addendum

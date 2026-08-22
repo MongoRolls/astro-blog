@@ -1,0 +1,78 @@
+---
+title: CLIProxyAPI
+excerpt: Turn Claude Code, Codex, Gemini, and Grok CLI subscriptions into local OpenAI-, Claude-, and Gemini-compatible APIs.
+publishDate: '2026-08-17'
+author: MongoRolls
+lang: en
+route: 26-08-17-cliproxyapi
+translationKey: 26-08-17-cliproxyapi
+tags:
+  - tools
+  - ai
+  - tech
+seo:
+  description: CLIProxyAPI exposes OAuth CLI subscriptions as local compatible APIs for Cursor, Cline, and scripts.
+  pageType: article
+---
+
+In [my everyday setup](/en/blog/26-08-13-ai-tools), CC Switch solves the problem of switching providers under the same Claude Code CLI. CLIProxyAPI does the reverse: you are already signed in to a CLI subscription and want to use it as an API for Cursor, Cline, or your own scripts.
+
+Repository: [router-for-me/CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI). Manual: [help.router-for.me](https://help.router-for.me/cn/introduction/quick-start). Desktop client: [EasyCLIProxyAPI](https://github.com/router-for-me/EasyCLIProxyAPI).
+
+## What it does
+
+It starts a proxy on your machine. You sign in through each CLI's OAuth flow (Claude Code, OpenAI Codex, Google Antigravity / Gemini, Grok Build, and Kimi), and it exposes OpenAI-, Gemini-, Claude-, Codex-, and Grok-compatible endpoints. Point the client's `base_url` to the local proxy.
+
+Multiple accounts can be rotated. Upstream OpenAI-compatible services such as OpenRouter can also be configured. Streaming, tool calls, and image-and-text input are supported. The default port is **8317**.
+
+This is not the same as a reseller proxy. A reseller sells someone else's key; this runs on your machine and uses the subscription you signed into yourself.
+
+## Installation
+
+On macOS, use Homebrew. The service reads `$(brew --prefix)/etc/cliproxyapi.conf` by default. If you want to keep the configuration in your home directory, create the file first and then symlink it; a dangling symlink makes the service exit immediately:
+
+```bash
+brew install cliproxyapi
+mkdir -p ~/.cli-proxy-api
+# Prepare ~/.cli-proxy-api/config.yaml according to the official example first:
+brew_conf="$(brew --prefix)/etc/cliproxyapi.conf"
+ln -sfn "$HOME/.cli-proxy-api/config.yaml" "$brew_conf"
+brew services start cliproxyapi
+```
+
+If you would rather avoid the commands, install EasyCLIProxyAPI to start and stop the service and edit its configuration from the tray.
+
+Docker:
+
+```bash
+docker run --rm -p 8317:8317 \
+  -v /path/to/config.yaml:/CLIProxyAPI/config.yaml \
+  -v /path/to/auth-dir:/root/.cli-proxy-api \
+  -v /path/to/plugins:/CLIProxyAPI/plugins \
+  eceasy/cli-proxy-api:latest
+```
+
+Mount the plugins directory, or installed store plugins will disappear when the container restarts.
+
+Follow the OAuth flow in the official documentation; Claude, Codex, Gemini, and Grok each have their own flow. Once signed in, point the API addresses in Cursor, Cline, or OpenCode to `http://127.0.0.1:8317`.
+
+Usage statistics are no longer built in as of v6.10.0. For a dashboard, use [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper) or [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus).
+
+## How it fits with my existing tools
+
+| Need | Tool |
+| --- | --- |
+| Switch Claude Code to DeepSeek / GLM | [CC Switch](https://cc-switch.cc/) |
+| Use a subscription as an API for other clients | CLIProxyAPI |
+| Cheap access with direct connectivity from China | Official DeepSeek API |
+| Write code in a repository | Cursor / Claude Code; do not treat the proxy as an IDE |
+
+Hermes can switch providers by itself, so it does not necessarily need this layer. CLIProxyAPI is more useful when a client only accepts an OpenAI or Claude endpoint but your access is a CLI subscription.
+
+## Do not treat it as free lunch
+
+Most subscription terms are written around the “official client.” Turning an OAuth login into a generic API **may violate the terms of service**; you bear the risks of bans and rate limits. Account pools, rotation, and exposing the port to the public internet add more risk. Keep it on `127.0.0.1`, add an access key, and do not expose it bare to the internet.
+
+Quota windows still apply—the Codex 5-hour and 7-day windows, for example. A proxy does not create more quota; it only changes the entry point. Model names and channel aliases should follow the current documentation, since README version numbers for GPT, Claude, and Gemini change quickly.
+
+My use case is narrow: turn it on when official quotas are tight and I want to use an existing subscription inside a tool that only accepts a standard API. For everyday coding, using the corresponding official client is still simpler.

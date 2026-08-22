@@ -1,0 +1,79 @@
+---
+title: Hermes Agent
+excerpt: An open-source, self-hosted Agent from Nous Research. The same core runs in the CLI, desktop app, and WeChat gateway, with memory, skills, and scheduled tasks.
+publishDate: '2026-08-17'
+author: MongoRolls
+lang: en
+route: 26-08-17-hermes
+translationKey: 26-08-17-hermes
+tags:
+  - tools
+  - ai
+  - tech
+seo:
+  description: What Hermes Agent is, how it differs from Cursor and Claude Code, how to install it, and how to connect it to WeChat.
+  pageType: article
+---
+
+For everyday coding I still use [Cursor + Claude Code + Codex](/en/blog/26-08-13-ai-tools). Hermes does not replace them; it fills a different role: a process that stays resident on your machine, with a chat app as another entry point.
+
+Repository: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent). Documentation: [hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/). MIT licensed.
+
+## What it is
+
+An open-source Agent built by Nous Research. You can switch models freely—OpenRouter, OpenAI, Anthropic, DeepSeek, or a local model—with one `hermes model` command. I currently use DeepSeek, and the WeChat gateway replies through it too.
+
+The difference from Cursor and Claude Code:
+
+| | Cursor / Claude Code | Hermes |
+| --- | --- | --- |
+| Home base | Repository, editor, terminal | A resident process on the local machine |
+| Entry points | IDE / CLI | CLI, desktop app, Telegram / Discord / Slack / WeChat… |
+| Memory | Mostly per-session | Remembers preferences, environment, and lessons across sessions |
+| Reuse | Project rules / CLAUDE.md | Skills; save a difficult workflow for direct loading next time |
+
+It can search past conversations on its own, and a complex task can be turned into a skill when it is finished. Scheduled tasks can also be configured and delivered to WeChat or Telegram.
+
+## Installation
+
+macOS / Linux / WSL:
+
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+source ~/.zshrc
+hermes
+```
+
+On Windows PowerShell: `iex (irm https://hermes-agent.nousresearch.com/install.ps1)`.
+
+Run the setup wizard first:
+
+```bash
+hermes setup
+hermes model
+hermes doctor
+```
+
+If you do not want to collect a pile of API keys, use [Nous Portal](https://portal.nousresearch.com). `hermes setup --portal` connects models and some tool gateways to the subscription. I do not use that route: the model is DeepSeek and tools are enabled as needed.
+
+## How I use it
+
+```bash
+hermes              # Terminal chat
+hermes desktop      # Desktop app
+hermes gateway      # Message gateway
+```
+
+Configuration lives in `~/.hermes/config.yaml`; keep secrets only in `~/.hermes/.env`. Project conventions still belong in the repository's `AGENTS.md` or `CLAUDE.md`, which Hermes reads.
+
+For WeChat, once the gateway is connected, send a message from your phone and the local Agent will call tools and reply. If closing the lid puts the machine to sleep, the session ends; keeping it running with the lid closed needs another solution, such as Amphetamine or [Adrafinil](https://github.com/kageroumado/adrafinil), which is designed to keep Agents alive.
+
+## When to use it—and when not to
+
+Good for local automation, scheduled reports, controlling a computer remotely from a phone, and using the same brain across multiple platforms.
+
+Not ideal when you are still watching a UI in the editor and adjusting pixels. Keep using Cursor for that. Keep well-bounded long tasks in Claude Code.
+
+It can execute local commands, read files, and open a browser. Always enable pairing or an allowlist for the gateway; do not expose it to everyone. Never put secrets in chat history.
+
+Tools will change. Hermes is worth trying because its entry point is not tied to an IDE, and it still remembers who you are between sessions.

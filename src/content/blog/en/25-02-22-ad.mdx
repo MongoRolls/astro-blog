@@ -1,0 +1,191 @@
+---
+title: Advertising notes
+publishDate: '2025-02-22'
+excerpt: Notes from reading parts of *Computational Advertising* 📒
+author: MongoRolls
+lang: en
+route: 25-02-22-ad
+translationKey: 25-02-22-ad
+tags:
+  - advertising
+---
+
+## Reading *Computational Advertising*
+
+## An overview of online advertising
+
+The three core assets of a product that can be monetized:
+
+- Traffic
+- Data (user gender, behavior, intentions, and so on)
+- Influence
+
+## Advertising concepts
+
+- Sponsor
+- Media
+- Audience
+
+**The essential function of advertising** is to use a medium with a broad audience to reach users at a relatively low cost.
+
+Return on investment (ROI)
+
+**_Brand advertising and performance advertising_**
+
+**Brand advertising:** create a distinctive, positive brand or product image, with the goal of improving offline conversion over a relatively long period.
+
+**Performance advertising:** advertising with a clear short-term goal of user conversion. Conversion actions include purchasing, registering, voting, and donating. Most internet advertising falls into this category.
+
+### Targeted advertising systems
+
+- Audience targeting
+- Ad serving
+
+<aside>
+💡
+
+For example: shaving razors 🪒 are served to adult men.
+
+For the media side, this audience data becomes valuable.
+
+</aside>
+
+Guaranteed delivery (GD) is more closely related to brand promotion and CPM.
+
+The most common eCPM (expected cost per mille) is expected revenue per thousand impressions.
+
+### Auction advertising
+
+Ad network (ADN)
+
+-
+
+CPC (cost per click)
+
+Revenue per mille (RPM)
+
+### Real-time bidding
+
+(real-time bidding, RTB)
+
+### Advertising effectiveness models
+
+![alt text](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/25-02-22-ad/image.png)
+
+# 2. Fundamentals of computational advertising
+
+> Expected cost per mille (eCPM)
+
+$$
+ecpm = r(a,u,c) = u(a,u,c) * v(a,u) = u(a,u,c)*c(a,u)*t(a)
+$$
+
+The three participants in an advertising campaign are:
+
+`a`, `u`, and `c`: the ad, user, and context.
+
+Click rate × click value can be broken down further into click-through rate, conversion rate, and conversion value.
+
+## Advertising pricing models
+
+### CPT
+
+Cost per time: used by portal websites and priced by time.
+
+### CPM
+
+Cost per mille: charge for every thousand impressions.
+
+### CPC
+
+Cost per click.
+
+### CPS / CPA / ROI
+
+Cost per sale, cost per action.
+
+### oCPX
+
+Comparison of online advertising pricing models:
+
+| Pricing model | Click-rate estimate | Click-value estimate | Advantages and disadvantages | Use case |
+| -------------------------- | ------------------------ | ------------ | -------------------------------- | ---------------------- |
+| CPT | Demand side | Demand side | Can make use of the storefront effect | Brand advertising with high exposure |
+|  | Cannot use audience-targeting technology |  |  |  |
+| CPM | Demand side | Demand side | Can use audience targeting to choose the target audience | Brand advertising that needs audience selection |
+|  | Under contract sales, audience segments cannot be too granular |  |  | Real-time bidding ad exchange |
+| CPC | Supply side | Demand side | Can finely segment different audiences | Auction ad network |
+|  | A relatively reasonable division of labor |  |  |  |
+| CPS / CPA / ROI | Supply side | Supply side | No direction from the demand side | Performance ad network |
+|  | More difficult for the supply side to operate |  |  | Performance DSP |
+| oCPX | Supply side | Supply side | Transition toward the CPA model | Advertising platforms with strong data capabilities |
+
+## Online advertising product logic
+
+![alt text](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/25-02-22-ad/image-1.png)
+
+$$History of online advertising development$$
+
+2.3.1 Advertising revenue breakdown
+
+CTR (click-through rate)
+
+CVR (conversion rate)
+
+## Auction advertising
+
+### Auction advertising strategies
+
+> Nash equilibrium: a stable market balance.
+
+State announcement:
+
+Auction mechanisms:
+
+- Generalized second price (GSP)
+  - The advertiser receives the position at the first price and pays the second price. The mechanism is relatively simple and stable.
+- VCG
+  - Optimizes social welfare.
+
+MRP: market reserve price (the floor price).
+
+Division of computation and product direction in auction advertising:
+
+| Pricing model | Click-through rate | Conversion rate | Conversion value | Product focus |
+| ---------- | ------ | ------ | -------- | -------- |
+| CPC auction | Supply side | Demand side | Demand side | |
+| Programmatic trading | Demand side | Demand side | Demand side | Real-time quotation |
+| Smart delivery | Supply side | Supply side | Demand side | oCPX |
+
+<aside>
+💡
+
+CPC auctions were the most common form in the early PC auction market. The division of computation also made sense: the media side calculated click-through rate, while the advertiser handled conversion rate and conversion value.
+
+</aside>
+
+<aside>
+💡
+
+Programmatic trading is better suited to customers with strong information and data capabilities.
+
+</aside>
+
+<aside>
+💡
+
+Smart delivery has a lower barrier to entry. The supply side provides the data service, making it more suitable for small and medium-sized customers.
+
+It generally uses oCPX (where x can be C or M).
+
+Q: CPS / CPA / ROI also leave click and conversion calculations to the supply side, so why not use them?
+
+A: Pricing by sale can create a bad-money-drives-out-good-money effect: low-quality products get more traffic, such as useless mechanical products made by hand.
+
+</aside>
+
+### Programmatic advertising
+
+DSP: demand-side platform.
+
+SSP: supply-side platform.

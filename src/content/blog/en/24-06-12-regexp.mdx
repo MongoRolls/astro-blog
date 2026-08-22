@@ -1,0 +1,319 @@
+---
+title: Regular expressions — a powerful tool for string processing
+publishDate: 2024-06-12
+author: MongoRolls
+lang: en
+route: regexp
+translationKey: regexp
+tags: [technology, programming, regular expressions]
+excerpt: Regular expressions are powerful tools for working with text. This post organizes their fundamentals, common syntax, and practical examples to help you process strings more efficiently.
+seo:
+  image:
+    src: https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/24-06-12-regexp/regex.png
+    alt: Regular expressions article cover
+---
+
+`/\$(\$)?([^]*?)\$(\$)?/`
+
+Matches the contents of mathematical formulas delimited by single or double `$` signs and then renders them.
+
+Delimiter pattern:
+
+`/(<[^>]+>|\$\$.+?\$\$|\$.+?\$|&[a-zA-Z]{2,8};)/gim`
+
+- `<[^>]+>`: matches an HTML or XML tag.
+- `\$\$.+?\$\$`: matches syntax similar to LaTeX; `+?` is a lazy match that consumes as little as possible.
+- `\$.+?\$`: same idea; double dollar signs render blocks, while single dollar signs render inline formulas.
+- `&[a-zA-Z]{2,8};`: matches an HTML entity, such as `&amp;`.
+- `|`: supports multiple patterns.
+- `/gim`: global matching, multiline mode, and case-insensitive matching.
+
+## Fundamentals
+
+### How to create one
+
+There are two main ways:
+
+- RegExp: `regexp = new RegExp('pattern','flags')`
+- Literal: `/abc/g`
+
+### Flags
+
+Common flags:
+
+- _g_: return all matches.
+- _i_: case-insensitive matching.
+- _u_: enable Unicode character support.
+- _s_: make the dot match newline characters.
+- _m_: enable multiline anchor mode.
+
+## Regular-expression methods
+
+### Search
+
+`string.match(regular expression)`
+
+Returns an array of matched characters.
+
+Without `/g`, the result also has properties such as `.index` and `.input`.
+
+Returns `null` when there is no match.
+
+### Replace
+
+`string.replace(regular expression, replacement)`
+
+```javascript
+// Without the g flag
+alert('We will, we will'.replace(/we/i, 'I')); // I will, we will
+
+// With the g flag
+alert('We will, we will'.replace(/we/gi, 'I')); // I will, I will
+```
+
+_The `replacement` parameter_
+
+| Symbol | Behavior in the replacement string |
+| :-------- | :------------------------------------------------------------------------------------------------------------- |
+| `$&` | Insert the entire match. |
+| `$`` | Insert the part of the string before the match. |
+| `$'` | Insert the part of the string after the match. |
+| `$n` | If `n` is a one- or two-digit number, insert the contents of the nth group; see [capturing groups](https://zh.javascript.info/regexp-groups). |
+| `$<name>` | Insert the contents of the parentheses with the given `name`; see [capturing groups](https://zh.javascript.info/regexp-groups). |
+| `$$` | Insert the `$` character. |
+
+### Test
+
+`string.test(regular expression)`
+
+Returns `true` if there is at least one match; otherwise returns `false`.
+
+## Character classes and special characters
+
+### Basic character classes
+
+`\d` digit, 0–9
+
+`\s` space, such as `\n` and `\t`
+
+`\w` word: letters, numbers, and **underscore `_`**
+
+### Inverse character classes
+
+`\D` any non-digit character.
+
+`\S` any non-space character.
+
+`\W` any non-word character.
+
+**The dot (`.`) matches “any character.”**
+
+The dot `.` is a special character class that matches “any character except a newline.”
+
+For example:
+
+```javascript
+alert('Z'.match(/./)); // Z
+```
+
+[With the `s` flag, the dot character class matches any character](https://zh.javascript.info/regexp-character-classes#dai-you-xiu-shi-fusshi-dian-zi-fu-lei-pi-pei-ren-he-zi-fu)
+
+```javascript
+alert('A\nB'.match(/A.B/s)); // A\nB (matched!)
+```
+
+## Anchors and boundaries
+
+### Start and end anchors
+
+The caret `^` and dollar sign `$` have special meanings in regular expressions. They are called “anchors.”
+
+The caret `^` matches the beginning of the text, while `$` matches the end.
+
+Together, they can achieve an **exact match**.
+
+### Multiline mode
+
+Adding the multiline flag lets the expression match the beginning and end of each line.
+
+### Word boundary
+
+`\b`
+
+There are three positions that can serve as word boundaries:
+
+- At the beginning of a string when the first character is a word character, `\w`.
+- Between two characters when one is a word character, `\w`, and the other is not.
+- At the end of a string when the last character is a word character, `\w`.
+
+## Sets and ranges
+
+### Sets
+
+Several characters or character classes inside square brackets `[…]` mean “any one of the given characters.”
+
+`[QWER]` matches any of these four characters: `'Q'`, `'W'`, `'E'`, or `'R'`.
+
+### Ranges
+
+Square brackets can also contain a **character range**.
+
+For example, `[a-z]` matches a character from `a` to `z`, and `[0-5]` matches a digit from `0` to `5`.
+
+`[0-9A-F]` contains two ranges. It matches a character that is either a digit from `0` to `9` or a letter from `A` to `F`.
+
+### Excluding a range
+
+In addition to ordinary ranges, there is an “exclude” range such as `[^…]`.
+
+Putting `^` at the beginning means “any character except the given characters.”
+
+- `[^aeyo]` matches any character except `'a'`, `'e'`, `'y'`, or `'o'`.
+- `[^0-9]` matches any non-digit character and is equivalent to `\D`.
+- `[^\s]` matches any non-space character and is equivalent to `\S`.
+
+### Escaping rules
+
+When we want to match a special character literally, we usually escape it, as in `\.`. To match a backslash, use `\\`, and so on.
+
+Inside square brackets, most special characters can be used without escaping:
+
+- `. + ( )` do not need escaping.
+- A hyphen `-` at the beginning or end (where it does not define a range) does not need escaping.
+- A caret `^` only needs special handling at the beginning, where it means exclusion.
+- A closing bracket `]` is always escaped when we need to search for that symbol.
+
+##### Ranges and the `u` flag
+
+If a set contains surrogate pairs, the `u` flag is required for them to work correctly.
+
+For example, let us search for `[𝒳𝒴]` in the string `𝒳`.
+
+## Quantifiers
+
+### Basic quantifiers
+
+#### An exact number
+
+```javascript
+{5}` => `\d{5}` === `\d\d\d\d\d
+```
+
+#### A range
+
+`{3,5}` **matches 3–5 characters**
+
+`{,5}` **matches at most 5 characters**
+
+`{6,}` **matches at least 6 characters**
+
+### Quantifier shorthand
+
+- **`+`**: one or more, equivalent to `{1,}`
+- **`*`**: zero or more, equivalent to `{0,}`
+- **`?`**: zero or one, equivalent to `{0,1}`
+
+### Greedy and lazy quantifiers
+
+Let us look at an example first:
+
+```javascript
+let regexp = /".+"/g;
+
+let str = 'a "witch" and her "broom" is one';
+
+alert(str.match(regexp)); // "witch" and her "broom"
+```
+
+…the result is clearly different from what we expected!
+
+**In greedy mode (the default), quantifiers repeat as many times as possible.**
+
+#### Lazy quantifiers
+
+By default, quantifiers are greedy, meaning that they match as many characters as possible. Add `?` after a quantifier to make it lazy, meaning it matches as few characters as possible.
+
+- `*?`: zero or more, as few as possible.
+- `+?`: one or more, as few as possible.
+- `??`: zero or one, as few as possible.
+- `{n,m}?`: n to m, as few as possible.
+- `{n,}?`: at least n, as few as possible.
+
+#### Comparison
+
+Suppose we have the string `"aaaaa"`.
+
+1. **Greedy matching**
+
+   Pattern: `a+`
+
+   Result: `["aaaaa"]`
+
+2. **Lazy matching**
+
+   Pattern: `a+?`
+
+   Result: `["a", "a", "a", "a", "a"]`
+
+## Capturing groups
+
+`(...)` is called a “capturing group.”
+
+- It lets you return part of a match as a separate item in the result array.
+- If a quantifier follows the parentheses, it treats the parentheses as one unit.
+
+### Named groups
+
+Put `?<name>` immediately after the opening parenthesis to name the group.
+
+For example, let us find a date in `year-month-day` format:
+
+```javascript
+let dateRegexp = /(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})/;
+let str = '2024-06-18';
+
+let groups = str.match(dateRegexp).groups;
+
+alert(groups.year); // 2024
+alert(groups.month); // 06
+alert(groups.day); // 18
+```
+
+### Capturing groups in replacement
+
+```javascript
+let str = 'John Bull';
+let regexp = /(\w+) (\w+)/;
+
+alert(str.replace(regexp, '$2, $1')); // Bull, John
+```
+
+For named parentheses, use `$<name>` as the reference.
+
+### Non-capturing groups
+
+This is somewhat abstract; try it a few more times.
+
+Sometimes we need parentheses to apply a quantifier correctly, but we do not want their contents to appear in the result.
+
+> [!NOTE]
+> Like building with blocks, the more pieces you have, the more complex it becomes.
+
+### Backreferences
+
+Suppose we want to match both `'...'` and `"..."`.
+
+If the pattern is `['"](.*?)['"]`, we run into this problem:
+
+```javascript
+let str = `He said: "She's the one!".`;
+
+let regexp = /['"](.*?)['"]/g;
+
+// Not the result we want
+alert(str.match(regexp)); // "She'
+```
+
+### Debugging
+
+`{n}` caused the MDX file to crash because it was parsed as a variable.
