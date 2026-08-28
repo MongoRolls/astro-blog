@@ -23,6 +23,8 @@ const redirects = {
   '/en/blog/25-03-27-cicd': '/en/blog/25-03-14-docker',
   '/blog/26-08-17-cliproxyapi': '/blog/26-08-17-hermes',
   '/en/blog/26-08-17-cliproxyapi': '/en/blog/26-08-17-hermes',
+  '/blog/25-04-07-ssr': '/blog/rendering-modes',
+  '/en/blog/25-04-07-ssr': '/en/blog/rendering-modes',
 }
 
 function normalizePathname(url) {

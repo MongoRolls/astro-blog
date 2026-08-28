@@ -1,72 +1,67 @@
 ---
 title: "Frontend rendering modes: CSR, SSR, and SPA"
-publishDate: 2025-08-19
+publishDate: 2025-04-07
+updatedDate: 2026-08-28
 author: MongoRolls
 lang: en
 route: rendering-modes
 translationKey: rendering-modes
-tags: [mindset, thinking, frontend, SSR, CSR, SPA]
-excerpt: An introduction to client-side rendering (CSR) and server-side rendering (SSR), including how they work, their advantages and disadvantages, and when to use them.
+tags: [mindset, thinking, frontend, tech, SSR, CSR, SPA]
+excerpt: CSR, SSR, SPA, SSG, and ISR, plus notes from rolling a custom SSR stack: renderToString, hydrateRoot, routing, and Redux.
 seo:
   image:
     src: https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/img/cognition.png
     alt: Frontend rendering modes article cover
+  description: How CSR, SSR, SPA, SSG, and ISR differ, and what isomorphism, hydration, and store injection look like in a custom SSR stack.
+  pageType: article
 ---
 
 ## CSR
 
-- Mainstream frontend frameworks in China, such as Vue and React, generally use CSR (Client-Side Rendering). When a user visits a page, the browser first requests and receives an almost empty HTML file along with the relevant JavaScript files. For example:
+Mainstream frontend frameworks in China, such as Vue and React, generally use CSR (Client-Side Rendering). When a user visits a page, the browser first receives an almost empty HTML file plus the related JavaScript:
 
-  ```html
-  <html>
-    <head>
-      <title>title</title>
-    </head>
-    <body>
-      <div id="root"></div>
-      <script src="./index.js"></script>
-    </body>
-  </html>
-  ```
+```html
+<html>
+  <head>
+    <title>title</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="./index.js"></script>
+  </body>
+</html>
+```
 
-  - The framework dynamically renders page content into a specific node through its internal mechanisms. In simple terms, think of it as inserting content into the page with something like `document.getElementById("root").innerHTML = "..."`.
+The framework then renders content into a specific node. Think of it as `document.getElementById("root").innerHTML = "..."`.
 
-  - In CSR mode, clicking a navigation link usually does not send another page request to the server. For example, React recommends using `<Link>` instead of `<a.../>`; modules such as React Router use mechanisms based on history or hash to execute JavaScript and handle navigation, then re-render the page.
-
-- This approach is also called a **single-page application (SPA)**.
+In CSR, clicking in-page navigation usually does not request a whole new page. React recommends `<Link>` instead of `<a>`; React Router (history / hash under the hood) re-runs JavaScript to navigate and render. This is also called a **single-page application (SPA)**.
 
 > **CSR advantages:**
 >
-> - After initialization, navigation in a single-page app responds very quickly. The page can update parts of its content without requesting the server every time.
-> - Data can be fetched and rendered dynamically through AJAX and similar mechanisms, improving the user experience.
+> - After initialization, in-app navigation is fast and can update parts of the page without hitting the server every time.
+> - Data can be fetched and rendered dynamically with AJAX and similar tools.
 >
 > **CSR disadvantages:**
 >
-> - It depends heavily on JavaScript and must wait for JavaScript to download and execute.
-> - First-screen loading is slow because the initial HTML is empty, which can result in a blank page.
-> - It is not friendly to SEO because search engines may have difficulty crawling the actual page content.
+> - It depends heavily on JavaScript and must wait for it to download and execute.
+> - First-screen loading is slow because the initial HTML is empty, which can flash a blank page.
+> - SEO is weak; crawlers may not see the real content.
 
 ## SSR
 
-- Taking the common example of Next.js, SSR (Server-Side Rendering) pre-renders the HTML on the server and returns it directly to the client.
+Taking Next.js as the usual example, SSR (Server-Side Rendering) pre-renders HTML on the server and returns it to the client.
 
-- Note that the initial page returned by the server usually does not yet contain interaction logic, such as click handlers on DOM elements. The returned HTML still includes script tags. Once the client loads those scripts, it completes a hydrate process to add data and interaction logic; only then does the page become fully interactive.
+The first HTML usually has no interaction yet (no click handlers on DOM nodes). Script tags are still there. After the client loads them, hydration attaches data and event logic; only then is the page fully interactive. From that point, further rendering and routing belong to the client. Mainstream SSR frameworks (Next.js on React, Nuxt.js on Vue) sit on top of traditional CSR frameworks.
 
-- After hydration, further rendering and route management are taken over by the client. Mainstream SSR frameworks, such as React-based Next.js and Vue-based Nuxt.js, are built on top of traditional CSR frameworks.
+CSR returns simple HTML, then downloads JavaScript to mutate the DOM. SSR returns complete HTML up front, so the first screen is better. Next and Nuxt are the common choices.
 
-### Q: Why is hydration needed? Why not process the JavaScript logic during server rendering?
+### Why hydration?
 
-A: React and Vue, for example, do not inherently support “state serialization” in their component systems. They depend on a runtime JavaScript environment, especially for closures and event handlers.
+Why not finish the JavaScript logic while rendering on the server? React and Vue components do not really serialize their state. They depend on a runtime, especially closures and event handlers.
 
-### Hydration
+Hydration is the client taking over the static HTML from SSR and making it interactive: after scripts load, they “activate” the markup (event listeners and so on). In an isomorphic / universal app, frontend and backend share one rendering path. The server emits the first HTML for first paint and SEO; the client then fills in events and state.
 
-### What hydrate means
-
-- Hydration means that client-side JavaScript takes over the static HTML returned by SSR and turns the page into an interactive one. In simple terms, after the browser loads and executes the scripts, it “activates” the static content by adding event listeners and other behavior, giving the page dynamic data and interactive capabilities.
-
-- Hydration usually occurs in an “isomorphic/universal” application where the frontend and backend share one rendering logic. The initial HTML is generated on the server to improve first-screen rendering speed and SEO. Then client-side JavaScript loads and fills in event bindings, data state, and other details to provide the complete interaction experience.
-
-> Isomorphism ensures that the client and server DOMs are consistent for mapping. Otherwise, hydration errors can occur. React also provides APIs such as `suppressHydrationWarning` to skip warnings.
+> The client and server DOMs must match, or hydration errors follow. React also has APIs such as `suppressHydrationWarning` to skip the warning.
 
 ```javascript
 function Counter() {
@@ -81,44 +76,91 @@ function Counter() {
 }
 ```
 
-### Hydration challenges
+The hard part is knowing which handlers to attach, which DOM nodes to attach them to, and how to restore related state.
 
-The challenge of hydration is knowing which event handlers to attach, which DOM nodes to attach them to, and how to restore the state related to those events.
+- **what**: handlers often close over component state, so JavaScript must run again to restore APP_STATE.
+- **where**: each handler must bind to the right node and event type.
 
-Specifically, hydration must solve:
-
-- **what**: event handlers often contain closures related to component state, so JavaScript must execute again to restore that state (APP_STATE).
-- **where**: each handler must be bound to the correct DOM node and event type.
-
-The framework's internal state (FRAMEWORK_STATE) also needs to be restored, such as which components should re-render and which data must be synchronized. In short, hydration uses JavaScript on the client to restore all application and framework state and give the page its interactive capabilities again.
+Framework internal state (FRAMEWORK_STATE) also has to come back: which components should re-render, which data to sync. In short, the client uses JavaScript to restore application and framework state so the page can interact again.
 
 > **SSR advantages:**
 >
-> - It does not depend as strongly on JavaScript; content can still display when JavaScript is disabled.
-> - First-screen loading is faster because the browser does not have to wait for client-side JavaScript to download and execute.
-> - It is better for SEO because the server delivers complete HTML directly, which is friendlier to crawlers.
+> - Less dependent on JavaScript; content can still show with JS disabled.
+> - Faster first screen; no wait for client JS to download and run.
+> - Better SEO; the server sends complete HTML.
+> - Caching can reduce work on the client.
 >
 > **SSR disadvantages:**
 >
-> - It requires a server and cannot be deployed entirely to a CDN like a purely static page.
-> - It creates concurrency and performance pressure on the server, requiring careful deployment and load testing.
-> - TTI (Time to Interactive) may be longer because the page must finish downloading and hydrating JavaScript before it can interact.
+> - Needs a server; you cannot dump the whole site on a CDN like a static page.
+> - Server concurrency and performance need real capacity planning.
+> - TTI may get longer because the page waits for JS download and hydration.
+
+### Rolling your own SSR: isomorphism in practice
+
+One older project did not have Next.js yet, so it implemented its own SSR framework.
+
+References:
+
+- [SSR blog](https://juejin.cn/post/6844903881390964744)
+- [Vite SSR](https://cn.vite.dev/guide/ssr.html)
+
+`react-dom/server`'s `renderToString` turns JSX into a string:
+
+```js
+// server/index.js
+import express from "express";
+import { renderToString } from "react-dom/server";
+import Home from "./containers/Home";
+
+const app = express();
+const content = renderToString(<Home />);
+app.get("/", function (req, res) {
+  res.send(
+    `
+    <html>
+      <head>
+        <title>ssr</title>
+      </head>
+      <body>
+        <div id="root">${content}</div>
+      </body>
+    </html>
+   `
+  );
+});
+app.listen(3001, () => {
+  // console.log('listen:3001');
+});
+```
+
+Isomorphism, simply: the same code runs on client and server and should produce the same result. If JSX has click handlers, `renderToString` output has none of those bindings, so you still need a script tag. React's client API for taking over is [`hydrateRoot`](https://react.dev/reference/react-dom/client/hydrateRoot).
+
+A common failure is a hydration error: client and server DOMs disagree, and mounting breaks (this is tied to React's virtual DOM). Adding `suppressHydrationWarning` on a div only hides the warning.
+
+Isomorphism also brings these concrete problems:
+
+**Routing.** Client and server must share the same routing logic. React apps usually use React Router; in SSR use `StaticRouter`, not `BrowserRouter`.
+
+**Redux.** The store has two connections: one on the client, one on the server. Both pass the store through react-redux `Provider`. The server store needs extra handling, or every export becomes the same store instance.
+
+![Connecting the store in an isomorphic Redux app](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2019/7/4/16bbc59406a49fad~tplv-t2oaga2asx-jj-mark:3024:0:0:0:q75.awebp)
+
+**State injection.** Initialize the store and put state on `window`.
+
+You also still have to deal with async data hydration/dehydration, nested-route rendering, a Node middle layer, CSS on the server, and SEO (`react-helmet`).
 
 ## SSG
 
-SSG (Static Site Generation) is an extension of SSR (Server-Side Rendering). Its defining feature is that, during the project build, all page content is rendered in advance as pure static HTML files. It does not depend on server computation at runtime and does not require complex JavaScript logic to execute on the client. The generated static pages can also be deployed to a CDN, greatly reducing server pressure compared with SSR.
+SSG (Static Site Generation) extends SSR: at build time every page becomes static HTML. There is no server computation at runtime and no heavy client JS. The files can sit on a CDN, which is much cheaper than SSR.
 
-Typical use cases include documentation sites, blogs, official websites, and product pages that focus on content display and have limited interaction requirements.
+Typical for docs, blogs, marketing sites, and product pages with little interaction.
 
 ## ISR
 
-**ISR (Incremental Static Regeneration)**
+ISR (Incremental Static Regeneration) sits between SSR and SSG: generate static pages ahead of time, then refresh some of them on demand without rebuilding the whole site.
 
-ISR is a technique between SSR (Server-Side Rendering) and SSG (Static Site Generation). It lets us generate static pages ahead of time like SSG, while also updating selected pages incrementally on demand without rebuilding the entire website.
-
-Taking Next.js as an example, developers can set a `revalidate` property to define the conditions for regenerating a page in the background. Once the specified revalidation time arrives, the next visitor to the page causes the server to fetch the latest data, regenerate the page, and automatically replace the original static page. This combines the performance and SEO advantages of static pages with data freshness and flexibility.
-
-For example, when an article in a CMS is updated, an on-demand trigger or revalidation mechanism can make the server request the latest data from the CMS and regenerate the corresponding static page.
+In Next.js, `revalidate` sets how soon a page may regenerate in the background. After that window, the next visit fetches fresh data, rebuilds the page, and replaces the old static file. A CMS update can also trigger on-demand regeneration.
 
 ```typescript
 // pages/blog/[slug].tsx
@@ -172,24 +214,19 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 ## Next
 
-#### Basic introduction
+[Next.js](https://nextjs.org/) is Vercel's open-source React framework, focused on SSR and SSG.
 
-[Next.js](https://nextjs.org/) is an open-source React frontend framework developed by Vercel, focused on server-side rendering (SSR) and static site generation (SSG). It provides developers with a rich and easy-to-use set of APIs and tools for efficiently building Web applications with excellent performance, SEO, and user experience.
+Main features:
 
-#### Main features
+1. SSR, SSG, and ISR out of the box for first paint and SEO, with background updates.
+2. File-system routing, no manual route table.
+3. Built-in API routes, so frontend and backend can live together.
+4. Native CSS / Sass / CSS-in-JS plus static asset and image optimization.
+5. Automatic per-route splitting and lazy loading.
+6. A large plugin ecosystem for data fetching and state.
+7. One-click Vercel deploy, plus Node and serverless targets.
 
-1. Supports server-side rendering (SSR), static site generation (SSG), and incremental static regeneration (ISR) out of the box, improving first-screen speed and SEO while allowing pages to update in the background.
-2. Automatic routing: the file structure maps directly to routes, with no manual configuration required.
-3. Frontend-backend integration: built-in API routes keep frontend and backend code together for full-stack development.
-4. Rich styling and static-asset support: native support for CSS, Sass, and CSS-in-JS, with integrated optimization for static files, images, and fonts.
-5. Code splitting and high performance: automatically split and lazy-load by route, loading only necessary assets.
-6. Active ecosystem and plugins: many tools and plugins make it easy to integrate data fetching, state management, and more.
-7. Fast, flexible deployment: one-click deployment to Vercel and compatibility with Node.js and major serverless platforms.
-
-#### Building a demo
-
-Next.js supports two routing modes: `page route` and `app route`.  
-Here is a basic server-rendered (SSR) page using the `page route` mode, which is common in projects:
+Next.js has `page route` and `app route`. A typical page-route SSR page looks like this:
 
 ```typescript
 function Home({ serverData }: { serverData: string }) {
@@ -214,17 +251,13 @@ export async function getServerSideProps() {
 export default Home;
 ```
 
-> `getServerSideProps` is a Next.js page-level lifecycle function for fetching data on the server. It runs on every page request and passes the returned data to the page component as props, implementing SSR.
+> `getServerSideProps` runs on every request, passes `props` into the page, and that is Next's SSR.
 
----
-
-Nuxt.js can be thought of as Next.js for the Vue ecosystem, corresponding to Next in the React ecosystem.
+Nuxt.js is the Vue-ecosystem counterpart of Next.js.
 
 ## Qwik
 
-Qwik is a JavaScript framework whose core feature is [skipping hydration](https://www.builder.io/blog/hydration-is-pure-overhead): it serializes JavaScript logic and state into HTML on the server, eliminating the traditional hydration step.
-
-The resumable idea can be summarized as **download and execute JavaScript on demand**.
+Qwik's core idea is [skipping hydration](https://www.builder.io/blog/hydration-is-pure-overhead): serialize JavaScript logic and state into HTML on the server. Resumable means **download and run JS on demand**.
 
 ```html
 <!-- The core of Qwik's serialization into HTML -->
@@ -247,14 +280,12 @@ The resumable idea can be summarized as **download and execute JavaScript on dem
 </script>
 ```
 
-**Execution flow**: when the user clicks the button for the first time, Qwik downloads the corresponding event-handler code, loading it on demand. Later clicks do not download it again; they execute the already loaded function directly.
+The first click downloads the handler; later clicks run the already loaded function. TTI is excellent, but the ecosystem is thinner than Next.js, so it is rarely the default unless performance is the top requirement.
 
-Qwik performs extremely well on TTI (Time to Interactive), significantly shortening the time from page load to interaction. However, its ecosystem is not as mature as Next.js, so it is generally not used unless performance requirements are especially high.
-
-There are also rendering approaches such as Islands. The [Astro](https://docs.astro.build/zh-cn/concepts/islands/) framework uses a similar idea, but it is beyond the scope of this post.
+There are also Islands-style approaches, such as [Astro](https://docs.astro.build/zh-cn/concepts/islands/). That is out of scope here.
 
 ## Summary
 
-- **SSG & ISR**: fastest loading (static HTML), best SEO, and low cost, but content updates require a rebuild. ISR supports incremental updates on demand and suits large content sites.
-- **SSR**: fast first-screen loading, flexible dynamic-content updates, and SEO-friendly, but requires a server and costs more.
-- **CSR**: best interactivity and fast later responses, but slow first-screen loading, average SEO, and a large amount of JavaScript execution.
+- **SSG & ISR**: fastest load (static HTML), best SEO, lowest cost; updates need a rebuild. ISR can refresh incrementally and suits large content sites.
+- **SSR**: fast first screen, flexible dynamic content, SEO-friendly; needs a server and costs more. If you roll your own, isomorphism, hydration, routing, and the store are the main pitfalls.
+- **CSR**: best interactivity and later navigation; slow first screen, weaker SEO, and a lot of JavaScript.
