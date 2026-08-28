@@ -19,6 +19,10 @@ const redirects = {
   '/blog/share': '/blog/26-01-30-share',
   '/blog/正则笔记': '/blog/regexp',
   '/blog/认知觉醒': '/blog/cognition',
+  '/blog/25-03-27-cicd': '/blog/25-03-14-docker',
+  '/en/blog/25-03-27-cicd': '/en/blog/25-03-14-docker',
+  '/blog/26-08-17-cliproxyapi': '/blog/26-08-17-hermes',
+  '/en/blog/26-08-17-cliproxyapi': '/en/blog/26-08-17-hermes',
 }
 
 function normalizePathname(url) {

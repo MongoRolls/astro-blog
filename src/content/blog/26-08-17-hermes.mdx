@@ -1,24 +1,33 @@
 ---
-title: Hermes Agent
-excerpt: Nous Research 的开源自托管 Agent。同一套核心跑 CLI、桌面、微信网关，能记人、存技能、定时干活。
+title: Hermes 与 CLIProxyAPI
+excerpt: 本机常驻 Agent 管入口和记忆；CLI 订阅要给别的客户端当 API 用，走 CLIProxyAPI。两块拼在一起，覆盖 IDE 以外的本地 AI 入口。
 publishDate: '2026-08-17'
+updatedDate: 2026-08-28
 author: MongoRolls
 tags:
   - tools
   - ai
   - tech
 seo:
-  description: Hermes Agent 是什么、和 Cursor / Claude Code 差在哪、自己怎么装、怎么接到微信。
+  description: Hermes Agent 做本机常驻与微信入口，CLIProxyAPI 把 CLI 订阅暴露成本地兼容 API。两者怎么分工、怎么装、什么时候不要用。
   pageType: article
 ---
 
-日常写代码还是 [Cursor + Claude Code + Codex](/blog/26-08-13-ai-tools)。Hermes 不替代它们，补的是另一块：机器自己常驻，聊天软件也能当入口。
+日常写代码还是 [Cursor + Claude Code + Codex](/blog/26-08-13-ai-tools)。下面两块都不替代 IDE，补的是 IDE 之外：
 
-仓库：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)。文档：[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)。MIT。
+| | Hermes | CLIProxyAPI |
+| --- | --- | --- |
+| 干什么 | 本机常驻 Agent，聊天软件也能当入口 | 把已登录的 CLI 订阅转成本地兼容 API |
+| 主场 | 本机进程、网关、记忆与 skills | `127.0.0.1:8317` 上的代理 |
+| 不干什么 | 不盯 UI、不改像素 | 不当 IDE，也不创造额外额度 |
 
-## 它是什么
+Hermes 自己就能换 provider，不一定非经 CLIProxyAPI。CLIProxyAPI 更适合「客户端只认 OpenAI / Claude 接口，手里却是 CLI 订阅」。
 
-Nous Research 做的开源 Agent。模型随便换：OpenRouter、OpenAI、Anthropic、DeepSeek、本地，一条 `hermes model` 切。自己现在走 DeepSeek，微信网关也是它在回。
+## Hermes Agent
+
+Nous Research 的开源 Agent。仓库：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)。文档：[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)。MIT。
+
+模型随便换：OpenRouter、OpenAI、Anthropic、DeepSeek、本地，一条 `hermes model` 切。自己现在走 DeepSeek，微信网关也是它在回。
 
 和 Cursor / Claude Code 的差别：
 
@@ -31,7 +40,7 @@ Nous Research 做的开源 Agent。模型随便换：OpenRouter、OpenAI、Anthr
 
 它会自己搜过去的会话，复杂任务结束后可以写成 skill。定时任务也能配，做完推到微信或 Telegram。
 
-## 安装
+### 安装
 
 macOS / Linux / WSL：
 
@@ -53,7 +62,7 @@ hermes doctor
 
 不想攒一堆 key，可以用 [Nous Portal](https://portal.nousresearch.com)，一条 `hermes setup --portal` 把模型和部分工具网关绑到订阅上。自己没走这条，模型用 DeepSeek，工具按需开。
 
-## 自己怎么用
+### 自己怎么用
 
 ```bash
 hermes              # 终端对话
@@ -65,12 +74,71 @@ hermes gateway      # 消息网关
 
 微信这条线：网关连上之后，手机发一句，本机 Agent 调工具再回。合盖会睡的话，会话就断；要关盖还跑，得另想办法（Amphetamine，或者专门给 Agent 保活的 [Adrafinil](https://github.com/kageroumado/adrafinil)）。
 
-## 什么时候用、什么时候不用
-
 适合：本机自动化、定时汇报、手机远程支使电脑、多平台同一套脑子。
 
 不适合：人还在编辑器里盯 UI、改像素。那种继续 Cursor。边界清楚的长任务继续 Claude Code。
 
 它能执行本机命令、读文件、开浏览器。网关务必开配对 / 白名单，别对所有人开放。密钥别写进聊天记录。
 
-工具会换。Hermes 值一试的点是：入口不绑死在 IDE，会话之间还记得你是谁。
+## CLIProxyAPI
+
+[日常那套](/blog/26-08-13-ai-tools)里，CC Switch 解决的是「同一套 Claude Code 换供应商」。CLIProxyAPI 反过来：订阅已经在 CLI 里登过了，想给 Cursor、Cline、自写脚本当 API 用。
+
+仓库：[router-for-me/CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)。手册：[help.router-for.me](https://help.router-for.me/cn/introduction/quick-start)。桌面端：[EasyCLIProxyAPI](https://github.com/router-for-me/EasyCLIProxyAPI)。
+
+本机起一个代理。你用各家 CLI 的 OAuth 登录（Claude Code、OpenAI Codex、Google Antigravity / Gemini、Grok Build，也接 Kimi），它对外提供 OpenAI / Gemini / Claude / Codex / Grok 兼容端点。客户端改 `base_url` 指向本机即可。
+
+多账号可以轮询。上游也能配 OpenRouter 这类 OpenAI 兼容服务。流式、工具调用、图文输入都支持。默认监听 **8317**。
+
+和中转站不是一类东西。中转站卖的是别人的 key；这个跑在你机器上，用的是你自己登进去的订阅。
+
+### 安装
+
+macOS 用 Homebrew，服务默认读 `$(brew --prefix)/etc/cliproxyapi.conf`。想继续用家目录配置，先有文件再软链，悬空软链服务会立刻退：
+
+```bash
+brew install cliproxyapi
+mkdir -p ~/.cli-proxy-api
+# 按官方示例准备好 ~/.cli-proxy-api/config.yaml 之后：
+brew_conf="$(brew --prefix)/etc/cliproxyapi.conf"
+ln -sfn "$HOME/.cli-proxy-api/config.yaml" "$brew_conf"
+brew services start cliproxyapi
+```
+
+懒得点命令，装 EasyCLIProxyAPI，托盘里启停、改配置。
+
+Docker：
+
+```bash
+docker run --rm -p 8317:8317 \
+  -v /path/to/config.yaml:/CLIProxyAPI/config.yaml \
+  -v /path/to/auth-dir:/root/.cli-proxy-api \
+  -v /path/to/plugins:/CLIProxyAPI/plugins \
+  eceasy/cli-proxy-api:latest
+```
+
+插件目录要挂进去，不然容器一重启，商店里装的插件就没了。
+
+登录走官方文档里的 OAuth 流程（Claude / Codex / Gemini / Grok 各有一条）。登完，把 Cursor、Cline、OpenCode 的 API 地址指到 `http://127.0.0.1:8317`。
+
+用量统计从 v6.10.0 起不再内置，要看板用 [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper) 或 [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus)。
+
+### 和现有工具怎么叠
+
+| 需求 | 用谁 |
+| --- | --- |
+| Claude Code 换 DeepSeek / GLM | [CC Switch](https://cc-switch.cc/) |
+| 订阅当 API，给别的客户端用 | CLIProxyAPI |
+| 只想便宜、国内直连 | DeepSeek 官方 API |
+| 人在仓库里写代码 | Cursor / Claude Code，别把代理当 IDE |
+| 本机常驻、微信入口 | Hermes；它能自己换模型，不必先过这层代理 |
+
+### 别当免费午餐
+
+各家订阅条款通常按「官方客户端」算，拿 OAuth 转成通用 API，**可能违 ToS**，封号、限流自己扛。号池、轮询、对外网开端口，风险再加一档。本机 `127.0.0.1`、加访问密钥，别裸奔到公网。
+
+额度窗口还在（Codex 的 5h / 7d 那些），代理不会变出更多配额，只是换了入口。模型名、渠道别名以当前文档为准，README 里的 GPT / Claude / Gemini 版本号更新很快。
+
+自己的用法：官方额度紧、又想在只认标准 API 的工具里蹭已有订阅时再开。日常写代码，还是直接走对应客户端更省事。
+
+工具会换。Hermes 值一试的点是入口不绑死在 IDE；CLIProxyAPI 值一试的点是订阅能被别的客户端接着用。两者都不要当成「免费无限额度」。
