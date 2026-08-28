@@ -1,3 +1,4 @@
+import type { GetStaticPathsOptions } from 'astro'
 import type { CollectionEntry } from 'astro:content'
 import type { Locale } from '../i18n/config'
 import { getCollection } from 'astro:content'
@@ -86,4 +87,53 @@ export function getAllTags(posts: CollectionEntry<'blog'>[]) {
 
 export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagId: string) {
   return posts.filter(post => (post.data.tags ?? []).some(tag => slugify(tag) === tagId))
+}
+
+export async function getBlogPostStaticPaths(locale: Locale) {
+  const posts = await getPublishedBlogPosts(locale)
+  const postCount = posts.length
+
+  return posts.map((post, index) => ({
+    params: { id: getPostSlug(post) },
+    props: {
+      post,
+      prevPost: index + 1 !== postCount ? posts[index + 1] : null,
+      nextPost: index !== 0 ? posts[index - 1] : null,
+    },
+  }))
+}
+
+export async function getBlogArchiveStaticPaths(
+  locale: Locale,
+  paginate: GetStaticPathsOptions['paginate'],
+  pageSize: number,
+) {
+  const posts = await getPublishedBlogPosts(locale)
+  return paginate(posts, { pageSize })
+}
+
+export async function getTagPageStaticPaths(
+  locale: Locale,
+  paginate: GetStaticPathsOptions['paginate'],
+  pageSize: number,
+) {
+  const posts = await getPublishedBlogPosts(locale)
+  const tags = getAllTags(posts)
+
+  return tags.flatMap((tag) => {
+    const filteredPosts = getPostsByTag(posts, tag.id)
+    return paginate(filteredPosts, {
+      params: { id: tag.id },
+      props: { tagName: tag.name },
+      pageSize,
+    })
+  })
+}
+
+export async function getContentPageStaticPaths(locale: Locale) {
+  const pages = await getPublishedPages(locale)
+  return pages.map(page => ({
+    params: { id: getPageSlug(page) },
+    props: { page },
+  }))
 }
