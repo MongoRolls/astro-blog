@@ -1,16 +1,13 @@
 ---
-import type { GetStaticPathsOptions, Page } from 'astro'
-import type { CollectionEntry } from 'astro:content'
+import type { GetStaticPathsOptions } from 'astro'
 import siteConfig from '../../../data/site-config'
-import { getPublishedBlogPosts } from '../../../utils/data-utils'
+import { getBlogArchiveStaticPaths } from '../../../utils/data-utils'
 import BlogArchivePage from '../../blog/[...page].astro'
 
-export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = await getPublishedBlogPosts('en')
-  return paginate(posts, { pageSize: siteConfig.postsPerPage || 6 })
+export function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  return getBlogArchiveStaticPaths('en', paginate, siteConfig.postsPerPage || 6)
 }
 
-type Props = { page: Page<CollectionEntry<'blog'>> }
 const { page } = Astro.props
 ---
 

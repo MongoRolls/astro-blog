@@ -1,8 +1,8 @@
 import type { ImageSource } from './env'
 import { imageSource } from './env'
 
-export const OSS_HOST = 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com'
-export const OSS_PREFIX = 'blog'
+const OSS_HOST = 'https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com'
+const OSS_PREFIX = 'blog'
 
 export function ossAsset(...segments: string[]) {
   const objectPath = [OSS_PREFIX, ...segments]
@@ -26,7 +26,7 @@ function resolveSource(options?: { source?: ImageSource }) {
   return options?.source ?? imageSource
 }
 
-export function buildCoverPath(options?: { source?: ImageSource }) {
+function buildCoverPath(options?: { source?: ImageSource }) {
   return resolveSource(options) === 'local' ? LOCAL_COVER_IMAGE : OSS_COVER_IMAGE
 }
 

@@ -1,25 +1,13 @@
 ---
-import type { GetStaticPathsOptions, Page } from 'astro'
-import type { CollectionEntry } from 'astro:content'
+import type { GetStaticPathsOptions } from 'astro'
 import siteConfig from '../../../../data/site-config'
-import { getAllTags, getPostsByTag, getPublishedBlogPosts } from '../../../../utils/data-utils'
+import { getTagPageStaticPaths } from '../../../../utils/data-utils'
 import TagPage from '../../../tags/[id]/[...page].astro'
 
-export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = await getPublishedBlogPosts('en')
-  const tags = getAllTags(posts)
-
-  return tags.flatMap((tag) => {
-    const filteredPosts = getPostsByTag(posts, tag.id)
-    return paginate(filteredPosts, {
-      params: { id: tag.id },
-      props: { tagName: tag.name },
-      pageSize: siteConfig.postsPerPage || 4,
-    })
-  })
+export function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  return getTagPageStaticPaths('en', paginate, siteConfig.postsPerPage || 4)
 }
 
-type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string }
 const { page, tagName } = Astro.props
 ---
 
