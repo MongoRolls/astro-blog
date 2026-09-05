@@ -25,7 +25,7 @@ const sortedBlogPosts = await getPublishedBlogPosts(locale)
             return (
                 <div class="!mt-4">
                     <span class="pr-5 font-serif inline-block w-32"><FormattedDate format="iso" date={post.data.publishDate} locale={locale} /></span>
-                    <a class="post-link" href={getPostUrl(post)}>{post.data.title}</a>
+                    <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
                 </div>
             )
         })}

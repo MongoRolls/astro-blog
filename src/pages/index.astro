@@ -92,7 +92,7 @@ const heroData = {
                         <span class="post-date italic font-serif text-gray-500">
                             <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
                         </span>
-                        <a class="post-link" href={getPostUrl(post)}>{post.data.title}</a>
+                        <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
                     </li>
                 )
             })}
