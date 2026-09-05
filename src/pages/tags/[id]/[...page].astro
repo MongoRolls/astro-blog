@@ -7,20 +7,10 @@ import PostPreview from '../../../components/PostPreview.astro'
 import siteConfig from '../../../data/site-config'
 import { alternateLocale, defaultLocale, localizedPath, stripLocalePrefix } from '../../../i18n/config'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import { getAllTags, getPostsByTag, getPublishedBlogPosts } from '../../../utils/data-utils'
+import { getPostsByTag, getPublishedBlogPosts, getTagPageStaticPaths } from '../../../utils/data-utils'
 
-export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = await getPublishedBlogPosts(defaultLocale)
-    const tags = getAllTags(posts)
-
-    return tags.flatMap((tag) => {
-        const filteredPosts = getPostsByTag(posts, tag.id)
-        return paginate(filteredPosts, {
-            params: { id: tag.id },
-            props: { tagName: tag.name },
-            pageSize: siteConfig.postsPerPage || 4,
-        })
-    })
+export function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+    return getTagPageStaticPaths(defaultLocale, paginate, siteConfig.postsPerPage || 4)
 }
 
 type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string, locale?: Locale }
