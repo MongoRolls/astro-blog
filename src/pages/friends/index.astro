@@ -14,9 +14,9 @@ const { locale = defaultLocale } = Astro.props
   title={locale === 'zh-CN' ? '友链' : 'Friends'}
   description={locale === 'zh-CN' ? 'MongoRolls 的朋友与推荐链接。' : 'Friends and recommended links from MongoRolls.'}
 >
-    <section class="container mx-auto px-4 py-12" aria-labelledby="friends-title">
+    <section class="w-full mx-auto md:px-4 md:py-12" aria-labelledby="friends-title">
         <h1 id="friends-title" class="sr-only">{locale === 'zh-CN' ? '友链' : 'Friends'}</h1>
-        <div class="mt-12 max-w-7xl mx-auto">
+        <div class="md:mt-12 mx-auto">
             <FriendCard friends={siteConfig.friends} locale={locale} />
         </div>
     </section>

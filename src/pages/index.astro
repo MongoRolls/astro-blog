@@ -214,7 +214,7 @@ const heroData = {
     .hero-content-list {
         display: flex;
         flex-direction: column;
-        align-items: space-between;
+        align-items: stretch;
         gap: 20px;
         height: 100%;
         justify-content: space-between;
@@ -289,17 +289,11 @@ const heroData = {
         }
     }
 
-    @media (max-width: 640px) {
-        .flex.items-center.justify-between {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-
-
+    @media (max-width: 767px) {
         .hero-title {
             font-size: 1.5rem;
+            line-height: 1.4;
+            text-wrap: balance;
             margin-bottom: 20px;
         }
 
@@ -308,17 +302,27 @@ const heroData = {
         }
 
         .hero-actions {
+            flex-direction: row;
             gap: 10px;
         }
 
         .hero-actions :global(a) {
-            flex: 1;
+            flex: 1 1 9rem;
+            min-height: 44px;
+            padding-inline: 12px;
             text-align: center;
         }
 
         .post-row {
-            grid-template-columns: 1fr;
-            gap: 0.15rem;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.25rem;
+            padding-block: 0.75rem;
+            line-height: 1.65;
+        }
+
+        .post-date {
+            font-size: 0.875rem;
+            color: rgb(var(--color-text-muted));
         }
     }
 

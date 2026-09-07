@@ -166,6 +166,35 @@ const {
         transition: width 0.3s ease-out;
     }
 
+    @media (max-width: 767px) {
+        .yaml-card {
+            position: static;
+            width: 100%;
+            max-width: 380px;
+            min-width: 0;
+            margin-top: 1rem;
+            cursor: auto;
+            user-select: text;
+        }
+
+        .yaml-card-content {
+            padding-top: 52px;
+        }
+
+        .yaml-value {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .copy-button {
+            width: 44px;
+            height: 44px;
+            top: 4px;
+            opacity: 1;
+            transform: none;
+        }
+    }
+
     // Dark mode support
     :global(.dark) .yaml-card {
         background-color: #1a1b26;
@@ -252,7 +281,7 @@ function initializeCards() {
     }, { signal: controller.signal })
 
     card.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0 || (event.target as Element).closest('.copy-button'))
+      if (window.matchMedia('(max-width: 767px)').matches || event.button !== 0 || (event.target as Element).closest('.copy-button'))
         return
       const rect = card.getBoundingClientRect()
       offsetX = event.clientX - rect.left

@@ -90,6 +90,61 @@
   }
 }
 
+/* 小屏正文：长内容在各自容器内换行或滚动，保留代码原始格式。 */
+@media (max-width: 767px) {
+  .prose {
+    overflow-wrap: anywhere;
+  }
+
+  .prose :where(p, li):not(:where(.not-prose, .not-prose *)) {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .prose :where(span):not(:where(.not-prose, .not-prose *)) {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
+  .prose :where(h1, h2, h3):not(:where(.not-prose, .not-prose *)) {
+    line-height: 1.4;
+  }
+
+  .prose :where(h1):not(:where(.not-prose, .not-prose *)) {
+    font-size: 1.875rem;
+  }
+
+  .prose :where(h2):not(:where(.not-prose, .not-prose *)) {
+    font-size: 1.5rem;
+  }
+
+  .prose :where(h3):not(:where(.not-prose, .not-prose *)) {
+    font-size: 1.25rem;
+  }
+
+  .prose :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+    padding: 0.75rem 1rem;
+  }
+
+  .prose :where(pre):not(:where(.not-prose, .not-prose *)) {
+    max-width: 100%;
+    padding: 1rem 0.875rem;
+    overflow-wrap: normal;
+  }
+
+  .prose :where(table):not(:where(.not-prose, .not-prose *)) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: normal;
+  }
+
+  .prose :where(th, td):not(:where(.not-prose, .not-prose *)) {
+    min-width: 7rem;
+  }
+}
+
 /* 全局过渡效果 */
 html {
   text-autospace: normal;
