@@ -40,7 +40,7 @@ const t = useTranslations(locale)
     <div class="p-4 relative">
       <input
         id="search-input"
-        class="w-full p-3 pl-10 border-2 border-blue-500 rounded-lg focus:ring-0 focus:border-blue-500 outline-none bg-white/90 dark:bg-zinc-700/90 dark:text-white"
+        class="w-full p-3 pl-10 pr-14 border-2 border-blue-500 rounded-lg focus:ring-0 focus:border-blue-500 outline-none bg-white/90 dark:bg-zinc-700/90 dark:text-white"
         type="text"
         placeholder={t.search.placeholder}
         aria-label={t.search.input}
@@ -55,7 +55,8 @@ const t = useTranslations(locale)
       </div>
       <button
         id="search-close"
-        class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 bg-white dark:bg-zinc-600 p-2 rounded-full"
+        class="absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 bg-white dark:bg-zinc-600 p-2 rounded-full"
+        type="button"
         aria-label={t.search.close}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
@@ -154,6 +155,8 @@ function initSearchFeature() {
   let previouslyFocused: HTMLElement | null = null
   let closeTimer: number | undefined
   let searchTimer: number | undefined
+  let openFrame: number | undefined
+  let isOpen = false
   let requestId = 0
 
   function createMessage(text: string, className = 'text-gray-500') {
@@ -212,13 +215,18 @@ function initSearchFeature() {
   }
 
   function openSearch() {
+    if (isOpen) {
+      input.focus()
+      return
+    }
+    isOpen = true
     previouslyFocused = document.activeElement as HTMLElement | null
     document.querySelector<HTMLButtonElement>('.menu-toggle[aria-expanded="true"]')?.click()
     if (closeTimer)
       window.clearTimeout(closeTimer)
     document.body.style.overflow = 'hidden'
     searchBox?.classList.remove('hidden')
-    requestAnimationFrame(() => {
+    openFrame = requestAnimationFrame(() => {
       searchContainer?.classList.remove('opacity-0', 'scale-95')
       searchContainer?.classList.add('opacity-100', 'scale-100')
       input.focus()
@@ -226,6 +234,11 @@ function initSearchFeature() {
   }
 
   function closeSearch() {
+    if (!isOpen)
+      return
+    isOpen = false
+    if (openFrame !== undefined)
+      cancelAnimationFrame(openFrame)
     document.body.style.overflow = ''
     searchContainer?.classList.remove('opacity-100', 'scale-100')
     searchContainer?.classList.add('opacity-0', 'scale-95')
@@ -236,6 +249,7 @@ function initSearchFeature() {
   async function handleSearch(value: string) {
     const currentRequest = ++requestId
     if (!value) {
+      searchResults.removeAttribute('aria-busy')
       renderMessage('🔍', 'text-5xl select-none')
       return
     }
@@ -283,20 +297,21 @@ function initSearchFeature() {
     const value = input.value.trim()
     if (!value) {
       requestId++
+      searchResults.removeAttribute('aria-busy')
       renderMessage('🔍', 'text-5xl select-none')
       return
     }
     searchTimer = window.setTimeout(() => void handleSearch(value), 250)
   }, listenerOptions)
   document.addEventListener('keydown', (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault()
       openSearch()
     }
-    else if (event.key === 'Escape' && !searchBox.classList.contains('hidden')) {
+    else if (event.key === 'Escape' && isOpen) {
       closeSearch()
     }
-    else if (event.key === 'Tab' && !searchBox.classList.contains('hidden')) {
+    else if (event.key === 'Tab' && isOpen) {
       const focusable = Array.from(searchContainer.querySelectorAll<HTMLElement>('a[href], button, input, [tabindex]:not([tabindex="-1"])'))
       const first = focusable[0]
       const last = focusable.at(-1)
@@ -314,6 +329,8 @@ function initSearchFeature() {
   disposeSearch = () => {
     controller.abort()
     requestId++
+    if (openFrame !== undefined)
+      cancelAnimationFrame(openFrame)
     if (closeTimer)
       window.clearTimeout(closeTimer)
     if (searchTimer)
@@ -327,6 +344,29 @@ document.addEventListener('astro:before-swap', () => disposeSearch())
 </script>
 
 <style>
+  #search-container {
+    --search-top: min(5rem, 10dvh);
+    top: var(--search-top);
+    max-height: calc(100dvh - var(--search-top) - 1rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  #search-container > .relative {
+    flex-shrink: 0;
+  }
+
+  #results {
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  @media (min-width: 640px) {
+    #search-container {
+      --search-top: min(8rem, 10dvh);
+    }
+  }
+
   /* 搜索结果卡片动画 */
   #results > div {
     animation: fadeIn 0.3s ease forwards;

@@ -58,6 +58,12 @@ const label = exactMatch ? t.language.switchTo : t.language.unavailable
     background: rgb(var(--color-text-main) / 0.08);
   }
 
+  @media (max-width: 767px) {
+    .language-toggle {
+      height: 2.75rem;
+    }
+  }
+
   .language-toggle:focus-visible {
     outline: 2px solid rgb(var(--color-primary));
     outline-offset: 2px;
