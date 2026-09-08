@@ -208,6 +208,7 @@ const { posts, locale = defaultLocale } = Astro.props;
     const controller = new AbortController()
     const slides = document.querySelectorAll('.carousel-slide')
     const dots = document.querySelectorAll('.carousel-dot')
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let currentSlide = 0
     let autoPlayInterval: ReturnType<typeof setInterval> | undefined
 
@@ -230,8 +231,10 @@ const { posts, locale = defaultLocale } = Astro.props;
     }
 
     function startAutoPlay() {
-      if (slides.length <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches || autoPlayInterval)
+      if (slides.length <= 1 || reducedMotion.matches || document.hidden
+        || container?.matches(':hover') || container?.contains(document.activeElement) || autoPlayInterval) {
         return
+      }
       autoPlayInterval = setInterval(nextSlide, 4000)
     }
 
@@ -260,6 +263,23 @@ const { posts, locale = defaultLocale } = Astro.props;
       // 鼠标悬停暂停自动播放
       container.addEventListener('mouseenter', stopAutoPlay, { signal: controller.signal })
       container.addEventListener('mouseleave', startAutoPlay, { signal: controller.signal })
+      container.addEventListener('focusin', stopAutoPlay, { signal: controller.signal })
+      container.addEventListener('focusout', (event) => {
+        if (!(event.relatedTarget instanceof Node) || !container.contains(event.relatedTarget))
+          startAutoPlay()
+      }, { signal: controller.signal })
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden)
+          stopAutoPlay()
+        else
+          startAutoPlay()
+      }, { signal: controller.signal })
+      reducedMotion.addEventListener('change', () => {
+        if (reducedMotion.matches)
+          stopAutoPlay()
+        else
+          startAutoPlay()
+      }, { signal: controller.signal })
     }
 
     disposeCarousel = () => {

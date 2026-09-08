@@ -70,7 +70,8 @@ const {
         transition: box-shadow 0.3s ease, transform 0.1s ease;
         will-change: transform, left, top;
 
-        &:hover {
+        &:hover,
+        &:focus-within {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 
             .copy-button {
@@ -131,6 +132,13 @@ const {
 
         &:active {
             transform: translateY(0) scale(0.95);
+        }
+
+        &:focus-visible {
+            opacity: 1;
+            transform: none;
+            outline: 2px solid rgb(var(--color-primary));
+            outline-offset: 2px;
         }
     }
 
