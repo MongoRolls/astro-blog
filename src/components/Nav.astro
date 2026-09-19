@@ -59,10 +59,10 @@ const navLinks = getSiteConfig(locale).headerNavLinks || [];
                         </ul>
                     </div>
 
-                    <div class="nav-actions flex items-center gap-0.5 sm:gap-1">
-                        <div class="w-11 h-11 md:w-8 md:h-8"><Search locale={locale} /></div>
+                    <div class="nav-actions flex items-center gap-0.5">
+                        <Search locale={locale} />
                         <LanguageToggle locale={locale} href={languageUrl} exactMatch={exactLanguageMatch} />
-                        <div class="w-11 h-11 md:w-8 md:h-8"><ThemeToggle locale={locale} /></div>
+                        <ThemeToggle locale={locale} />
                     </div>
                 </div>
             </div>
@@ -167,6 +167,47 @@ const navLinks = getSiteConfig(locale).headerNavLinks || [];
         border-radius: 999px;
         background: rgb(var(--color-bg-main) / 0.5);
         box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    }
+    .nav-actions :global(.nav-action) {
+        position: relative;
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        color: rgb(var(--color-text-main));
+        background: transparent;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+    }
+
+    .nav-actions :global(.nav-action:hover) {
+        background: var(--link-bg-hover);
+    }
+
+    .nav-actions :global(.nav-action:active) {
+        background: var(--link-bg-active);
+    }
+
+    .nav-actions :global(.nav-action:focus-visible) {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }
+
+    .nav-actions :global(.nav-action > svg) {
+        width: 20px;
+        height: 20px;
+    }
+
+    @media (max-width: 767px) {
+        .nav-actions :global(.nav-action) {
+            width: 44px;
+            height: 44px;
+        }
     }
 </style>
 

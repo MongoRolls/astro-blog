@@ -2,18 +2,19 @@
 import type { Locale } from '../i18n/config'
 import { defaultLocale, localizedPath } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
+import IconButton from './IconButton.astro'
 
 type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
 ---
 
-<button type="button" class="flex items-center justify-center w-full h-full rounded-full text-main hover:text-blue-500 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer transition-colors duration-200" id="search-icon" aria-label={t.search.button}>
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+<IconButton type="button" class="nav-action" id="search-icon" aria-label={t.search.button} title={t.search.button}>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="10.75" cy="10.75" r="7.25"></circle>
+    <path d="m16 16 4.5 4.5"></path>
   </svg>
-</button>
+</IconButton>
 
 <div
   class="hidden"

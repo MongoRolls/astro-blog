@@ -2,40 +2,28 @@
 import type { Locale } from '../i18n/config'
 import { defaultLocale } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
+import IconButton from './IconButton.astro'
 
 type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
 ---
 
-<button
+<IconButton
   id="theme-toggle"
-  class="theme-toggle-btn"
+  class="nav-action"
   type="button"
   aria-label={t.theme}
   title={t.theme}
 >
-  <!-- 太阳图标 -->
-  <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-    <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+  <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
   </svg>
-
-  <!-- 月亮图标 -->
-  <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-    <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
-    <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path>
-    <path d="M19 11h2m-1 -1v2"></path>
+  <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
   </svg>
-</button>
+</IconButton>
 
 <script>
 let disposeThemeToggle = () => {}
@@ -69,77 +57,14 @@ document.addEventListener('astro:before-swap', () => disposeThemeToggle())
 </script>
 
 <style>
-.theme-toggle-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: color 150ms ease, background-color 150ms ease, transform 80ms ease-in-out;
-  padding: 4px;
-}
-
-.theme-toggle-btn:hover {
-  color: rgb(var(--color-primary));
-  background: rgb(var(--color-text-main) / 0.08);
-  transform: scale(1.05);
-}
-
-.theme-toggle-btn:focus-visible {
-  outline: 2px solid rgb(var(--color-primary));
-  outline-offset: 2px;
-}
-
-.theme-toggle-btn:active {
-  transform: scale(0.95);
-}
-
 .sun-icon,
 .moon-icon {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  transition: all 0.08s ease-in-out;
-  color: currentColor;
+  transition: opacity 150ms ease;
 }
 
-/* 默认状态：浅色模式显示太阳，深色模式显示月亮 */
-.sun-icon {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.moon-icon {
-  opacity: 0;
-  transform: scale(0);
-}
-
-/* 深色模式下的图标状态 */
-:global(.dark) .sun-icon {
-  opacity: 0;
-  transform: scale(0);
-}
-
-:global(.dark) .moon-icon {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* 深色模式下的样式调整 */
-
-/* 图标颜色适应主题 */
-.sun-icon,
-.moon-icon {
-  color: currentColor;
-}
-
-:global(.dark) .sun-icon,
-:global(.dark) .moon-icon {
-  color: currentColor;
-}
+.sun-icon { opacity: 1; }
+.moon-icon { opacity: 0; }
+:global(.dark) .sun-icon { opacity: 0; }
+:global(.dark) .moon-icon { opacity: 1; }
 </style>

@@ -4,79 +4,139 @@ import { defaultLocale } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
 
 interface Props {
-    headings: {
-        depth: number
-        slug: string
-        text: string
-    }[]
-    locale?: Locale
+  headings: { depth: number, slug: string, text: string }[]
+  locale?: Locale
 }
 
 const { headings, locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
-const toc = headings.filter(({ depth }) => depth > 1 && depth < 4)
+const toc = headings.filter(({ depth }) => depth === 2 || depth === 3)
+const groups: { heading: typeof toc[number], children: typeof toc }[] = []
+for (const heading of toc) {
+  if (heading.depth === 3 && groups.at(-1)?.heading.depth === 2)
+    groups.at(-1)!.children.push(heading)
+  else
+    groups.push({ heading, children: [] })
+}
 ---
 
-<nav data-pagefind-ignore class="toc hidden lg:block h-full" aria-label={t.common.content}>
-    <div class="sticky top-24 max-h-[70vh] overflow-y-auto">
-        <h2 class="font-serif italic mb-3 text-xs leading-4 font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider ml-4">{t.common.content}</h2>
-        <ul class="space-y-1 text-xs leading-4 border-l border-gray-200 dark:border-gray-800">
-        {
-                toc.map(heading => (
-                    <li
-                      class:list={[
-                            'toc-item line-clamp-1 relative flex items-center',
-                            {
-                                'pl-4': heading.depth === 2,
-                                'pl-6': heading.depth === 3,
-                            },
-                        ]}
-                    >
-                        {heading.depth === 3 && <span class="text-gray-500 dark:text-gray-400 pr-2 font-semibold">-</span>}
-                        <a
-                          href={`#${heading.slug}`}
-                          title={heading.text}
-                          class="truncate block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200"
-                        >{heading.text}
-                        </a>
-                    </li>
-                ))
-            }
+<nav data-pagefind-ignore class="toc" aria-label={t.common.content}>
+  <div class="toc-panel">
+    <div class="toc-scroll">
+      <div class="toc-outline">
+        <span class="toc-indicator" aria-hidden="true"></span>
+        <ul class="toc-list">
+          {groups.map(({ heading, children }, index) => (
+            <li class="toc-section">
+              <div class="toc-row">
+                <a class="toc-link toc-chapter" href={`#${heading.slug}`} data-heading-id={heading.slug}>{heading.text}</a>
+                {children.length > 0 && (
+                  <button class="toc-toggle" type="button" aria-label={`${locale === 'en' ? 'Toggle subsections:' : '展开或收起子章节：'}${heading.text}`} aria-expanded="true" aria-controls={`toc-children-${index}`}>
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="m5 6 3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  </button>
+                )}
+              </div>
+              {children.length > 0 && (
+                <div class="toc-branch" id={`toc-children-${index}`}>
+                  <ul class="toc-children">
+                    {children.map(child => (
+                      <li><a class="toc-link" href={`#${child.slug}`} data-heading-id={child.slug}>{child.text}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          ))}
         </ul>
+      </div>
     </div>
+    <div class="toc-footer">
+      <svg class="toc-divider" viewBox="0 0 160 12" fill="none" aria-hidden="true"><path d="M1 5C18 10 28 10 42 6S65 2 81 5s24 5 40 1 24-3 38-1" /></svg>
+      <div class="toc-status">
+        <span class="toc-progress" role="progressbar" aria-label={locale === 'en' ? 'Reading progress' : '阅读进度'} aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle class="toc-ring-track" cx="10" cy="10" r="7" /><circle class="toc-ring" cx="10" cy="10" r="7" pathLength="100" /></svg>
+          <span class="toc-percent">0%</span>
+        </span>
+        <button class="toc-top" type="button">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M8 12V4m-4 4 4-4 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          {t.common.backToTop}
+        </button>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <style>
-    @reference "../styles/global.css";
+  .toc {
+    --toc-ink: #425bc5;
+    height: 100%;
+    min-width: 0;
+    padding-left: 1.5rem;
+  }
 
-    .toc {
-        width: 100%;
-        min-width: 0;
-        padding-left: 1rem;
-    }
+  :global(html.dark) .toc { --toc-ink: rgb(var(--color-primary)); }
+  .toc-panel { position: sticky; top: 6rem; display: flex; flex-direction: column; max-height: calc(100dvh - 8rem); }
+  .toc-scroll { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(var(--color-border-card)) transparent; padding: 4px; }
+  .toc-outline { position: relative; }
+  .toc-list, .toc-children { list-style: none; padding: 0; margin: 0; }
+  .toc-row { display: flex; align-items: flex-start; }
+  .toc-link {
+    display: block;
+    min-width: 0;
+    padding: 3px 4px 3px 15px;
+    color: rgb(var(--color-text-muted));
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: color 180ms ease;
+  }
 
-    .toc-item {
-        line-height: 1rem;
-        font-size: 0.75rem;
-    }
+  .toc-chapter { flex: 1; }
+  .toc-link:hover { color: rgb(var(--color-text-main)); }
+  .toc-section[data-current] > .toc-row .toc-chapter { color: var(--toc-ink); font-weight: 500; }
+  .toc-link[aria-current="location"] { color: var(--toc-ink); font-weight: 600; }
+  .toc-children .toc-link { padding-left: 26px; font-size: 0.75rem; }
+  .toc-branch { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 240ms ease, opacity 180ms ease; }
+  .toc-children { min-height: 0; overflow: hidden; }
+  .toc-branch[data-collapsed] { grid-template-rows: 0fr; opacity: 0; }
 
-    /* 激活状态的样式 */
-    .toc-item.active > a {
-        @apply text-blue-600 dark:text-blue-400 font-semibold translate-x-0.5 scale-105;
-    }
+  .toc-toggle { display: none; flex: 0 0 24px; min-height: 28px; align-items: center; justify-content: center; background: none; border: 0; color: rgb(var(--color-text-muted)); cursor: pointer; }
+  .toc[data-ready] .toc-toggle { display: flex; }
+  .toc-toggle:hover { color: var(--toc-ink); }
+  .toc-toggle svg { transition: transform 200ms ease; }
+  .toc-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
+  .toc-link:focus-visible, .toc-toggle:focus-visible, .toc-top:focus-visible { outline: 2px solid var(--toc-ink); outline-offset: -1px; border-radius: 3px; }
 
-    .toc-item.active::before {
-        content: "";
-        position: absolute;
-        left: -1px;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        border-radius: 4px;
-        transition: all 0.15s ease-in-out;
-        @apply bg-blue-600 dark:bg-blue-400;
-    }
+  .toc-indicator {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--toc-ink) 80%, transparent);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--toc-ink) 25%, transparent);
+    pointer-events: none;
+    transition: top 280ms cubic-bezier(0.4, 0, 0.2, 1), height 240ms ease;
+  }
 
+  .toc[data-ready] .toc-indicator { display: block; }
+  .toc-footer { display: none; flex-shrink: 0; padding: 10px 4px 0; }
+  .toc[data-ready] .toc-footer { display: block; }
+  .toc-divider { width: 140px; max-width: 85%; height: 12px; color: rgb(var(--color-border-card)); }
+  .toc-divider path { stroke: currentColor; stroke-width: 1; }
+  .toc-status { display: flex; flex-wrap: wrap; align-items: center; column-gap: 16px; margin-top: 5px; }
+  .toc-progress { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; color: rgb(var(--color-text-main)); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+  .toc-progress circle { fill: none; stroke-width: 1.8; }
+  .toc-ring-track { stroke: rgb(var(--color-border-card)); }
+  .toc-ring { stroke: var(--toc-ink); stroke-dasharray: 100; stroke-dashoffset: var(--remaining, 100); transform: rotate(-90deg); transform-origin: center; stroke-linecap: round; }
+  .toc-top { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; border: 0; padding: 0; background: none; font-size: 0.6875rem; color: rgb(var(--color-text-muted)); cursor: pointer; }
+  .toc-top:hover { color: var(--toc-ink); }
+  @media (pointer: coarse) { .toc-toggle, .toc-top { min-height: 44px; } }
+  @media (min-width: 1024px) {
+    :global(body:has(.toc[data-ready]) .reading-progress), :global(body:has(.toc[data-ready]) .back-to-top) { display: none; }
+  }
 </style>
 
 <script>
@@ -84,59 +144,128 @@ let disposeTableOfContents = () => {}
 
 document.addEventListener('astro:page-load', () => {
   disposeTableOfContents()
-
+  const nav = document.querySelector<HTMLElement>('.toc')
+  if (!nav)
+    return
+  const scroller = nav.querySelector<HTMLElement>('.toc-scroll')!
+  const outline = nav.querySelector<HTMLElement>('.toc-outline')!
+  const indicator = nav.querySelector<HTMLElement>('.toc-indicator')!
+  const progress = nav.querySelector<HTMLElement>('.toc-progress')!
+  const percentLabel = nav.querySelector<HTMLElement>('.toc-percent')!
+  const sections = Array.from(nav.querySelectorAll<HTMLElement>('.toc-section'))
+  const entries = Array.from(nav.querySelectorAll<HTMLAnchorElement>('[data-heading-id]'))
+    .flatMap((link) => {
+      const heading = document.getElementById(link.dataset.headingId!)
+      return heading ? [{ link, heading, top: 0 }] : []
+    })
+  if (!entries.length)
+    return
+  const content = entries[0].heading.closest<HTMLElement>('.prose') ?? entries[0].heading.closest('article')!
+  const chapters = sections.map(section => entries.find(entry => entry.link === section.querySelector('.toc-chapter'))!)
   const controller = new AbortController()
-  // 记录当前活跃的目录项ID
-  let activeId = ''
+  const overrides = new Map<number, boolean>()
+  let frame = 0
+  let dirty = true
+  let outlineChanged = true
+  let end = 0
+  let offset = 96
+  let activeChapter = -1
+  let activeLink: HTMLAnchorElement | undefined
 
-  // 创建交叉观察器
-  const observer = new IntersectionObserver(
-    (entries) => {
-      // 获取所有当前可见的标题元素
-      const visibleHeadings = entries
-        .filter(entry => entry.isIntersecting)
-        .map(entry => entry.target)
-
-      if (visibleHeadings.length > 0) {
-        // 按照在视口中的位置排序，选择最靠近顶部的标题
-        const topHeading = Array.from(visibleHeadings).sort((a, b) => {
-          return Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top)
-        })[0]
-
-        const id = topHeading.getAttribute('id')
-
-        // 只有在活跃ID变化时才更新DOM
-        if (id && id !== activeId) {
-          activeId = id
-
-          // 移除所有当前活跃项
-          document.querySelectorAll('.toc-item.active').forEach(item =>
-            item.classList.remove('active'))
-
-          // 添加新的活跃项
-          const tocItem = document.querySelector(`.toc-item a[href="#${id}"]`)?.parentElement
-          tocItem?.classList.add('active')
-        }
-      }
-    },
-    // {
-    //     // rootMargin值解释:
-    //     // 顶部-10%: 标题必须至少进入视口10%才被考虑
-    //     // 底部-70%: 忽略视口底部70%区域内的标题
-    //     // 这样可以更好地突出当前阅读区域的标题
-    //     // rootMargin: '-10% 0px -70% 0px'
-    // }
-
-  )
-
-  // 观察所有标题元素
-  document.querySelectorAll('main h2[id], main h3[id]').forEach((heading) => {
-    observer.observe(heading)
+  const update = () => {
+    frame = 0
+    if (!nav.getClientRects().length)
+      return
+    if (dirty) {
+      offset = Number.parseFloat(getComputedStyle(entries[0].heading).scrollMarginTop) || 96
+      entries.forEach(entry => entry.top = entry.heading.getBoundingClientRect().top + window.scrollY)
+      end = Math.max(content.getBoundingClientRect().bottom + window.scrollY, entries.at(-1)!.top + 1)
+      dirty = false
+    }
+    const start = entries[0].top
+    const position = Math.min(Math.max(window.scrollY + offset + 2, start), end)
+    const percent = Math.round((position - start) / Math.max(end - start, 1) * 100)
+    percentLabel.textContent = `${percent}%`
+    progress.setAttribute('aria-valuenow', String(percent))
+    progress.style.setProperty('--remaining', String(100 - percent))
+    let current = entries[0]
+    for (const entry of entries) {
+      if (entry.top > position)
+        break
+      current = entry
+    }
+    const chapterIndex = chapters.reduce((index, chapter, next) => chapter.top <= position ? next : index, 0)
+    if (chapterIndex !== activeChapter) {
+      activeChapter = chapterIndex
+      overrides.delete(chapterIndex)
+    }
+    sections.forEach((section, index) => {
+      section.toggleAttribute('data-current', index === chapterIndex)
+      const branch = section.querySelector<HTMLElement>('.toc-branch')
+      const toggle = section.querySelector<HTMLButtonElement>('.toc-toggle')
+      if (!branch || !toggle)
+        return
+      // Never collapse the branch containing the reader's keyboard focus.
+      const expanded = branch.contains(document.activeElement) || (overrides.get(index) ?? index === chapterIndex)
+      branch.toggleAttribute('data-collapsed', !expanded)
+      branch.inert = !expanded
+      branch.setAttribute('aria-hidden', String(!expanded))
+      toggle.setAttribute('aria-expanded', String(expanded))
+    })
+    const branch = current.link.closest<HTMLElement>('.toc-branch')
+    const visibleLink = branch?.inert ? chapters[chapterIndex].link : current.link
+    const activeChanged = activeLink !== visibleLink
+    if (activeChanged) {
+      activeLink?.removeAttribute('aria-current')
+      activeLink = visibleLink
+      activeLink.setAttribute('aria-current', 'location')
+    }
+    if (activeChanged || outlineChanged) {
+      const rect = visibleLink.getBoundingClientRect()
+      const viewport = scroller.getBoundingClientRect()
+      if (!nav.contains(document.activeElement) && (rect.top < viewport.top || rect.bottom > viewport.bottom))
+        scroller.scrollTop += rect.top - viewport.top - scroller.clientHeight / 2
+    }
+    outlineChanged = false
+    const section = sections[chapterIndex]
+    indicator.style.top = `${section.offsetTop}px`
+    indicator.style.height = `${section.getBoundingClientRect().height}px`
+  }
+  const schedule = () => {
+    if (!frame)
+      frame = requestAnimationFrame(update)
+  }
+  const remeasure = () => {
+    dirty = true
+    schedule()
+  }
+  sections.forEach((section, index) => {
+    section.querySelector('.toc-toggle')?.addEventListener('click', (event) => {
+      const toggle = event.currentTarget as HTMLButtonElement
+      overrides.set(index, toggle.getAttribute('aria-expanded') !== 'true')
+      schedule()
+    }, { signal: controller.signal })
   })
-
+  nav.addEventListener('focusout', schedule, { signal: controller.signal })
+  nav.querySelector('.toc-top')!.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+  }, { signal: controller.signal })
+  window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal })
+  window.addEventListener('resize', remeasure, { signal: controller.signal })
+  const contentObserver = new ResizeObserver(remeasure)
+  contentObserver.observe(content)
+  const outlineObserver = new ResizeObserver(() => {
+    outlineChanged = true
+    schedule()
+  })
+  outlineObserver.observe(outline)
+  nav.dataset.ready = ''
+  update()
   disposeTableOfContents = () => {
     controller.abort()
-    observer.disconnect()
+    contentObserver.disconnect()
+    outlineObserver.disconnect()
+    cancelAnimationFrame(frame)
   }
 })
 
