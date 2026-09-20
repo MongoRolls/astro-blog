@@ -12,20 +12,10 @@ import { alternateLocale, defaultLocale, localizedPath } from '../../i18n/config
 import { useTranslations } from '../../i18n/ui'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { slugify } from '../../utils/common-utils'
-import { getPostSlug, getPostTranslation, getPostUrl, getPublishedBlogPosts } from '../../utils/data-utils'
+import { getBlogPostStaticPaths, getPostTranslation, getPostUrl } from '../../utils/data-utils'
 
-export async function getStaticPaths() {
-    const posts = await getPublishedBlogPosts(defaultLocale)
-    const postCount = posts.length
-
-    return posts.map((post, index) => ({
-        params: { id: getPostSlug(post) },
-        props: {
-            post,
-            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
-            nextPost: index !== 0 ? posts[index - 1] : null,
-        },
-    }))
+export function getStaticPaths() {
+    return getBlogPostStaticPaths(defaultLocale)
 }
 
 type Props = {

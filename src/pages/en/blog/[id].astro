@@ -1,26 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content'
-import { getPostSlug, getPublishedBlogPosts } from '../../../utils/data-utils'
+import { getBlogPostStaticPaths } from '../../../utils/data-utils'
 import BlogPostPage from '../../blog/[id].astro'
 
-export async function getStaticPaths() {
-  const posts = await getPublishedBlogPosts('en')
-  const postCount = posts.length
-
-  return posts.map((post, index) => ({
-    params: { id: getPostSlug(post) },
-    props: {
-      post,
-      prevPost: index + 1 !== postCount ? posts[index + 1] : null,
-      nextPost: index !== 0 ? posts[index - 1] : null,
-    },
-  }))
-}
-
-type Props = {
-  post: CollectionEntry<'blog'>
-  prevPost: CollectionEntry<'blog'> | null
-  nextPost: CollectionEntry<'blog'> | null
+export function getStaticPaths() {
+  return getBlogPostStaticPaths('en')
 }
 
 const { post, prevPost, nextPost } = Astro.props

@@ -5,16 +5,10 @@ import type { Locale } from '../i18n/config'
 import { render } from 'astro:content'
 import { alternateLocale, defaultLocale } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPageSlug, getPageTranslation, getPageUrl, getPublishedPages } from '../utils/data-utils'
+import { getContentPageStaticPaths, getPageTranslation, getPageUrl } from '../utils/data-utils'
 
-export async function getStaticPaths() {
-    const pages = await getPublishedPages(defaultLocale)
-    return pages.map((page) => {
-        return {
-            params: { id: getPageSlug(page) },
-            props: { page },
-        }
-    })
+export function getStaticPaths() {
+    return getContentPageStaticPaths(defaultLocale)
 }
 
 type Props = { page: CollectionEntry<'pages'>, locale?: Locale }

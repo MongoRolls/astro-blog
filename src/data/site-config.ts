@@ -1,16 +1,15 @@
 import type { Locale } from '../i18n/config'
 import { localizedPath } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 
 export interface Image {
   src: string
   alt?: string
-  caption?: string
 }
 
 export interface Link {
   text: string
   href: string
-  icon?: string
 }
 
 export interface Friend {
@@ -57,37 +56,6 @@ const siteConfig: SiteConfig = {
     src: '/logo.png',
     alt: 'MongoRolls 技术博客',
   },
-  headerNavLinks: [
-    // {
-    //     text: 'Home',
-    //     href: '/'
-    // },
-    // {
-    //     text: 'Projects',
-    //     href: '/projects'
-    // },
-    {
-      text: 'Post',
-      href: '/post',
-    },
-    {
-      text: 'Blog',
-      href: '/blog',
-    },
-    {
-      text: 'Tags',
-      href: '/tags',
-    },
-    // {
-    //     text: 'Friends',
-    //     href: '/friends'
-    // },
-    {
-      text: 'About',
-      href: '/about',
-    },
-
-  ],
   socialLinks: [
     {
       text: 'github',
@@ -156,6 +124,7 @@ const localizedMetadata = {
 
 export function getSiteConfig(locale: Locale): SiteConfig {
   const metadata = localizedMetadata[locale]
+  const t = useTranslations(locale)
   return {
     ...siteConfig,
     subtitle: metadata.subtitle,
@@ -167,10 +136,10 @@ export function getSiteConfig(locale: Locale): SiteConfig {
       ? { ...siteConfig.image, alt: metadata.imageAlt }
       : undefined,
     headerNavLinks: [
-      { text: locale === 'zh-CN' ? '文章' : 'Posts', href: localizedPath(locale, '/post/') },
-      { text: locale === 'zh-CN' ? '博客' : 'Blog', href: localizedPath(locale, '/blog/') },
-      { text: locale === 'zh-CN' ? '标签' : 'Tags', href: localizedPath(locale, '/tags/') },
-      { text: locale === 'zh-CN' ? '关于' : 'About', href: localizedPath(locale, '/about/') },
+      { text: t.nav.post, href: localizedPath(locale, '/post/') },
+      { text: t.nav.blog, href: localizedPath(locale, '/blog/') },
+      { text: t.nav.tags, href: localizedPath(locale, '/tags/') },
+      { text: t.nav.about, href: localizedPath(locale, '/about/') },
     ],
     socialLinks: siteConfig.socialLinks?.map(link => link.text === 'RSS'
       ? { ...link, href: localizedPath(locale, '/rss.xml') }
