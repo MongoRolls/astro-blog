@@ -56,7 +56,7 @@ const { minutesRead } = remarkPluginFrontmatter;
         <article data-pagefind-body class="w-full lg:max-w-[674px]">
             <header class="mb-8">
                 <img src={getPostCoverSrc(post.data)} alt={coverImage?.alt ?? t.post.coverAlt(title)} class="w-full h-auto rounded-lg mb-3" width="1200" height="630" loading="eager" fetchpriority="high" decoding="async" />
-                <h1 data-pagefind-meta="title" class="text-[1.75rem] leading-snug [overflow-wrap:anywhere] font-serif text-[#425bc5] font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+                <h1 data-pagefind-meta="title" class="text-[1.75rem] leading-snug [overflow-wrap:anywhere] font-serif text-brand font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm leading-relaxed space-y-1">
                     <div class="text-base">{t.post.published}: <FormattedDate date={publishDate} locale={locale} /></div>
                     {
@@ -69,8 +69,8 @@ const { minutesRead } = remarkPluginFrontmatter;
                             </>
                         )
                     }
-                    <div class="text-gray-500 text-base">{t.post.author}: {author}</div>
-                    <div class="text-gray-500 text-base">{minutesRead} {t.post.minutesRead}</div>
+                    <div class="text-muted text-base">{t.post.author}: {author}</div>
+                    <div class="text-muted text-base">{minutesRead} {t.post.minutesRead}</div>
                 </div>
                 <div class="w-full h-[1px] bg-gray-400 my-4" />
             </header>

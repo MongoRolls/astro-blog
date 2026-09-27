@@ -160,7 +160,7 @@ function initSearchFeature() {
   let isOpen = false
   let requestId = 0
 
-  function createMessage(text: string, className = 'text-gray-500') {
+  function createMessage(text: string, className = 'text-muted') {
     const message = document.createElement('div')
     message.className = `w-full min-h-48 flex justify-center items-center ${className}`
     message.textContent = text
@@ -173,7 +173,7 @@ function initSearchFeature() {
 
   function createExcerpt(excerpt: string) {
     const paragraph = document.createElement('p')
-    paragraph.className = 'text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mt-1 ml-2'
+    paragraph.className = 'text-muted text-sm line-clamp-2 mt-1 ml-2'
     const parsed = new DOMParser().parseFromString(excerpt, 'text/html')
 
     function appendSafeNodes(source: Node, target: Node) {
@@ -197,16 +197,16 @@ function initSearchFeature() {
   function renderResults(data: SearchResult[]) {
     const fragment = document.createDocumentFragment()
     const count = document.createElement('div')
-    count.className = 'text-sm text-gray-500 mb-3 px-1'
+    count.className = 'text-sm text-muted mb-3 px-1'
     count.textContent = data.length === 1 ? resultOne : resultTemplate.replace('{count}', String(data.length))
     fragment.appendChild(count)
 
     data.forEach(({ excerpt, meta, url }) => {
       const card = document.createElement('div')
-      card.className = 'bg-white dark:bg-zinc-700 p-3 rounded-lg shadow-md border border-gray-100 dark:border-zinc-600'
+      card.className = 'search-result bg-white dark:bg-zinc-700 p-3 rounded-lg shadow-md border border-gray-100 dark:border-zinc-600'
       const link = document.createElement('a')
       link.href = url
-      link.className = 'text-blue-500 hover:text-blue-600 font-medium text-lg'
+      link.className = 'text-brand hover:underline font-medium text-lg'
       link.textContent = meta.title
       card.append(link, createExcerpt(excerpt))
       fragment.appendChild(card)
@@ -345,6 +345,14 @@ document.addEventListener('astro:before-swap', () => disposeSearch())
 </script>
 
 <style>
+  :global(.dark) #search-backdrop { background: rgb(var(--color-bg-main) / 0.55); }
+  :global(.dark) #search-container { background: rgb(var(--color-bg-card) / 0.96); border-color: rgb(var(--color-border-card)); }
+  :global(.dark) #search-input { background: rgb(var(--color-bg-main)); color: rgb(var(--color-text-main)); border-color: rgb(var(--color-primary) / 0.65); }
+  :global(.dark) #search-input::placeholder { color: rgb(var(--color-text-muted)); }
+  :global(.dark) #search-close { background: rgb(var(--color-bg-muted)); color: rgb(var(--color-text-main)); }
+  :global(.dark .search-result) { background: rgb(var(--color-bg-main)); border-color: rgb(var(--color-border-card)); }
+  :global(.dark .search-result mark) { background: rgb(var(--color-primary) / 0.18); color: rgb(var(--color-brand)); }
+
   #search-container {
     --search-top: min(5rem, 10dvh);
     top: var(--search-top);

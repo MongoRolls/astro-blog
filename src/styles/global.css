@@ -3,9 +3,14 @@
 
 @layer base {
   :root {
+    /* 正文最大宽度，明暗主题保持一致 */
+    --content-width: 674px;
+
     /* 主题色 - 使用CSS变量便于全局控制和暗色模式适配 */
     --color-primary: 14, 165, 233; /* sky-500 */
     --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
+    --color-brand: 66 91 197;
+    --color-accent-secondary: 232 121 249;
     --color-secondary: 236, 72, 153; /* pink-500 */
 
     /* 文本颜色 */
@@ -34,34 +39,29 @@
     --link-bg-active: rgba(55, 53, 47, 0.12);
   }
 
-  /* 暗色模式变量 */
+  /* Catppuccin Mocha: https://github.com/catppuccin/catppuccin */
   html.dark {
-    /* 文本颜色 */
-    --color-text-main: 244 246 255;
-    --color-text-p: 214 218 236;
-    --color-text-muted: 148 153 176;
-    /* 背景颜色 */
-    --color-bg-main: 15 15 16;
-    --color-bg-muted: 30 41 59; /* #1e293b */
-    --color-bg-card: 31 31 34;
-    /* 主题色 */
-    --color-primary: 92 124 255;
-    --color-primary-dark: 76 105 220;
-    --color-primary-glow: 140 170 255;
-    /* 边框颜色 */
-    --color-border-main: 48 48 52;
-    --color-border-card: 62 66 76;
-    /* 卡片特效 */
-    --card-shadow: 0 18px 35px rgba(8, 10, 20, 0.55),
-      0 6px 14px rgba(25, 31, 55, 0.35);
-    --card-shadow-hover: 0 24px 50px rgba(6, 8, 18, 0.7),
-      0 10px 22px rgba(40, 50, 95, 0.45);
+    color-scheme: dark;
+    --color-text-main: 205 214 244;
+    --color-text-p: 186 194 222;
+    --color-text-muted: 166 173 200;
+    --color-bg-main: 30 30 46;
+    --color-bg-muted: 49 50 68;
+    --color-bg-card: 24 24 37;
+    --color-primary: 137 180 250;
+    --color-primary-dark: 180 190 254;
+    --color-primary-glow: 180 190 254;
+    --color-brand: 180 190 254;
+    --color-accent-secondary: 203 166 247;
+    --color-secondary: 203, 166, 247;
+    --color-border-main: 108 112 134;
+    --color-border-card: 69 71 90;
+    --card-shadow: 0 8px 24px rgb(17 17 27 / 0.25);
+    --card-shadow-hover: 0 14px 32px rgb(17 17 27 / 0.4);
     --card-border-blur: 12px;
-
-    /* 链接颜色（暗色） */
-    --link-fg: rgba(230, 230, 227, 0.95);
-    --link-bg-hover: rgba(255, 255, 255, 0.12);
-    --link-bg-active: rgba(255, 255, 255, 0.18);
+    --link-fg: rgb(205 214 244);
+    --link-bg-hover: rgb(180 190 254 / 0.1);
+    --link-bg-active: rgb(180 190 254 / 0.17);
   }
 
   /* 基础字体设置，确保页面默认使用自定义的中英文字体 */
@@ -213,4 +213,26 @@ main :where(h2[id], h3[id]) {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Semantic accents also cover titles outside the Markdown typography wrapper. */
+.text-brand { color: rgb(var(--color-brand)); }
+.text-muted { color: rgb(var(--color-text-muted)); }
+html.dark ::selection { background: rgb(180 190 254 / 0.25); color: rgb(var(--color-text-main)); }
+html.dark .post-link-text { background-image: linear-gradient(90deg, rgb(var(--color-primary)), rgb(var(--color-accent-secondary))); }
+html.dark .prose { --tw-prose-invert-bullets: rgb(var(--color-text-muted)); --tw-prose-invert-hr: rgb(var(--color-border-card)); }
+html.dark .prose a { color: rgb(var(--color-primary)); text-decoration-color: rgb(var(--color-primary) / 0.4); }
+html.dark .prose summary { color: rgb(var(--color-brand)); }
+html.dark .prose :not(pre) > code {
+  background: rgb(var(--color-bg-muted) / 0.8);
+  color: rgb(var(--color-primary));
+  border-color: rgb(var(--color-border-card));
+}
+html.dark .astro-code,
+html.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }

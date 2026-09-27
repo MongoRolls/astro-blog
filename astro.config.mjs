@@ -45,6 +45,7 @@ export default defineConfig({
   },
   redirects,
   markdown: {
+    shikiConfig: { themes: { light: 'github-light', dark: 'catppuccin-mocha' } },
     processor: unified({
       remarkPlugins: [remarkReadingTime, remarkAlert, remarkReplaceLinks],
     }),

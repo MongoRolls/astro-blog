@@ -11,7 +11,8 @@ const currentPath = normalizePath(pathname)
 const linkPath = typeof href === 'string'
   ? normalizePath(new URL(href, Astro.url).pathname)
   : ''
-const isActive = Boolean(linkPath) && (linkPath === '/'
+const isInternal = typeof href === 'string' && new URL(href, Astro.url).origin === Astro.url.origin
+const isActive = isInternal && Boolean(linkPath) && (linkPath === '/'
   ? currentPath === '/'
   : currentPath === linkPath || currentPath.startsWith(`${linkPath}/`))
 ---

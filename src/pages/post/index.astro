@@ -17,49 +17,78 @@ const sortedBlogPosts = await getPublishedBlogPosts(locale)
 >
     <h1 class="text-xl text-center leading-tight font-serif font-bold sm:text-3xl mb-3">Posts</h1>
 
-    <h2 class="text-lg text-center leading-tight font-serif font-medium sm:text-xl my-8">
+    <p class="archive-intro">
         {locale === 'zh-CN' ? '记录知识与思考沿途碰撞的痕迹' : 'Notes from the intersection of knowledge and thought'}
-    </h2>
-    <div class="archive-list mx-auto max-w-2xl">
+    </p>
+    <ul class="archive-list mx-auto max-w-2xl">
         {sortedBlogPosts.map((post) => {
             return (
-                <div class="archive-row">
-                    <span class="archive-date font-serif"><FormattedDate format="iso" date={post.data.publishDate} locale={locale} /></span>
+                <li class="archive-row">
+                    <span class="archive-date"><FormattedDate format="iso" date={post.data.publishDate} locale={locale} /></span>
                     <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
-                </div>
+                </li>
             )
         })}
-    </div>
+    </ul>
   </BaseLayout>
 
 <style>
+    .archive-intro {
+        margin: 1rem 0 2.5rem;
+        color: rgb(var(--color-text-muted));
+        text-align: center;
+        font-size: 1rem;
+        line-height: 1.8;
+        text-wrap: balance;
+    }
+
     .archive-list {
-        display: grid;
-        gap: 1rem;
+        padding: 0;
+        list-style: none;
     }
 
     .archive-row {
         display: grid;
-        grid-template-columns: 8rem minmax(0, 1fr);
+        grid-template-columns: 6.5rem minmax(0, 1fr);
+        column-gap: 1.25rem;
         align-items: baseline;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgb(var(--color-border-card) / 0.6);
         line-height: 1.65;
     }
 
     .archive-date {
         white-space: nowrap;
+        font-size: 0.8125rem;
+        font-variant-numeric: tabular-nums;
+        color: rgb(var(--color-text-muted));
+    }
+
+    .archive-row .post-link {
+        color: rgb(var(--color-text-main));
+        font-size: 1.25rem;
+        font-weight: 500;
+        overflow-wrap: anywhere;
+    }
+
+    .archive-row .post-link-text {
+        text-decoration: none;
+    }
+
+    .archive-row .post-link:focus-visible {
+        outline: 2px solid rgb(var(--color-brand));
+        outline-offset: 5px;
+        border-radius: 2px;
     }
 
     @media (max-width: 767px) {
         .archive-row {
             grid-template-columns: minmax(0, 1fr);
             gap: 0.25rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgb(var(--color-border-main) / 0.12);
         }
 
-        .archive-date {
-            font-size: 0.875rem;
-            color: rgb(var(--color-text-muted));
+        .archive-row .post-link {
+            font-size: 1.125rem;
         }
     }
 </style>
