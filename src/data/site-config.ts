@@ -169,6 +169,7 @@ export function getSiteConfig(locale: Locale): SiteConfig {
     headerNavLinks: [
       { text: locale === 'zh-CN' ? '文章' : 'Posts', href: localizedPath(locale, '/post/') },
       { text: locale === 'zh-CN' ? '博客' : 'Blog', href: localizedPath(locale, '/blog/') },
+      { text: locale === 'zh-CN' ? '项目' : 'Projects', href: localizedPath(locale, '/projects/') },
       { text: locale === 'zh-CN' ? '标签' : 'Tags', href: localizedPath(locale, '/tags/') },
       { text: locale === 'zh-CN' ? '关于' : 'About', href: localizedPath(locale, '/about/') },
     ],

@@ -1,0 +1,15 @@
+---
+import type { Locale } from '../../i18n/config'
+import { defaultLocale } from '../../i18n/config'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const title = locale === 'zh-CN' ? '项目' : 'Projects'
+---
+
+<BaseLayout title={title} locale={locale}>
+    <section aria-label={title} class="min-h-[50vh]">
+        <h1 class="sr-only">{title}</h1>
+    </section>
+</BaseLayout>
