@@ -59,13 +59,9 @@ Link: [Pokemon](https://pokemon-tcg-pocket.wiki/)
 
 ## Loading animation
 
-<div style="transform: scale(0.2); width: 0px; height: 0px;">
-  <Load />
-</div>
-
-<div style="height: 160px;"></div>
+<Load replayLabel="Replay animation" imageLabel="Loading animation revealing a rose photo in steps" />
 
 Steps:
 
-1. Calculate values with SCSS variables and custom functions.
-2. Use `mask`, `mask-position`, `mask-size`, and `mask-repeat`.
+1. Create an image mask with `mask-image`.
+2. Reveal the image in steps with `mask-size`, `mask-position`, and `steps()`.

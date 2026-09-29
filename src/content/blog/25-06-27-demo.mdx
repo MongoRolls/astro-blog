@@ -55,13 +55,9 @@ Step:
 
 ## 加载动画
 
-<div style="transform: scale(0.2); width: 0px; height: 0px;">
-  <Load />
-</div>
-
-<div style="height: 160px;"></div>
+<Load />
 
 Step:
 
-1. scss 变量计算，自定义函数
-2. mask mask-position mask-size mask-repeat
+1. 使用 `mask-image` 创建图片遮罩
+2. 通过 `mask-size`、`mask-position` 和 `steps()` 逐格显示图片
