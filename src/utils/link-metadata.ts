@@ -46,7 +46,3 @@ export function getFaviconCandidates(url: string): string[] {
     `https://${domain}/favicon.ico`,
   ]
 }
-
-export function getFaviconUrl(url: string): string {
-  return getFaviconCandidates(url)[0] ?? ''
-}

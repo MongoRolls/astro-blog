@@ -5,6 +5,7 @@ const messages = {
     nav: {
       post: '文章',
       blog: '博客',
+      projects: '项目',
       tags: '标签',
       about: '关于',
       home: '返回首页',
@@ -61,6 +62,7 @@ const messages = {
     nav: {
       post: 'Posts',
       blog: 'Blog',
+      projects: 'Projects',
       tags: 'Tags',
       about: 'About',
       home: 'Back to home',
