@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import type { Locale } from '../i18n/config'
+// 处理contact/about/terms页面
+import { render } from 'astro:content'
+import { defaultLocale } from '../i18n/config'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPageUrl } from '../utils/data-utils'
+
+type Props = { page: CollectionEntry<'pages'>, translation: CollectionEntry<'pages'> | null, locale?: Locale }
+
+const { page, translation, locale = defaultLocale } = Astro.props
+const alternateUrls = {
+    [locale]: getPageUrl(page),
+    ...(translation ? { [translation.data.lang]: getPageUrl(translation) } : {}),
+}
+const { title, seo } = page.data
+const { Content } = await render(page);
+---
+
+<BaseLayout locale={locale} alternateUrls={alternateUrls} languageFallbackPath="/" title={seo?.title ?? title} description={seo?.description} image={seo?.image}>
+    <article data-pagefind-body class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 data-pagefind-meta="title" class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+        </header>
+        <div class="max-w-none prose dark:prose-invert">
+            <Content />
+        </div>
+      </article>
+</BaseLayout>

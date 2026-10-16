@@ -1,12 +1,11 @@
 ---
 import { getBlogPostStaticPaths } from '../../../utils/data-utils'
-import BlogPostPage from '../../blog/[id].astro'
+import BlogPostPage from '../../../views/BlogPostPage.astro'
 
 export function getStaticPaths() {
   return getBlogPostStaticPaths('en')
 }
 
-const { post, prevPost, nextPost } = Astro.props
 ---
 
-<BlogPostPage post={post} prevPost={prevPost} nextPost={nextPost} locale="en" />
+<BlogPostPage {...Astro.props} locale="en" />

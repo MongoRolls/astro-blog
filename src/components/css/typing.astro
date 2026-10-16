@@ -1,22 +1,26 @@
 ---
+interface Props { text: string }
 const { text } = Astro.props
-
-const textLength = text.length;
+const textLength = Array.from(text).length
 ---
 
-<div class="typing">{text}</div>
+<button type="button" class="typing" aria-pressed="false" style={`--textLength: ${textLength}`}>{text}</button>
 
-<style define:vars={{ textLength }}>
-/* 打字效果 */
+<style>
 .typing {
   font-family: monospace;
   font-size: 32px;
   display: inline-block;
   white-space: nowrap;
   overflow: hidden;
-  border-right: 3px solid black;
+  border-right: 3px solid currentColor;
   vertical-align: middle;
   cursor: pointer;
+}
+
+.typing:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
 }
 
 .typing-active {
@@ -30,31 +34,29 @@ const textLength = text.length;
 
 @keyframes blink {
   from, to { border-color: transparent; }
-  50% { border-color: black; }
+  50% { border-color: currentColor; }
 }
 
-/* 暗色模式支持 */
-:global(.dark) .typing {
-  border-right-color: white;
-}
-
-:global(.dark) .typing {
-  animation: typing 4s steps(var(--textLength), end), blinkDark 0.75s step-end infinite;
-}
-
-@keyframes blinkDark {
-  from, to { border-color: transparent; }
-  50% { border-color: white; }
+@media (prefers-reduced-motion: reduce) {
+  .typing-active { animation: none; }
 }
 </style>
 
-
 <script>
-const typing = document.querySelector('.typing')
+let disposeTyping = () => {}
 
-if (typing) {
-  typing.addEventListener('click', () => {
-    typing.classList.toggle('typing-active')
+function initTyping() {
+  disposeTyping()
+  const controller = new AbortController()
+  document.querySelectorAll<HTMLButtonElement>('.typing').forEach((typing) => {
+    typing.addEventListener('click', () => {
+      const active = typing.classList.toggle('typing-active')
+      typing.setAttribute('aria-pressed', String(active))
+    }, { signal: controller.signal })
   })
+  disposeTyping = () => controller.abort()
 }
+
+document.addEventListener('astro:page-load', initTyping)
+document.addEventListener('astro:before-swap', () => disposeTyping())
 </script>

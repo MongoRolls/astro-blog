@@ -2,13 +2,12 @@
 import type { GetStaticPathsOptions } from 'astro'
 import siteConfig from '../../../../data/site-config'
 import { getTagPageStaticPaths } from '../../../../utils/data-utils'
-import TagPage from '../../../tags/[id]/[...page].astro'
+import TagPage from '../../../../views/TagPage.astro'
 
 export function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   return getTagPageStaticPaths('en', paginate, siteConfig.postsPerPage || 4)
 }
 
-const { page, tagName } = Astro.props
 ---
 
-<TagPage page={page} tagName={tagName} locale="en" />
+<TagPage {...Astro.props} locale="en" />

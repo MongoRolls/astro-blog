@@ -34,3 +34,7 @@ public/blog/
 .agents/skills/
 .codex/skills
 .claude/skills
+
+# browser test artifacts
+playwright-report/
+test-results/

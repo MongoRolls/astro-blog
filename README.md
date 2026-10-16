@@ -63,7 +63,9 @@ pnpm preview
 │   ├── content/         # 博客内容
 │   ├── data/           # 配置数据
 │   ├── layouts/        # 布局模板
-│   ├── pages/          # 页面
+│   ├── pages/          # 中英文路由入口
+│   ├── views/          # 共享页面视图
+│   ├── scripts/        # 浏览器端逻辑
 │   └── styles/         # 样式
 ├── astro.config.mjs    # Astro 配置
 └── package.json
@@ -131,3 +133,12 @@ public/
 ## 构建说明
 
 封面图需手动维护在 `public/cover-images/` 目录。OSS 路径、密钥和同步命令见 [`.codex/AGENTS.md`](.codex/AGENTS.md) 的「图片与环境」。
+
+## 回归验证
+
+首次运行浏览器测试前执行 `pnpm exec playwright install chromium`（Linux CI 使用 `--with-deps`）。
+`pnpm verify` 包含 lint、类型检查、构建、产物检查和浏览器回归。
+已有本次构建产物时可单独执行 `pnpm test:browser`。
+如需使用系统 Chromium，可设置 `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`。
+
+浏览器回归覆盖正式与降级搜索的语言切换、加载失败重试、结果分批加载与过期查询，以及打字演示的页面切换和键盘操作。

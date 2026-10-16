@@ -1,0 +1,262 @@
+---
+import type { Locale } from '../i18n/config'
+import { defaultLocale, localizedPath } from '../i18n/config'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getAllTags, getPublishedBlogPosts } from '../utils/data-utils'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const posts = await getPublishedBlogPosts(locale)
+const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
+
+---
+
+<BaseLayout
+  locale={locale}
+  title={locale === 'zh-CN' ? '标签' : 'Tags'}
+  description={locale === 'zh-CN' ? '按标签浏览 MongoRolls 博客中的前端、工程化与思考类文章。' : 'Browse MongoRolls blog posts by topic.'}
+>
+    <div class="tags-container">
+        <h1 class="tags-title">Tags</h1>
+        <div class="tags-description">
+            {locale === 'zh-CN' ? '标签占比可视化' : 'Topic distribution'}
+        </div>
+
+        <div class="chart-section">
+            <div class="tag-distribution" aria-label={locale === 'zh-CN' ? '文章标签分布' : 'Post tag distribution'}>
+                {tags.map(tag => (
+                    <div class="tag-distribution-item">
+                        <div class="tag-distribution-label">
+                            <span>{tag.name}</span>
+                            <span>{tag.value}</span>
+                        </div>
+                        <div class="tag-distribution-track">
+                            <span style={`width: ${(tag.value / posts.length) * 100}%`}></span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div class="chart-info">
+                <p>{locale === 'zh-CN' ? '总共' : 'A total of'} <span class="highlight">{posts.length}</span> {locale === 'zh-CN' ? '篇文章，分布在' : `post${posts.length === 1 ? '' : 's'} across`} <span class="highlight">{tags.length}</span> {locale === 'zh-CN' ? '个标签中' : `tag${tags.length === 1 ? '' : 's'}`}</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 标签列表 -->
+        <h2 class="section-title">{locale === 'zh-CN' ? '标签列表' : 'All tags'}</h2>
+        <div class="tags-list">
+            {tags.map(tag => (
+                <div class="tag-item">
+                    <a href={localizedPath(locale, `/tags/${tag.id}/`)} class="tag-link">
+                        <span class="tag-name">{`# ${tag.name}`}</span>
+                        <span class="tag-count">{tag.value}</span>
+                    </a>
+                </div>
+            ))}
+        </div>
+
+        {tags.length === 0 && (
+            <div class="empty-state">
+                <p>{locale === 'zh-CN' ? '暂无标签' : 'No tags yet'}</p>
+            </div>
+        )}
+    </div>
+</BaseLayout>
+
+<style lang="scss">
+.tags-container {
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.tags-title {
+    font-size: 1.8rem;
+    font-family: serif;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: rgb(var(--color-text-main));
+    line-height: 1.2;
+}
+
+.tags-description {
+    font-size: 1rem;
+    color: rgb(var(--color-text-main) / 0.6);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.chart-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgb(var(--color-bg-main) / 0.5);
+    border-radius: 12px;
+    border: 1px solid rgb(var(--color-text-main) / 0.1);
+
+    .chart-info {
+        text-align: center;
+        color: rgb(var(--color-text-main) / 0.7);
+        font-size: 0.95rem;
+
+        .highlight {
+            color: rgb(var(--color-text-main));
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0 4px;
+        }
+    }
+}
+
+.tag-distribution {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tag-distribution-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+    color: rgb(var(--color-text-main) / 0.8);
+}
+
+.tag-distribution-track {
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(var(--color-text-main) / 0.1);
+}
+
+.tag-distribution-track span {
+    display: block;
+    min-width: 0.5rem;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #425bc5, #60a5fa);
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgb(var(--color-text-main) / 0.2),
+        transparent
+    );
+    margin: 2rem 0;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-family: serif;
+    font-weight: 600;
+    margin: 2rem 0 1.5rem 0;
+    color: rgb(var(--color-text-main));
+}
+
+.tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+
+    @media (max-width: 768px) {
+        gap: 1.5rem;
+    }
+}
+
+.tag-item {
+    position: relative;
+    display: inline-block;
+
+    .tag-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .tag-name {
+            color: rgb(var(--color-text-main) / 0.7);
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #60a5fa, #e879f9);
+                transition: width 0.3s ease;
+            }
+
+            &:hover {
+                color: rgb(var(--color-text-main));
+
+                &::after {
+                    width: 100%;
+                }
+            }
+        }
+
+        .tag-count {
+            color: rgb(var(--color-text-main) / 0.5);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        &:hover {
+            .tag-count {
+                color: rgb(var(--color-text-main) / 0.7);
+            }
+        }
+    }
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: rgb(var(--color-text-main) / 0.5);
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .chart-section {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .tags-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tags-description {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tags-list {
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        margin: 1.5rem 0 1rem 0;
+    }
+
+    .chart-section {
+        margin: 1.5rem 0;
+    }
+}
+</style>

@@ -1,12 +1,11 @@
 ---
 import { getContentPageStaticPaths } from '../../utils/data-utils'
-import ContentPage from '../[...id].astro'
+import ContentPage from '../../views/ContentPage.astro'
 
 export function getStaticPaths() {
   return getContentPageStaticPaths('en')
 }
 
-const { page } = Astro.props
 ---
 
-<ContentPage page={page} locale="en" />
+<ContentPage {...Astro.props} locale="en" />
