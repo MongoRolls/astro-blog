@@ -2,13 +2,12 @@
 import type { GetStaticPathsOptions } from 'astro'
 import siteConfig from '../../../data/site-config'
 import { getBlogArchiveStaticPaths } from '../../../utils/data-utils'
-import BlogArchivePage from '../../blog/[...page].astro'
+import BlogArchivePage from '../../../views/BlogArchivePage.astro'
 
 export function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   return getBlogArchiveStaticPaths('en', paginate, siteConfig.postsPerPage || 6)
 }
 
-const { page } = Astro.props
 ---
 
-<BlogArchivePage page={page} locale="en" />
+<BlogArchivePage {...Astro.props} locale="en" />

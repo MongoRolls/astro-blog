@@ -19,9 +19,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:smoke": "node scripts/check-dist.mjs",
-    "verify": "pnpm lint && pnpm check && pnpm build && pnpm test:smoke",
+    "verify": "pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
     "oss:sync": "node scripts/oss-sync.mjs",
-    "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run"
+    "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^9.5.1",
     "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/typography": "^0.5.20",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^3.2.1",

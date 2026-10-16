@@ -2,7 +2,7 @@ import type { GetStaticPathsOptions } from 'astro'
 import type { CollectionEntry } from 'astro:content'
 import type { Locale } from '../i18n/config'
 import { getCollection } from 'astro:content'
-import { defaultLocale, localizedPath } from '../i18n/config'
+import { alternateLocale, defaultLocale, localizedPath } from '../i18n/config'
 import { slugify } from './common-utils'
 
 export function sortItemsByDateDesc(itemA: CollectionEntry<'blog'>, itemB: CollectionEntry<'blog'>) {
@@ -50,18 +50,6 @@ export function getPageUrl(page: CollectionEntry<'pages'>) {
   return localizedPath(page.data.lang, `/${getPageSlug(page)}/`)
 }
 
-export async function getPostTranslation(post: CollectionEntry<'blog'>, locale: Locale) {
-  const key = getPostTranslationKey(post)
-  const posts = await getPublishedBlogPosts(locale)
-  return posts.find(candidate => getPostTranslationKey(candidate) === key)
-}
-
-export async function getPageTranslation(page: CollectionEntry<'pages'>, locale: Locale) {
-  const key = getPageTranslationKey(page)
-  const pages = await getPublishedPages(locale)
-  return pages.find(candidate => getPageTranslationKey(candidate) === key)
-}
-
 export function getAllTags(posts: CollectionEntry<'blog'>[]) {
   const tagsById = new Map<string, { name: string, id: string, value: number }>()
 
@@ -90,13 +78,19 @@ export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagId: string) {
 }
 
 export async function getBlogPostStaticPaths(locale: Locale) {
-  const posts = await getPublishedBlogPosts(locale)
+  const now = new Date()
+  const [posts, translatedPosts] = await Promise.all([
+    getPublishedBlogPosts(locale, now),
+    getPublishedBlogPosts(alternateLocale(locale), now),
+  ])
+  const translations = new Map(translatedPosts.map(post => [getPostTranslationKey(post), post]))
   const postCount = posts.length
 
   return posts.map((post, index) => ({
     params: { id: getPostSlug(post) },
     props: {
       post,
+      translation: translations.get(getPostTranslationKey(post)) ?? null,
       prevPost: index + 1 !== postCount ? posts[index + 1] : null,
       nextPost: index !== 0 ? posts[index - 1] : null,
     },
@@ -131,9 +125,13 @@ export async function getTagPageStaticPaths(
 }
 
 export async function getContentPageStaticPaths(locale: Locale) {
-  const pages = await getPublishedPages(locale)
+  const [pages, translatedPages] = await Promise.all([
+    getPublishedPages(locale),
+    getPublishedPages(alternateLocale(locale)),
+  ])
+  const translations = new Map(translatedPages.map(page => [getPageTranslationKey(page), page]))
   return pages.map(page => ({
     params: { id: getPageSlug(page) },
-    props: { page },
+    props: { page, translation: translations.get(getPageTranslationKey(page)) ?? null },
   }))
 }

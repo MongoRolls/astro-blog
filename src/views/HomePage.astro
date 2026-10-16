@@ -1,0 +1,330 @@
+---
+import type { Locale } from '../i18n/config'
+import heroCover from '../assets/blog-cover.webp'
+import ArticleCarousel from '../components/ArticleCarousel.astro'
+import Button from '../components/Button.astro'
+import FormattedDate from '../components/FormattedDate.astro'
+import PostPreview from '../components/PostPreview.astro'
+import { getHeroImageSrc } from '../config/image'
+import { getSiteConfig } from '../data/site-config'
+import { defaultLocale, localizedPath } from '../i18n/config'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPostUrl, getPublishedBlogPosts } from '../utils/data-utils'
+
+type Props = { locale?: Locale }
+const { locale = defaultLocale } = Astro.props
+const siteConfig = getSiteConfig(locale)
+const posts = await getPublishedBlogPosts(locale)
+const featuredPosts = posts.filter(({ data }) => data.isFeatured)
+const carouselPosts = posts.slice(0, 4)
+
+const heroData = {
+    title: locale === 'zh-CN' ? '你好，欢迎来到我的博客' : 'Hi there, welcome to my blog',
+    text: locale === 'zh-CN'
+        ? '在这里我会分享技术问题、工程实践、算法与生活思考。欢迎阅读，希望这些文章能给你带来启发。'
+        : 'I write about frontend engineering, web tooling, AI, algorithms, and the occasional personal reflection. I hope you find something useful here.',
+    image: {
+        src: getHeroImageSrc(heroCover.src),
+        alt: locale === 'zh-CN' ? '博客封面图' : 'Blog cover',
+    },
+    actions: [
+        {
+            text: locale === 'zh-CN' ? '👋 关于我' : '👋 About me',
+            href: localizedPath(locale, '/about/'),
+        },
+        {
+            text: locale === 'zh-CN' ? '👀 Markdown 样式' : '👀 Markdown style',
+            href: localizedPath(locale, '/style/'),
+        },
+    ],
+}
+
+---
+
+<BaseLayout locale={locale} description={siteConfig.description} image={siteConfig.image} title={locale === 'zh-CN' ? '前端技术博客' : 'Frontend Engineering Blog'}>
+
+    <section class="hero-section w-full mb-8 sm:mb-16">
+        {heroData.title && (
+            <h1 class="hero-title w-full">
+                <span class="hero-title-text">{heroData.title}</span>
+            </h1>
+        )}
+        <div class="hero-content-grid w-full max-w-screen-xl mx-auto">
+            <div class="hero-content-list w-full flex flex-col md:flex-row items-center justify-between gap-8">
+            <p class="hero-text mb-3 flex-1">{heroData.text}</p>
+                <div class="hero-image-container flex-1">
+                    <img
+                      class="hero-image w-full h-auto"
+                      src={heroData.image.src}
+                      alt={heroData.image.alt || ''}
+                      loading="eager"
+                      fetchpriority="high"
+                      decoding="async"
+                      width="10530"
+                      height="5924"
+                    />
+                </div>
+                <div class="hero-actions w-full flex flex-col md:flex-row gap-4 justify-start">
+                    {heroData.actions.map(action => (
+                        <Button href={action.href} class="w-full md:w-auto">{action.text}</Button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {carouselPosts.length > 0 && (
+        <>
+            <hr class="my-8 border-dashed border-main" />
+            <ArticleCarousel posts={carouselPosts} locale={locale} />
+            <hr class="my-8 border-dashed border-main" />
+        </>
+    )}
+
+
+
+    <section class="w-full mb-8 ">
+        <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">{locale === 'zh-CN' ? '文章' : 'Posts'}</h2>
+        <ul class="post-list flex flex-col">
+            {posts.slice(0, 8).map((post) => {
+                return (
+                    <li class="post-row">
+                        <span class="post-date italic font-serif text-gray-500">
+                            <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
+                        </span>
+                        <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
+                    </li>
+                )
+            })}
+        </ul>
+        <div class="mt-8">
+            <a class="read-more-link font-serif" href={localizedPath(locale, '/post/')}>{locale === 'zh-CN' ? '阅读更多' : 'Read more'} →</a>
+        </div>
+        <hr class="my-8 border-dashed border-main" />
+    </section>
+
+    {
+        featuredPosts?.length > 0 && (
+            <div class="mb-16 sm:mb-24 mt-12">
+                <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">{locale === 'zh-CN' ? '精选文章' : 'Featured posts'}</h2>
+                <div class="flex flex-col gap-10 sm:gap-12">
+                    {featuredPosts.map(post => (
+                        <PostPreview post={post} headingLevel="h3" locale={locale} />
+                    ))}
+                </div>
+
+                <div class="mt-12 sm:mt-16">
+                    <Button href={localizedPath(locale, '/blog/')}>{locale === 'zh-CN' ? '查看全部文章' : 'View all posts'}</Button>
+                </div>
+            </div>
+        )
+    }
+</BaseLayout>
+
+<style lang="scss">
+    .read-more-link {
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        color: rgb(var(--color-text-main));
+        font-weight: 500;
+        transition: all 0.3s ease;
+
+        &:hover {
+            text-decoration-color: rgb(var(--color-text-main));
+        }
+    }
+
+
+
+    /* Hero区域样式 */
+    .hero-section {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        transition: none;
+    }
+
+    .hero-section:hover {
+        border-color: transparent;
+        transform: none;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        // font-family: serif;
+        font-weight: 600;
+        margin: 0 0 24px 0;
+        // color: rgb(var(--color-text-main));
+        line-height: 1.2;
+    }
+
+    .hero-title-text {
+        background: linear-gradient(to bottom right, rgb(var(--color-text-main)) 50%, rgb(var(--color-text-muted)) 50%);
+        background-clip: text;
+        color: transparent;
+    }
+
+    .post-list {
+        gap: 0.25rem;
+    }
+
+    .post-row {
+        display: grid;
+        grid-template-columns: 8rem minmax(0, 1fr);
+        align-items: baseline;
+        gap: 0.75rem;
+        padding: 0.55rem 0.5rem;
+        margin-inline: -0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 150ms ease;
+    }
+
+    .post-row:hover {
+        background: rgb(var(--color-text-main) / 0.05);
+    }
+
+    .post-date {
+        white-space: nowrap;
+    }
+
+    .hero-content-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .hero-image-container {
+        width: 100%;
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        transition: transform 0.3s ease, filter 0.3s ease;
+        max-height: 300px;
+        object-fit: cover;
+    }
+
+    .hero-image:hover {
+        transform: scale(1.02);
+    }
+
+    .hero-content-list {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        height: 100%;
+        justify-content: space-between;
+    }
+
+    .hero-text {
+        color: rgb(var(--color-text-main));
+        font-size: 1rem;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .hero-text :global(p) {
+        margin: 0 0 12px 0;
+    }
+
+    .hero-text :global(p:last-child) {
+        margin-bottom: 0;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+
+
+    /* 优化后的夜间模式样式 */
+    :global(.dark) .hero-image {
+        filter: brightness(0.8);
+        transition: transform 0.3s ease;
+    }
+
+    :global(.dark) .hero-image:hover {
+        transform: translateY(-2px);
+    }
+
+    /* 使用CSS @property来优化动画性能 */
+    @property --glow-opacity {
+        syntax: '<number>';
+        initial-value: 0.3;
+        inherits: false;
+    }
+
+    :global(.dark) .hero-image {
+        box-shadow: 0 0 20px rgba(147, 197, 253, var(--glow-opacity));
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        :global(.dark) .hero-image {
+            animation: subtle-glow 3s ease-in-out infinite;
+        }
+    }
+
+    @keyframes subtle-glow {
+        0%, 100% { --glow-opacity: 0.3; }
+        50% { --glow-opacity: 0.5; }
+    }
+
+    /* 响应式布局调整 */
+    @media (max-width: 1024px) {
+
+        .hero-content-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .hero-title {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .hero-title {
+            font-size: 1.5rem;
+            line-height: 1.4;
+            text-wrap: balance;
+            margin-bottom: 20px;
+        }
+
+        .hero-content-grid {
+            gap: 16px;
+        }
+
+        .hero-actions {
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        .hero-actions :global(a) {
+            flex: 1 1 9rem;
+            min-height: 44px;
+            padding-inline: 12px;
+            text-align: center;
+        }
+
+        .post-row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.25rem;
+            padding-block: 0.75rem;
+            line-height: 1.65;
+        }
+
+        .post-date {
+            font-size: 0.875rem;
+            color: rgb(var(--color-text-muted));
+        }
+    }
+
+
+</style>

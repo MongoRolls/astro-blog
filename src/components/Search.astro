@@ -19,6 +19,8 @@ const t = useTranslations(locale)
 <div
   class="hidden"
   id="search-box"
+  data-locale={locale}
+  data-load-more-message={t.search.loadMore}
   data-index-url={localizedPath(locale, '/search-index.json')}
   data-loading-message={t.search.loading}
   data-no-results-message={t.search.noResults}
@@ -76,58 +78,11 @@ const t = useTranslations(locale)
 </div>
 
 <script>
-interface SearchResult {
-  excerpt: string
-  meta: { title: string }
-  searchText?: string
-  url: string
-}
-
-interface Pagefind {
-  init: () => Promise<void>
-  search: (query: string) => Promise<{
-    results: Array<{ data: () => Promise<SearchResult> }>
-  }>
-}
+import type { SearchMatch, SearchResult } from '../scripts/search-engine'
+import { loadSearchEngine } from '../scripts/search-engine'
 
 let disposeSearch = () => {}
-let pagefindPromise: Promise<Pagefind> | undefined
-
-async function loadFallbackSearch(indexUrl: string): Promise<Pagefind> {
-  const response = await fetch(indexUrl)
-  if (!response.ok)
-    throw new Error(`搜索索引加载失败: ${response.status}`)
-  const items = await response.json() as SearchResult[]
-
-  return {
-    init: async () => {},
-    search: async (query) => {
-      const normalizedQuery = query.toLocaleLowerCase()
-      const matches = items.filter(({ excerpt, meta, searchText }) =>
-        `${meta.title} ${excerpt} ${searchText ?? ''}`.toLocaleLowerCase().includes(normalizedQuery),
-      )
-      return {
-        results: matches.map(item => ({ data: async () => item })),
-      }
-    },
-  }
-}
-
-async function loadPagefindEngine(): Promise<Pagefind> {
-  const pagefindUrl = new URL('/pagefind/pagefind.js', window.location.origin).href
-  const pagefind = await import(/* @vite-ignore */ pagefindUrl) as Pagefind
-  await pagefind.init()
-  return pagefind
-}
-
-function loadPagefind(indexUrl: string) {
-  pagefindPromise ||= loadPagefindEngine().catch((error) => {
-    if (import.meta.env.DEV)
-      console.warn('Pagefind 不可用，已回退到本地搜索索引。先运行 pnpm build 可启用完整搜索。', error)
-    return loadFallbackSearch(indexUrl)
-  })
-  return pagefindPromise
-}
+const pageSize = 20
 
 function initSearchFeature() {
   disposeSearch()
@@ -146,6 +101,8 @@ function initSearchFeature() {
   const searchResults = resultsElement
   const input = searchInput
   const indexUrl = searchBox.dataset.indexUrl ?? '/search-index.json'
+  const locale = searchBox.dataset.locale ?? 'zh-CN'
+  const loadMoreMessage = searchBox.dataset.loadMoreMessage ?? 'Load more'
   const loadingMessage = searchBox.dataset.loadingMessage ?? 'Searching…'
   const noResultsMessage = searchBox.dataset.noResultsMessage ?? 'No results found'
   const unavailableMessage = searchBox.dataset.unavailableMessage ?? 'Search is temporarily unavailable'
@@ -159,6 +116,18 @@ function initSearchFeature() {
   let openFrame: number | undefined
   let isOpen = false
   let requestId = 0
+  let matches: SearchMatch[] = []
+  let displayed = 0
+  let activeQuery = ''
+  let loadingMore = false
+  const moreButton = document.createElement('button')
+  moreButton.type = 'button'
+  moreButton.className = 'text-brand underline p-3'
+  moreButton.textContent = loadMoreMessage
+
+  function isCurrent(id: number, query: string) {
+    return id === requestId && input.value.trim() === query && !controller.signal.aborted
+  }
 
   function createMessage(text: string, className = 'text-muted') {
     const message = document.createElement('div')
@@ -194,12 +163,14 @@ function initSearchFeature() {
     return paragraph
   }
 
-  function renderResults(data: SearchResult[]) {
+  function renderResults(data: SearchResult[], append = false) {
+    const restoreFocus = append && document.activeElement === moreButton
     const fragment = document.createDocumentFragment()
     const count = document.createElement('div')
     count.className = 'text-sm text-muted mb-3 px-1'
-    count.textContent = data.length === 1 ? resultOne : resultTemplate.replace('{count}', String(data.length))
-    fragment.appendChild(count)
+    count.textContent = matches.length === 1 ? resultOne : resultTemplate.replace('{count}', String(matches.length))
+    if (!append)
+      fragment.appendChild(count)
 
     data.forEach(({ excerpt, meta, url }) => {
       const card = document.createElement('div')
@@ -212,8 +183,50 @@ function initSearchFeature() {
       fragment.appendChild(card)
     })
 
-    searchResults.replaceChildren(fragment)
+    const firstNewLink = fragment.querySelector('a')
+    moreButton.remove()
+    if (append)
+      searchResults.appendChild(fragment)
+    else
+      searchResults.replaceChildren(fragment)
+    if (displayed < matches.length)
+      searchResults.appendChild(moreButton)
+    if (restoreFocus)
+      firstNewLink?.focus()
   }
+
+  async function loadMore() {
+    if (loadingMore || displayed >= matches.length)
+      return
+    const id = requestId
+    const query = activeQuery
+    loadingMore = true
+    moreButton.disabled = true
+    moreButton.textContent = loadingMessage
+    searchResults.setAttribute('aria-busy', 'true')
+    try {
+      const data = await Promise.all(matches.slice(displayed, displayed + pageSize).map(item => item.data()))
+      if (!isCurrent(id, query))
+        return
+      displayed += data.length
+      renderResults(data, true)
+    }
+    catch {
+      if (isCurrent(id, query))
+        moreButton.textContent = `${unavailableMessage} · ${loadMoreMessage}`
+    }
+    finally {
+      if (isCurrent(id, query)) {
+        loadingMore = false
+        moreButton.disabled = false
+        if (moreButton.textContent === loadingMessage)
+          moreButton.textContent = loadMoreMessage
+        searchResults.removeAttribute('aria-busy')
+      }
+    }
+  }
+
+  moreButton.addEventListener('click', () => void loadMore(), listenerOptions)
 
   function openSearch() {
     if (isOpen) {
@@ -259,10 +272,14 @@ function initSearchFeature() {
     renderMessage(loadingMessage)
 
     try {
-      const pagefind = await loadPagefind(indexUrl)
-      const search = await pagefind.search(value)
-      const data = await Promise.all(search.results.map(item => item.data()))
-      if (currentRequest !== requestId || input.value.trim() !== value)
+      const engine = await loadSearchEngine(indexUrl, locale)
+      if (!isCurrent(currentRequest, value))
+        return
+      const search = await engine.search(value)
+      if (!isCurrent(currentRequest, value))
+        return
+      const data = await Promise.all(search.results.slice(0, pageSize).map(item => item.data()))
+      if (!isCurrent(currentRequest, value))
         return
 
       if (data.length === 0) {
@@ -270,15 +287,20 @@ function initSearchFeature() {
         return
       }
 
+      matches = search.results
+      displayed = data.length
+      activeQuery = value
+      moreButton.disabled = false
+      moreButton.textContent = loadMoreMessage
       renderResults(data)
     }
     catch (error) {
       console.error('搜索出错:', error)
-      if (currentRequest === requestId)
+      if (isCurrent(currentRequest, value))
         renderMessage(unavailableMessage, 'text-red-500')
     }
     finally {
-      if (currentRequest === requestId)
+      if (isCurrent(currentRequest, value))
         searchResults.removeAttribute('aria-busy')
     }
   }
@@ -293,15 +315,20 @@ function initSearchFeature() {
       openSearch()
   }, listenerOptions)
   input.addEventListener('input', () => {
+    requestId++
+    matches = []
+    loadingMore = false
+    moreButton.remove()
     if (searchTimer)
       window.clearTimeout(searchTimer)
     const value = input.value.trim()
     if (!value) {
-      requestId++
       searchResults.removeAttribute('aria-busy')
       renderMessage('🔍', 'text-5xl select-none')
       return
     }
+    searchResults.setAttribute('aria-busy', 'true')
+    renderMessage(loadingMessage)
     searchTimer = window.setTimeout(() => void handleSearch(value), 250)
   }, listenerOptions)
   document.addEventListener('keydown', (event) => {
@@ -313,7 +340,7 @@ function initSearchFeature() {
       closeSearch()
     }
     else if (event.key === 'Tab' && isOpen) {
-      const focusable = Array.from(searchContainer.querySelectorAll<HTMLElement>('a[href], button, input, [tabindex]:not([tabindex="-1"])'))
+      const focusable = Array.from(searchContainer.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input, [tabindex]:not([tabindex="-1"])'))
       const first = focusable[0]
       const last = focusable.at(-1)
       if (event.shiftKey && document.activeElement === first) {
