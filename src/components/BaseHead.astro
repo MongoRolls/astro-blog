@@ -25,6 +25,7 @@ export type Props = {
     nextUrl?: string
     locale?: Locale
     alternateUrls?: Partial<Record<Locale, string>>
+    markdownUrl?: string
 }
 
 const {
@@ -37,6 +38,7 @@ const {
     prevUrl,
     nextUrl,
     alternateUrls,
+    markdownUrl,
 } = Astro.props
 const siteConfig = getSiteConfig(locale)
 const description = Astro.props.description ?? siteConfig.description
@@ -126,6 +128,7 @@ function toJsonLd(data: unknown) {
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS`} href={new URL(localizedPath(locale, '/rss.xml'), Astro.site).toString()} />
 <link rel="alternate" type="text/plain" title={`${siteConfig.title} LLM index`} href={new URL(localizedPath(locale, '/llms.txt'), Astro.site).toString()} />
+{markdownUrl && <link rel="alternate" type="text/markdown" title={`${Astro.props.title ?? siteConfig.title} (Markdown)`} href={new URL(markdownUrl, Astro.site).toString()} />}
 
 <!-- Page Metadata -->
 {indexable && <link rel="canonical" href={canonical} />}
