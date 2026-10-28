@@ -1,6 +1,45 @@
+# 指定了 User-agent 的分组不会继承 `*` 的规则，放行分组需重复站内禁止项。
+
+# 搜索与检索：实时抓取用于回答查询，放行
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+Allow: /
+Disallow: /pagefind/
+Disallow: /search-index.json
+Disallow: /en/search-index.json
+
+# 用户触发：用户在对话中粘贴链接时才抓取，放行
+User-agent: ChatGPT-User
+User-agent: Claude-User
+User-agent: Perplexity-User
+User-agent: Google-Agent
+Allow: /
+Disallow: /pagefind/
+Disallow: /search-index.json
+Disallow: /en/search-index.json
+
+# 模型训练：拒绝
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Meta-ExternalAgent
+User-agent: CCBot
+Disallow: /
+
+# 退出 AI 训练的声明令牌：拒绝
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Disallow: /
+
+# 未如实声明用途的爬虫：拒绝
+User-agent: Bytespider
+Disallow: /
+
+# 其他爬虫（含 Googlebot、Bingbot 等传统搜索引擎）
 User-agent: *
 Allow: /
 Disallow: /pagefind/
 Disallow: /search-index.json
+Disallow: /en/search-index.json
 
 Sitemap: https://mongorolls.cn/sitemap-index.xml

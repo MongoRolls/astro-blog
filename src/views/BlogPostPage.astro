@@ -13,6 +13,7 @@ import { useTranslations } from '../i18n/ui'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { slugify } from '../utils/common-utils'
 import { getPostUrl } from '../utils/data-utils'
+import { getPostMarkdownUrl } from '../utils/post-markdown'
 
 type Props = {
   post: CollectionEntry<'blog'>
@@ -36,7 +37,7 @@ const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const { minutesRead } = remarkPluginFrontmatter;
 ---
 
-<BaseLayout locale={locale} alternateUrls={alternateUrls} languageFallbackPath="/blog/" title={seo?.title ?? title} description={summary} image={coverImage} pageType="article" keywords={keywords} author={author} publishDate={publishDate} updatedDate={updatedDate} tags={tags} headings={headings}>
+<BaseLayout locale={locale} alternateUrls={alternateUrls} languageFallbackPath="/blog/" title={seo?.title ?? title} description={summary} image={coverImage} pageType="article" keywords={keywords} author={author} publishDate={publishDate} updatedDate={updatedDate} tags={tags} headings={headings} markdownUrl={getPostMarkdownUrl(post)}>
     <div class="relative lg:flex lg:gap-10">
         <!-- 主要内容 -->
         <article data-pagefind-body class="w-full lg:max-w-[674px]">
