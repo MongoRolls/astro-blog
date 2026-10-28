@@ -24,7 +24,14 @@ const requiredFiles = [
   'en/rss.xml',
   'en/llms.txt',
   'en/search-index.json',
+  'robots.txt',
+  'llms.txt',
+  'llms-full.txt',
+  'en/llms-full.txt',
+  'blog/26-08-21-ai-text-watermarking.md',
+  'en/blog/26-08-21-ai-text-watermarking.md',
 ]
+const siteOrigin = 'https://mongorolls.cn'
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -60,9 +67,18 @@ if (totalSize > maximumDistSize) {
 
 const htmlFiles = files.filter(file => file.endsWith('.html'))
 const missingReferences = new Set()
+let markdownAlternateCount = 0
 
 for (const htmlFile of htmlFiles) {
   const html = await readFile(htmlFile, 'utf8')
+  for (const [, href] of html.matchAll(/<link rel="alternate" type="text\/markdown"[^>]*href="([^"]+)"/g)) {
+    markdownAlternateCount++
+    const target = href.startsWith(siteOrigin) ? resolvePublicReference(href.slice(siteOrigin.length), true) : undefined
+    if (!target)
+      missingReferences.add(`${path.relative(distDirectory, htmlFile)} -> ${href}`)
+    else
+      await access(target).catch(() => missingReferences.add(`${path.relative(distDirectory, htmlFile)} -> ${href}`))
+  }
   const references = html.matchAll(/(?:href|src)=["']([^"']+)["']/g)
   for (const [, reference] of references) {
     const targets = [
@@ -103,5 +119,29 @@ assert.match(englishPost, /hreflang="zh-CN" href="https:\/\/mongorolls\.cn\/blog
 assert.ok(chineseSearch.every(item => !item.url.startsWith('/en/')), '中文搜索索引混入英文 URL')
 assert.ok(englishSearch.length > 0 && englishSearch.every(item => item.url.startsWith('/en/')), '英文搜索索引缺失或混入中文 URL')
 assert.match(englishRss, /<language>en<\/language>/)
+
+const [robots, chineseLlms, chineseLlmsFull, englishLlmsFull, chineseMarkdown, demoMarkdown] = await Promise.all([
+  readFile(path.join(distDirectory, 'robots.txt'), 'utf8'),
+  readFile(path.join(distDirectory, 'llms.txt'), 'utf8'),
+  readFile(path.join(distDirectory, 'llms-full.txt'), 'utf8'),
+  readFile(path.join(distDirectory, 'en/llms-full.txt'), 'utf8'),
+  readFile(path.join(distDirectory, 'blog/26-08-21-ai-text-watermarking.md'), 'utf8'),
+  readFile(path.join(distDirectory, 'blog/25-06-27-demo.md'), 'utf8'),
+])
+const markdownFiles = files.filter(file => file.endsWith('.md'))
+
+assert.match(robots, /^Sitemap: https:\/\/mongorolls\.cn\/sitemap-index\.xml$/m)
+assert.match(robots, /User-agent: OAI-SearchBot\n(?:User-agent: .+\n)*Allow: \//)
+assert.match(robots, /User-agent: GPTBot\n(?:User-agent: .+\n)*Disallow: \/\n/)
+assert.match(chinesePost, /<link rel="alternate" type="text\/markdown"[^>]*href="https:\/\/mongorolls\.cn\/blog\/26-08-21-ai-text-watermarking\.md"/)
+assert.match(englishPost, /<link rel="alternate" type="text\/markdown"[^>]*href="https:\/\/mongorolls\.cn\/en\/blog\/26-08-21-ai-text-watermarking\.md"/)
+assert.doesNotMatch(chineseHome, /type="text\/markdown"/, '非文章页不应声明 Markdown 版本')
+assert.equal(markdownAlternateCount, markdownFiles.length, '文章 Markdown 版本数量与 head 声明不一致')
+assert.match(chineseMarkdown, /^# AI 文本水印是怎么藏进普通文字里的\n/)
+assert.match(chineseMarkdown, /https:\/\/mongorolls\.cn\/blog\/26-08-21-ai-text-watermarking\//)
+assert.doesNotMatch(demoMarkdown, /^import /m, 'Markdown 版本残留 MDX import')
+assert.match(chineseLlms, /\(https:\/\/mongorolls\.cn\/llms-full\.txt\)/)
+assert.match(chineseLlmsFull, /^## AI 文本水印是怎么藏进普通文字里的$/m)
+assert.match(englishLlmsFull, /^## How AI Text Watermarks Hide in Plain Text$/m)
 
 console.log(`Smoke check passed: ${htmlFiles.length} HTML files, ${(totalSize / 1024 / 1024).toFixed(2)} MB`)
