@@ -19,10 +19,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:smoke": "node scripts/check-dist.mjs",
-    "verify": "pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
+    "verify": "pnpm test:dependencies && pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
     "oss:sync": "node scripts/oss-sync.mjs",
     "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:dependencies": "node scripts/check-dependencies.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
@@ -49,7 +50,14 @@
     "@tailwindcss/typography": "^0.5.20",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^3.2.1",
+    "rollup": "^4.65.1",
     "rollup-plugin-visualizer": "^7.1.1",
     "sass-embedded": "^1.105.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tailwindcss/typography@0.5.20>postcss-selector-parser": "6.1.5",
+      "micromark-extension-math@3.1.0>katex": "0.18.2"
+    }
   }
 }

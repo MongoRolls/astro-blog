@@ -142,3 +142,20 @@ public/
 如需使用系统 Chromium，可设置 `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`。
 
 浏览器回归覆盖正式与降级搜索的语言切换、加载失败重试、结果分批加载与过期查询，以及打字演示的页面切换和键盘操作。
+
+## 依赖安全检查
+
+使用 `packageManager` 指定的 pnpm 10.13.1 安装依赖；`pnpm audit --audit-level low`
+检查锁文件中的生产和开发依赖。CI 在 PR 和 main 推送时独立执行该只读检查，
+审计服务不可用也会使任务失败，不自动修复依赖或忽略公告。
+
+`package.json` 中两项限定上游版本的覆盖用于等待上游更新：
+
+- `micromark-extension-math@3.1.0` 仍依赖 KaTeX 0.16.x，暂用最小修复版 0.18.2
+  修复 [trust 绕过公告](https://github.com/KaTeX/KaTeX/security/advisories/GHSA-238p-pmpm-9mq7)。
+  它由 ESLint 引入；`pnpm test:dependencies`（已纳入 verify）验证数学扩展的行内、块级渲染和继承 trust 的回归。
+- `@tailwindcss/typography@0.5.20` 固定旧的选择器解析器，暂用同一 6.x 系列的 6.1.5
+  修复 [解析耗尽 CPU 公告](https://github.com/advisories/GHSA-rj75-hqrm-r3gf)。
+
+升级这两个上游包时重新检查依赖范围，确认已包含修复后移除对应覆盖。
+Rollup 显式作为 visualizer 的开发期 peer 依赖管理，保持在兼容的 4.x 系列。
