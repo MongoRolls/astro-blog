@@ -38,3 +38,9 @@ For ESLint and Prettier, I also tried the newer and increasingly popular **Biome
 - It still does not support HTML, Astro, Markdown, and other formats, which is a shame.
 
 ## Addendum
+
+- **Extract constants**: give magic numbers and repeated strings named constants. For example, use `const requestTimeout = 5000` and `const pendingStatus = 'pending'` instead of repeating `5000` in requests and `'pending'` across the code.
+- **Use camelCase**: variable and function names should match the project's existing identifiers. For example, if the project uses `userName` and `getUserInfo()`, follow that style in new code.
+- **Keep complexity down**: keep functions short, limit branches, and split up complex logic. Readable beats clever. For example, split form submission into `validateForm()` and `saveForm()` instead of nesting several levels of `if` in one function.
+- **Review**: usually hand it to an AI review skill. Small changes can pass directly; core business logic must have human confirmation before merging. For example, AI can review a message change, but order-total calculations need a person to confirm them.
+- **Verify**: for UI and interaction changes, have AI use Computer Use to follow the real user path, rather than only reading the diff. For example, after changing a form, go through “open the page → fill it in → submit → confirm the result.”
