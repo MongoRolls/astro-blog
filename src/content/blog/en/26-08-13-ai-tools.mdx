@@ -1,6 +1,6 @@
 ---
 title: Everyday AI tools
-excerpt: "The AI tools I currently use for daily development: Cursor, Claude Code, Codex App, CC Switch, and DeepSeek."
+excerpt: "The AI tools I currently use for daily development and content curation: Cursor, Claude Code, Codex App, CC Switch, DeepSeek, Grok bots, and GPT dots."
 publishDate: '2026-08-13'
 author: MongoRolls
 lang: en
@@ -20,6 +20,8 @@ It is hard to write code without AI these days. I currently use this stack:
 | CLI | Claude Code | Long, well-bounded tasks that can run asynchronously |
 | App | Codex | Desktop app; an old account with a Turkish gift card costs a little over ¥70 per month |
 | Intelligence | [Codex Radar](https://codexradar.com/) | Track quotas, model quality, degradation, and community sentiment |
+| Content curation | Grok bots | Organize news, RSS, and blog content, then update the Reader API in the agreed format |
+| Personal assistant | GPT dots | Coordinate across tools and handle GitHub coding tasks |
 | Switching | CC Switch | Change providers for Claude Code |
 | API | DeepSeek | Cheap, directly reachable from China, and a fallback for CLIs and scripts |
 
@@ -55,6 +57,14 @@ I use it as a backup and second perspective alongside Claude Code: run the same 
 
 For quota status, model quality, and community sentiment, I check [Codex Radar](https://codexradar.com/). It also has ready-made notes on enabling Max reasoning and connecting DeepSeek to Codex.
 
+## Grok bots
+
+I use these to organize news, RSS, and blog content: summarize it, then update the Reader API in the agreed format. This is my own workflow connected to Reader; the sources, summary fields, and API format are agreed on first.
+
+## GPT dots
+
+I use these as a personal assistant for coordination across tools and GitHub coding tasks. I spell out the goal, scope, and what needs to be verified before handing things over. Work that spans several tools fits here.
+
 ## CC Switch
 
 Before CC Switch, changing Claude Code providers meant editing `~/.claude` and environment variables. It quickly became messy with multiple channels. [CC Switch](https://cc-switch.cc/) is a desktop app where providers, MCP, and Skills can be switched with a click. GitHub: [farion1231/cc-switch](https://github.com/farion1231/cc-switch)
@@ -75,5 +85,7 @@ The APIs are compatible with OpenAI (`https://api.deepseek.com`) and Anthropic (
 4. For a different perspective or when Claude is not working well, open the **Codex App**; check [Codex Radar](https://codexradar.com/) for quota and model-quality reports.
 5. For a resident local agent with WeChat as an entry point, use [Hermes](/en/blog/26-08-17-hermes/#hermes-agent).
 6. To expose a CLI subscription as an API for other clients, use [CLIProxyAPI](/en/blog/26-08-17-hermes/#cliproxyapi).
+7. Hand news, RSS, and blog content to **Grok bots** to organize and update the Reader API in the agreed format.
+8. Use **GPT dots** for personal-assistant work, coordination across tools, and GitHub coding tasks.
 
 Tools will change. The stable habits are to put conventions in rule files, review your own diffs, and never confuse “it runs” with “it is correct.”

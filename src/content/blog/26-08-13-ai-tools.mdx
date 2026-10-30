@@ -1,6 +1,6 @@
 ---
 title: 日常 AI 工具
-excerpt: 目前日常开发里常用的几套 AI 工具：Cursor、Claude Code、Codex App、CC Switch 和 DeepSeek
+excerpt: 目前日常开发和内容整理里常用的几套 AI 工具：Cursor、Claude Code、Codex App、CC Switch、DeepSeek、Grok bots 和 GPT dots
 publishDate: '2026-08-13'
 author: MongoRolls
 tags:
@@ -17,6 +17,8 @@ tags:
 | CLI | Claude Code | 边界清楚、可以异步的长任务 |
 | App | Codex | 桌面 App；旧号土耳其礼品卡约 70 多一个月 |
 | 情报 | [Codex 雷达](https://codexradar.com/) | 看额度、智商、降智、社区体感 |
+| 内容整理 | Grok bots | 整理资讯、RSS 和博客，按约定格式更新 Reader 接口 |
+| 个人助理 | GPT dots | 跨工具协调、GitHub 代码任务 |
 | 切换 | CC Switch | 给 Claude Code 换供应商 |
 | API | DeepSeek | 便宜、国内直连，给 CLI / 脚本兜底 |
 
@@ -52,6 +54,14 @@ npm install -g @anthropic-ai/claude-code
 
 额度够不够、模型有没有降智、社区体感怎么样，自己看 [Codex 雷达](https://codexradar.com/)。Max 推理怎么开、DeepSeek 怎么接到 Codex，那边也有现成说明。
 
+## Grok bots
+
+自己用来整理资讯、RSS 和博客：归纳内容、生成摘要，再按约定格式更新 Reader 接口。这是自己接到 Reader 的流程，来源、摘要字段和接口格式先约定好。
+
+## GPT dots
+
+自己当个人助理用，跨工具协调、GitHub 代码任务都交给它处理。先说清目标、范围和要验证的结果，再让它推进；需要串几个工具的事，适合放在这里。
+
 ## CC Switch
 
 Claude Code 换供应商以前要改 `~/.claude` 和环境变量，渠道一多就乱。[CC Switch](https://cc-switch.cc/) 是桌面应用，供应商、MCP、Skills 点一下切。GitHub：[farion1231/cc-switch](https://github.com/farion1231/cc-switch)
@@ -72,5 +82,7 @@ Claude Code 换供应商以前要改 `~/.claude` 和环境变量，渠道一多�
 4. 换思路或 Claude 不好用，开 **Codex App**；额度/降智看 [Codex 雷达](https://codexradar.com/)
 5. 本机常驻、微信当入口，用 [Hermes](/blog/26-08-17-hermes/#hermes-agent)
 6. CLI 订阅要给别的客户端当 API 用，用 [CLIProxyAPI](/blog/26-08-17-hermes/#cliproxyapi)
+7. 资讯、RSS 和博客交给 **Grok bots** 整理，按约定格式更新 Reader 接口
+8. 个人助理、跨工具协调和 GitHub 代码任务，用 **GPT dots**
 
 工具会换。比较稳的是：约定写进规则文件，自己审 diff，不要把「能跑」当成「对」。
