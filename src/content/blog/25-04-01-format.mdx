@@ -35,3 +35,9 @@ tags:
 - 但是还不支持html,astro,markdown等确实比较可惜
 
 ## 补充
+
+- **常量提取**：魔法数字、重复字符串收成命名常量。比如请求里的 `5000` 和多处出现的 `'pending'`，统一用 `const requestTimeout = 5000`、`const pendingStatus = 'pending'`。
+- **驼峰命名**：变量、函数用 camelCase，和项目现有标识符一致。比如已有 `userName`、`getUserInfo()`，新增代码就沿用这个写法。
+- **代码复杂度**：函数保持短、分支少，复杂逻辑拆开，读得懂比写得巧重要。比如把表单提交拆成 `validateForm()`、`saveForm()`，别在一个函数里套好几层 `if`。
+- **评审**：一般交给 AI review skill，小需求可以直接过；核心业务必须人工确认后再合。比如提示文案交给 AI 评审，订单金额计算要人确认。
+- **验证**：界面和交互类改动，让 AI 用 Computer Use 按真实路径点一遍，不只看 diff。比如改表单，就走一遍「打开页面 → 填写 → 提交 → 确认结果」。
