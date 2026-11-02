@@ -1,5 +1,7 @@
 ---
 import type { Locale } from '../i18n/config'
+import markup from './weather-bottle/markup.html?raw'
+import './weather-bottle/scene.css'
 
 type Props = { locale: Locale }
 const { locale } = Astro.props
@@ -7,90 +9,103 @@ const en = locale === 'en'
 const url = `/widgets/weather-bottle/index.html?lang=${en ? 'en' : 'zh'}&live=1`
 ---
 
-<section class="weather-bottle" data-weather-bottle data-url={url} aria-labelledby="weather-bottle-title">
-  <div class="bottle-intro">
-    <svg class="bottle-mark" viewBox="0 0 64 80" fill="none" aria-hidden="true">
-      <path d="M24 8h16v13c0 5 13 9 13 20v25c0 6-4 8-10 8H21c-6 0-10-2-10-8V41c0-11 13-15 13-20V8Z" stroke="currentColor" stroke-width="1.4" />
-      <path d="M25 6h14v8H25z" fill="currentColor" opacity=".18" />
-      <path d="M12 55c10-5 20 5 40 0v11c0 5-4 7-10 7H22c-6 0-10-2-10-7V55Z" fill="currentColor" opacity=".1" />
-      <path d="M24 51h17l-4 5h-9l-4-5Zm-1-14c-4 0-3-6 1-6 1-6 10-6 12-2 7-1 9 8 3 8H23Z" stroke="currentColor" stroke-width="1.2" />
-      <path d="m27 41-1 4m8-4-1 4m8-4-1 4" stroke="currentColor" stroke-linecap="round" />
-    </svg>
-    <div class="bottle-copy">
-      <p class="bottle-kicker">{en ? 'A small pause' : '片刻放空'}</p>
-      <h2 id="weather-bottle-title">{en ? 'A bottle of weather' : '装着天气的玻璃瓶'}</h2>
-      <p>{en ? 'A tiny boat, a passing cloud. Turn the bottle and wipe the mist.' : '一叶小船，一片流云。转动瓶子，也擦去一点雾气。'}</p>
-      <button type="button" class="bottle-open" aria-expanded="false" aria-controls="weather-bottle-scene" data-open-label={en ? 'Open the bottle' : '打开天气瓶'} data-close-label={en ? 'Put it away' : '收起天气瓶'}>{en ? 'Open the bottle' : '打开天气瓶'} <span aria-hidden="true">↗</span></button>
-    </div>
+<section class="weather-bottle" aria-label={en ? 'A bottle of weather' : '装着天气的玻璃瓶'}>
+  <div class="weather-scene embed" data-weather-scene data-locale={locale} data-state="waiting" set:html={markup} />
+  <div class="bottle-links">
+    <span>{en ? 'Approximate IP region; may be affected by VPN. A default scene appears if unavailable.' : '按 IP 大致地区展示，可能受 VPN 影响；获取不到则显示默认场景。'}</span>
+    <a href={url} target="_blank" rel="noopener noreferrer">{en ? 'Open full view ↗' : '展开观察 ↗'}</a>
+    <a href="/widgets/weather-bottle/index.html" download="index.html" data-astro-reload>{en ? 'Download HTML' : '下载 HTML'}</a>
   </div>
-  <div id="weather-bottle-scene" class="bottle-scene" hidden>
-    <div class="bottle-frame"></div>
-    <div class="bottle-links">
-      <span>{en ? 'Approximate IP region; may be affected by VPN. A default scene appears if unavailable.' : '按 IP 大致地区展示，可能受 VPN 影响；获取不到则显示默认场景。'}</span>
-      <a href={url} target="_blank" rel="noopener noreferrer">{en ? 'Open full view ↗' : '展开观察 ↗'}</a>
-      <a href="/widgets/weather-bottle/index.html" download="index.html" data-astro-reload>{en ? 'Download HTML' : '下载 HTML'}</a>
-    </div>
-  </div>
-  <noscript><a href={url} data-astro-reload>{en ? 'Open the weather bottle' : '打开天气玻璃瓶'} ↗</a></noscript>
 </section>
 
 <script>
-  function initWeatherBottle() {
-    const host = document.querySelector<HTMLElement>('[data-weather-bottle]')
-    if (!host)
-      return
-    const controller = new AbortController()
-    const button = host.querySelector<HTMLButtonElement>('.bottle-open')!
-    const panel = host.querySelector<HTMLElement>('.bottle-scene')!
-    const holder = host.querySelector<HTMLElement>('.bottle-frame')!
-    let frame: HTMLIFrameElement | undefined
-    const syncTheme = () => frame?.contentWindow?.postMessage({ type: 'weather-bottle-theme', dark: document.documentElement.classList.contains('dark') }, location.origin)
-    const theme = new MutationObserver(syncTheme)
-    theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    button.addEventListener('click', () => {
-      const opening = panel.hidden
-      panel.hidden = !opening
-      button.setAttribute('aria-expanded', String(opening))
-      button.textContent = opening ? button.dataset.closeLabel! : `${button.dataset.openLabel} ↗`
-      if (opening) {
-        frame = document.createElement('iframe')
-        frame.title = host.querySelector('h2')!.textContent!
-        frame.src = `${host.dataset.url}&embed=1&theme=${document.documentElement.classList.contains('dark') ? 'dark' : 'light'}`
-        frame.setAttribute('allow', 'geolocation \'none\'')
-        frame.referrerPolicy = 'no-referrer'
-        frame.addEventListener('load', syncTheme, { signal: controller.signal })
-        holder.append(frame)
+  type Scene = ReturnType<typeof import('./weather-bottle/scene.js')['mountWeatherBottle']>
+  const instances = new Map<HTMLElement, () => void>()
+
+  function initWeatherBottles() {
+    document.querySelectorAll<HTMLElement>('[data-weather-scene]').forEach((host) => {
+      if (instances.has(host))
+        return
+      let active = true
+      let loading = false
+      let scene: Scene | undefined
+      const isDark = () => document.documentElement.classList.contains('dark')
+      const theme = new MutationObserver(() => {
+        host.classList.toggle('dark', isDark())
+        scene?.setTheme(isDark())
+      })
+      host.classList.toggle('dark', isDark())
+      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+      const mount = async () => {
+        if (!active || loading)
+          return
+        loading = true
+        scene?.dispose()
+        try {
+          const { mountWeatherBottle } = await import('./weather-bottle/scene.js')
+          if (!active || !host.isConnected)
+            return
+          scene = mountWeatherBottle(host, {
+            locale: host.dataset.locale,
+            embedded: true,
+            dark: isDark(),
+            live: true,
+            debug: new URLSearchParams(location.search).get('debug') === '1',
+            onRetry: () => {
+              void mount()
+            },
+          })
+          await scene.ready
+        }
+        catch (error) {
+          if (!active)
+            return
+          host.dataset.state = 'error'
+          const message = host.querySelector<HTMLElement>('[data-bottle-part=message]')!
+          message.hidden = false
+          message.setAttribute('role', 'alert')
+          host.querySelector('[data-bottle-part=message-text]')!.textContent = host.dataset.locale === 'en' ? 'Unable to load the scene. Check your connection and retry.' : '场景加载失败，请检查网络后重试。'
+          const retry = host.querySelector<HTMLButtonElement>('[data-bottle-part=retry]')!
+          retry.hidden = false
+          retry.onclick = () => {
+            void mount()
+          }
+          console.error(error)
+        }
+        finally {
+          loading = false
+        }
       }
-      else {
-        frame?.remove()
-        frame = undefined
-        button.focus({ preventScroll: true })
-      }
-    }, { signal: controller.signal })
-    document.addEventListener('astro:before-swap', () => {
-      controller.abort()
-      theme.disconnect()
-      frame?.remove()
-    }, { once: true, signal: controller.signal })
+      const visibility = new IntersectionObserver((entries) => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          visibility.disconnect()
+          void mount()
+        }
+      }, { rootMargin: '240px' })
+      visibility.observe(host)
+      instances.set(host, () => {
+        active = false
+        visibility.disconnect()
+        theme.disconnect()
+        scene?.dispose()
+        host.querySelectorAll('button').forEach(button => button.onclick = null)
+        host.dataset.state = 'disposed'
+      })
+    })
   }
-  document.addEventListener('astro:page-load', initWeatherBottle)
+  document.addEventListener('astro:page-load', initWeatherBottles)
+  document.addEventListener('astro:before-swap', () => {
+    instances.forEach(dispose => dispose())
+    instances.clear()
+  })
+  initWeatherBottles()
 </script>
 
 <style>
   .weather-bottle { margin: 0 0 3rem; border: 1px solid rgb(var(--color-border-card) / .65); border-radius: 14px; background: rgb(var(--color-bg-card)); overflow: hidden; }
-  .bottle-intro { display: flex; align-items: center; gap: 22px; padding: 24px; }
-  .bottle-mark { flex: 0 0 56px; width: 56px; height: 76px; color: rgb(var(--color-text-muted)); }
-  .bottle-copy { min-width: 0; }
-  .bottle-kicker { margin: 0 0 5px; font-size: 11px; letter-spacing: .13em; color: rgb(var(--color-text-muted)); }
-  h2 { margin: 0 0 6px; font-size: 20px; font-weight: 500; }
-  .bottle-copy > p:not(.bottle-kicker) { margin: 0; font-size: 13px; line-height: 1.7; color: rgb(var(--color-text-muted)); }
-  .bottle-open { margin-top: 8px; min-height: 44px; padding: 8px 0; background: none; border: 0; color: rgb(var(--color-text-main)); font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
-  .bottle-open:focus-visible, a:focus-visible { outline: 2px solid rgb(var(--color-brand)); outline-offset: 4px; border-radius: 2px; }
-  .bottle-scene { border-top: 1px solid rgb(var(--color-border-card) / .65); }
-  .bottle-frame { height: 520px; }
-  .bottle-frame :global(iframe) { border: 0; display: block; width: 100%; height: 100%; }
-  .bottle-links { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; padding: 12px 20px; font-size: 11px; line-height: 1.7; color: rgb(var(--color-text-muted)); }
+  .bottle-links { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; padding: 12px 20px; font-size: 11px; line-height: 1.7; color: rgb(var(--color-text-muted)); border-top: 1px solid rgb(var(--color-border-card) / .65); }
   .bottle-links span { flex-basis: 100%; }
   .bottle-links a { display: inline-flex; align-items: center; min-height: 44px; color: rgb(var(--color-text-main)); text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 600px) { .bottle-intro { padding: 18px; gap: 16px; } .bottle-mark { flex-basis: 42px; height: 62px; } h2 { font-size: 18px; } .bottle-frame { height: 540px; } }
+  .bottle-links a:focus-visible { outline: 2px solid rgb(var(--color-brand)); outline-offset: 4px; border-radius: 2px; }
 </style>
