@@ -85,6 +85,8 @@ test('sunlight is the quiet default, with no visual controls and real canvas alp
   expect(alpha.solidRatio).toBeGreaterThan(0.005)
   expect(alpha.glassAirAlpha).toBeGreaterThan(0)
   expect(alpha.glassAirAlpha).toBeLessThan(100)
+  // Clear walls, but the glass thickens toward its silhouette.
+  expect(alpha.rimAlpha).toBeGreaterThan(alpha.glassAirAlpha + 100)
   await expect(page.locator(stage)).toHaveAttribute('aria-describedby', /weather-bottle-hint/)
 })
 

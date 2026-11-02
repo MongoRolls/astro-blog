@@ -387,58 +387,45 @@ function mountWeatherBottle(host, options = {}) {
       env.dispose()
       envTex.dispose()
     })
-    // Bottle coordinates are shared by geometry, collision checks and fog raycasts.
+    // Bottle coordinates are shared by geometry, collision checks, fog raycasts and glass shading.
+    // Inner wall knots [y, radius]: below the first knot is the solid base, above the last the neck bore.
+    const INNER = [[-1.43, 0.93], [-1.35, 1.01], [0.92, 1.01], [1.06, 0.98], [1.2, 0.89], [1.37, 0.73], [1.58, 0.49]]
+    const BORE = 0.4
+    function innerRadius(y) {
+      if (y < INNER[0][0])
+        return 0
+      for (let i = 1; i < INNER.length; i++) {
+        const [y1, r1] = INNER[i]
+        if (y <= y1) {
+          const [y0, r0] = INNER[i - 1]
+          return lerp(r0, r1, (y - y0) / (y1 - y0))
+        }
+      }
+      return BORE
+    }
+    const glslFloat = n => n.toFixed(3)
+    const innerRadiusGlsl = `float innerRadius(float y){if(y<${glslFloat(INNER[0][0])})return 0.;${INNER.slice(1).map(([y1, r1], i) => {
+      const [y0, r0] = INNER[i]
+      return `if(y<=${glslFloat(y1)})return mix(${glslFloat(r0)},${glslFloat(r1)},(y-(${glslFloat(y0)}))/${glslFloat(y1 - y0)});`
+    }).join('')}return ${glslFloat(BORE)};}`
+    // Only the outer skin is drawn: smooth splines keep long highlights unbroken, and the glass
+    // shader derives wall thickness from innerRadius() instead of drawing a second surface.
+    const spline = (points, divisions) => new T.SplineCurve(points.map(([r, y]) => new T.Vector2(r, y))).getPoints(divisions)
     const profile = [
-      [0, -1.56],
-      [0.88, -1.56],
-      [1.02, -1.5],
-      [1.08, -1.38],
-      [1.08, 0.93],
-      [1.04, 1.08],
-      [0.94, 1.22],
-      [0.78, 1.38],
-      [0.55, 1.55],
-      [0.47, 1.67],
-      [0.47, 1.98],
-      [0.49, 2.02],
-      [0.49, 2.08],
-      [0.4, 2.08],
-      [0.4, 1.68],
-      [0.49, 1.58],
-      [0.73, 1.37],
-      [0.89, 1.2],
-      [0.98, 1.06],
-      [1.01, 0.92],
-      [1.01, -1.35],
-      [0.93, -1.43],
-      [0, -1.43],
+      new T.Vector2(0, -1.56),
+      ...Array.from({ length: 7 }, (_, i) => {
+        const a = (i / 6 - 1) * Math.PI / 2
+        return new T.Vector2(0.94 + Math.cos(a) * 0.14, -1.42 + Math.sin(a) * 0.14)
+      }),
+      ...spline([[1.08, 0.62], [1.08, 0.93], [1.04, 1.08], [0.94, 1.22], [0.78, 1.38], [0.55, 1.55], [0.47, 1.67], [0.47, 1.8]], 21),
+      ...spline([[0.47, 1.9], [0.47, 1.94], [0.49, 1.975], [0.512, 2.015], [0.506, 2.055], [0.48, 2.08], [0.44, 2.09], [0.41, 2.08], [0.4, 2.05], [0.4, 1.98]], 18),
     ]
-    const bottleGeo = new T.LatheGeometry(
-      profile.map(([r, y]) => new T.Vector2(r, y)),
-      96,
-    )
+    const bottleGeo = new T.LatheGeometry(profile, 72)
     for (let i = 0; i < bottleGeo.attributes.uv.count; i++) {
       bottleGeo.attributes.uv.setY(
         i,
         (bottleGeo.attributes.position.getY(i) + 1.56) / 3.64,
       )
-    }
-    function innerRadius(y) {
-      if (y < -1.43)
-        return 0
-      if (y < -1.35)
-        return lerp(0.93, 1.01, (y + 1.43) / 0.08)
-      if (y <= 0.92)
-        return 1.01
-      if (y <= 1.06)
-        return lerp(1.01, 0.98, (y - 0.92) / 0.14)
-      if (y <= 1.2)
-        return lerp(0.98, 0.89, (y - 1.06) / 0.14)
-      if (y <= 1.37)
-        return lerp(0.89, 0.73, (y - 1.2) / 0.17)
-      if (y <= 1.58)
-        return lerp(0.73, 0.49, (y - 1.37) / 0.21)
-      return 0.4
     }
     const target = new T.WebGLRenderTarget(1, 1, {
       depthBuffer: true,
@@ -449,6 +436,10 @@ function mountWeatherBottle(host, options = {}) {
       uScene: { value: target.texture },
       uResolution: { value: new T.Vector2(1, 1) },
       uEye: { value: camera.position },
+      uEyeLocal: { value: new T.Vector3() },
+      uAxis: { value: new T.Vector3(0, 1, 0) },
+      uPage: { value: new T.Color(1, 1, 1) },
+      uPageDisplay: { value: new T.Vector3(1, 1, 1) },
       uFlash: { value: 0 },
       uDark: { value: dark ? 1 : 0 },
     }
@@ -456,51 +447,88 @@ function mountWeatherBottle(host, options = {}) {
       uniforms: glassUniforms,
       transparent: true,
       blending: T.NoBlending,
-      depthWrite: false,
+      depthWrite: true,
       side: T.FrontSide,
-      vertexShader: `varying vec3 vNormal;varying vec3 vWorld;void main(){vec4 world=modelMatrix*vec4(position,1.);vWorld=world.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*world;}`,
-      // Replace pixels inside the bottle with a premultiplied RGBA refraction.
-      // Empty glass transmits the actual page underneath, without a baked background.
-      fragmentShader: `uniform sampler2D uScene;uniform vec2 uResolution;uniform vec3 uEye;uniform float uFlash;uniform float uDark;varying vec3 vNormal;varying vec3 vWorld;
-    void main(){vec3 n=normalize(vNormal),v=normalize(uEye-vWorld);float fres=pow(1.-abs(dot(n,v)),3.);vec2 uv=gl_FragCoord.xy/uResolution;
-    vec2 bend=(mat3(viewMatrix)*n).xy*(.0025+fres*.008);vec4 inside=texture2D(uScene,clamp(uv+bend,vec2(.002),vec2(.998)));
-    vec3 r=reflect(-v,n);float strip=pow(max(0.,dot(r,normalize(vec3(-.65,.4,.7)))),28.);float strip2=pow(max(0.,dot(r,normalize(vec3(.8,.3,-.2)))),42.);
-    float film=clamp(.025+fres*.34+strip*.22+strip2*.15+uFlash*.035,0.,.7);
-    float alpha=inside.a+(1.-inside.a)*film;
-    vec3 reflection=mix(vec3(.29,.42,.46),vec3(.65,.82,.88),uDark);
-    vec3 tint=mix(vec3(1.),vec3(.87,.97,.97),fres*.2);
-    vec3 light=reflection*film+vec3(1.,.94,.80)*(strip*.13+strip2*.08+uFlash*.07);
-    vec3 color=(inside.rgb*tint+light*(1.-inside.a))/max(alpha,.001);
-    gl_FragColor=vec4(color,alpha);
-#include <tonemapping_fragment>
-#include <colorspace_fragment>
-    gl_FragColor.rgb*=gl_FragColor.a;
+      vertexShader: `varying vec3 vNormal;varying vec3 vWorld;varying vec3 vLocal;void main(){vLocal=position;vec4 world=modelMatrix*vec4(position,1.);vWorld=world.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*world;}`,
+      // Replace pixels inside the bottle with premultiplied RGBA glass over the known page colour:
+      // the canvas stays transparent, so the real page still shows through the bottle.
+      fragmentShader: `uniform sampler2D uScene;uniform vec2 uResolution;uniform vec3 uEye,uEyeLocal,uAxis,uPage,uPageDisplay;uniform float uFlash,uDark;
+varying vec3 vNormal;varying vec3 vWorld;varying vec3 vLocal;
+${innerRadiusGlsl}
+float wrapAngle(float a){return mod(a+3.14159265,6.2831853)-3.14159265;}
+float strip(float az,float center,float width){return 1.-smoothstep(width*.5,width,abs(wrapAngle(az-center)));}
+// Procedural studio: tall key softbox camera-left, slim rim strip behind, round top light, dark floor.
+vec3 studio(vec3 r){
+  float az=atan(r.x,r.z);
+  vec3 floorColor=mix(vec3(.07,.08,.075),vec3(.01,.012,.018),uDark);
+  vec3 ceiling=mix(vec3(.62,.66,.68),vec3(.06,.065,.09),uDark);
+  vec3 room=mix(floorColor,ceiling,smoothstep(-.45,.9,r.y));
+  float panel=smoothstep(-.5,-.2,r.y)*(1.-smoothstep(.6,.86,r.y));
+  float top=smoothstep(.93,.96,dot(r,normalize(vec3(-.3,1.,.35))));
+  float light=strip(az,-.64,.21)*panel*16.+strip(az,2.3,.075)*panel*9.+top*7.;
+  return room+vec3(1.,.97,.92)*light;
+}
+void main(){
+  vec3 n=normalize(vNormal);
+  vec3 v=normalize(uEye-vWorld);
+  float ndv=clamp(abs(dot(n,v)),0.,1.);
+  float fres=.04+.96*pow(1.-ndv,5.);
+  // Closest approach of the view ray to the axis decides whether it crosses the cavity or only glass.
+  vec3 d=normalize(vLocal-uEyeLocal);
+  float across=max(length(d.xz),.001);
+  float ro=max(length(vLocal.xz),.001);
+  float b=min(abs(vLocal.x*d.z-vLocal.z*d.x)/across,ro);
+  float ri=clamp(innerRadius(vLocal.y),0.,ro-.02);
+  float cavity=1.-smoothstep(ri-.015,ri+.004,b);
+  float chord=2.*(sqrt(max(ro*ro-b*b,0.))-sqrt(max(ri*ri-b*b,0.)));
+  vec3 absorb=exp(-vec3(.42,.12,.22)*min(chord/max(across,.25),1.2));
+  float rim=smoothstep(.95,.992,b/ro);
+  float wallLine=exp(-pow((b-ri)/.02,2.))*step(.05,ri);
+  float edge=max(rim,wallLine*.75);
+  vec2 uv=gl_FragCoord.xy/uResolution;
+  vec2 bend=(viewMatrix*vec4(n,0.)).xy*(.004+.03*pow(1.-ndv,3.));
+  vec4 inside=texture2D(uScene,clamp(uv-bend,.002,.998));
+  inside.r=texture2D(uScene,clamp(uv-bend*.9,.002,.998)).r;
+  inside.b=texture2D(uScene,clamp(uv-bend*1.12,.002,.998)).b;
+  inside*=cavity;
+  vec3 insideColor=inside.rgb/max(inside.a,.0001);
+  #ifdef TONE_MAPPING
+  insideColor=toneMapping(insideColor);
+  #endif
+  // Front reflection plus the back wall's inner face, which mirrors the highlights more faintly.
+  vec3 across3=normalize(v-dot(v,uAxis)*uAxis+1e-5);
+  vec3 back=n-2.*dot(n,across3)*across3;
+  vec3 light=studio(reflect(-v,n))*fres+studio(reflect(-v,back))*fres*cavity*absorb*.7;
+  light+=vec3(.75,.85,1.)*uFlash*(.08+fres*.4);
+  light/=1.+light;
+  vec3 edgeEnv=studio(refract(-v,n,.67));
+  vec3 edgeLight=absorb*mix(edgeEnv*.42,edgeEnv*1.5+vec3(.05,.065,.08),uDark);
+  vec3 trans=absorb*pow(1.-fres,1.+cavity);
+  vec3 pageShare=trans*(1.-inside.a)*(1.-edge);
+  vec3 radiance=light+trans*((1.-edge)*insideColor*inside.a+edge*edgeLight)+pageShare*uPage;
+  vec3 display=linearToOutputTexel(vec4(radiance,1.)).rgb;
+  vec3 page=max(uPageDisplay,vec3(.02));
+  float alpha=clamp(1.-min(min(display.r/page.r,display.g/page.g),display.b/page.b),0.,1.);
+  gl_FragColor=vec4(max(display-(1.-alpha)*uPageDisplay,0.),alpha);
 }`,
-
     })
     const glass = new T.Mesh(bottleGeo, glassMat)
     glass.renderOrder = 20
     root.add(glass)
-    const lipMat = new T.MeshPhysicalMaterial({
-      color: 0xDCEBE0,
-      roughness: 0.16,
-      metalness: 0.05,
-      transparent: true,
-      opacity: 0.34,
-      clearcoat: 1,
-    })
-    function torus(radius, tube, y, material) {
-      const mesh = new T.Mesh(
-        new T.TorusGeometry(radius, tube, 10, 72),
-        material,
-      )
-      mesh.rotation.x = Math.PI / 2
-      mesh.position.y = y
-      root.add(mesh)
-      return mesh
-    }
-    torus(0.45, 0.044, 2.055, lipMat)
-    torus(1.015, 0.026, -1.44, lipMat)
+    const floorRing = new T.Mesh(
+      new T.TorusGeometry(1.015, 0.026, 10, 72),
+      new T.MeshPhysicalMaterial({
+        color: 0xDCEBE0,
+        roughness: 0.16,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.34,
+        clearcoat: 1,
+      }),
+    )
+    floorRing.rotation.x = Math.PI / 2
+    floorRing.position.y = -1.44
+    root.add(floorRing)
     // Wood is entirely procedural, with longitudinal grain and knots.
     function woodTexture() {
       const c = document.createElement('canvas')
@@ -569,18 +597,25 @@ function mountWeatherBottle(host, options = {}) {
     )
     corkTop.position.y = 2.272
     root.add(corkTop)
-    // Grounding shadow is a generated radial texture; no external bitmap.
+    // Generated grounding: a soft contact shadow plus the caustic the water focuses from the key
+    // light, offset away from it. Both fade out inside the plane so the canvas edge stays clear.
     const sc = document.createElement('canvas')
-    sc.width = sc.height = 128
+    sc.width = sc.height = 256
     const sx = sc.getContext('2d')
-    const sg = sx.createRadialGradient(64, 64, 0, 64, 64, 64)
-    sg.addColorStop(0, '#30322c29')
-    sg.addColorStop(0.45, '#30322c13')
-    sg.addColorStop(1, '#30322c00')
+    const sg = sx.createRadialGradient(128, 128, 0, 128, 128, 116)
+    sg.addColorStop(0, '#2a302d2c')
+    sg.addColorStop(0.5, '#2a302d1c')
+    sg.addColorStop(1, '#2a302d00')
     sx.fillStyle = sg
-    sx.fillRect(0, 0, 128, 128)
+    sx.fillRect(0, 0, 256, 256)
+    const cg = sx.createRadialGradient(192, 114, 0, 192, 114, 40)
+    cg.addColorStop(0, '#c4f4e890')
+    cg.addColorStop(0.5, '#a2e2d240')
+    cg.addColorStop(1, '#a2e2d200')
+    sx.fillStyle = cg
+    sx.fillRect(0, 0, 256, 256)
     const shadow = new T.Mesh(
-      new T.PlaneGeometry(3.6, 2.5),
+      new T.PlaneGeometry(3.6, 2.4),
       new T.MeshBasicMaterial({
         map: new T.CanvasTexture(sc),
         transparent: true,
@@ -588,7 +623,7 @@ function mountWeatherBottle(host, options = {}) {
       }),
     )
     shadow.rotation.x = -Math.PI / 2
-    shadow.position.y = -1.74
+    shadow.position.set(0, -1.74, -0.12)
     scene.add(shadow)
     // Water is a closed, deformed cylinder wholly within the straight bottle body.
     // The volume's mean height is conserved: every wave is zero-mean on the polar grid.
@@ -669,12 +704,16 @@ function mountWeatherBottle(host, options = {}) {
       true,
     )
     sideGeo.translate(0, (LEVEL + BOTTOM) / 2, 0)
+    // Linear RGBA per ring: thin and pale under the surface, denser teal toward the floor.
+    sideGeo.setAttribute('color', new T.Float32BufferAttribute(
+      Array.from({ length: sideGeo.attributes.position.count }, (_, i) => i <= SEG ? [0.18, 0.55, 0.5, 0.14] : [0.03, 0.25, 0.26, 0.42]).flat(),
+      4,
+    ))
     const volume = new T.Mesh(
       sideGeo,
       new T.MeshPhysicalMaterial({
-        color: 0x4EABA2,
+        vertexColors: true,
         transparent: true,
-        opacity: 0.16,
         roughness: 0.2,
         metalness: 0.05,
         side: T.DoubleSide,
@@ -686,9 +725,9 @@ function mountWeatherBottle(host, options = {}) {
     const bottom = new T.Mesh(
       new T.CircleGeometry(R, SEG),
       new T.MeshStandardMaterial({
-        color: 0x55998B,
+        color: 0x2E7C74,
         transparent: true,
-        opacity: 0.10,
+        opacity: 0.22,
         roughness: 0.3,
       }),
     )
@@ -1110,7 +1149,7 @@ function mountWeatherBottle(host, options = {}) {
       sun.visible = clearMix > 0.01
       sunlight.intensity = clearMix * 0.55
       key.intensity = 2.8 + clearMix * 0.8
-      fogMat.uniforms.uDensity.value = 0.35 + fogMix * 1.1 + snowMix * 0.3
+      fogMat.uniforms.uDensity.value = 0.14 + fogMix * 1.2 + snowMix * 0.35 + rainMix * 0.2
       cloudMat.color.copy(lightCloud).lerp(stormCloud, stormMix * 0.85)
       cloudParts.forEach(({ mesh, base, phase }) => {
         mesh.position.x = base.x + Math.sin(time * 0.16 + phase) * 0.035
@@ -1569,7 +1608,23 @@ function mountWeatherBottle(host, options = {}) {
     })
     resize.observe(stage)
     cleanups.push(() => resize.disconnect())
+    // The glass composites against the nearest opaque page background behind the canvas.
+    function syncBackdrop() {
+      let rgb = dark ? [18, 18, 18] : [255, 255, 255]
+      for (let node = host; node; node = node.parentElement) {
+        const [r, g, b, a = 1] = getComputedStyle(node).backgroundColor.match(/[\d.]+/g)?.map(Number) || []
+        if (b !== undefined && a >= 1) {
+          rgb = [r, g, b]
+          break
+        }
+      }
+      const [r, g, b] = rgb.map(c => c / 255)
+      glassUniforms.uPageDisplay.value.set(r, g, b)
+      glassUniforms.uPage.value.setRGB(r, g, b, T.SRGBColorSpace)
+    }
+    syncBackdrop()
     applyTheme = () => {
+      syncBackdrop()
       glassUniforms.uDark.value = dark ? 1 : 0
       fogMat.uniforms.uDark.value = dark ? 1 : 0
       requestFrame()
@@ -1605,6 +1660,9 @@ function mountWeatherBottle(host, options = {}) {
       shakeEnergy *= Math.exp(-dt * 0.6)
     }
     function render() {
+      root.updateMatrixWorld()
+      root.worldToLocal(glassUniforms.uEyeLocal.value.copy(camera.position))
+      glassUniforms.uAxis.value.set(0, 1, 0).applyQuaternion(root.quaternion)
       glass.visible = false
       fog.visible = false
       renderer.setRenderTarget(target)
@@ -1852,11 +1910,15 @@ function mountWeatherBottle(host, options = {}) {
           const air = new T.Vector3(0.4, 0.2, 0.99).applyMatrix4(root.matrixWorld).project(camera)
           const x = Math.round((air.x + 1) / 2 * (width - 1))
           const y = Math.round((air.y + 1) / 2 * (height - 1))
+          let rimAlpha = 0
+          for (let i = 0; i < width; i++)
+            rimAlpha = Math.max(rimAlpha, pixels[(y * width + i) * 4 + 3])
           return {
             clearRatio: clear / (width * height),
             translucentRatio: translucent / (width * height),
             solidRatio: solid / (width * height),
             glassAirAlpha: pixels[(y * width + x) * 4 + 3],
+            rimAlpha,
             cornerAlphas: [3, width * 4 - 1, (height - 1) * width * 4 + 3, pixels.length - 1].map(i => pixels[i]),
           }
         },
