@@ -6,106 +6,101 @@ import './weather-bottle/scene.css'
 type Props = { locale: Locale }
 const { locale } = Astro.props
 const en = locale === 'en'
-const url = `/widgets/weather-bottle/index.html?lang=${en ? 'en' : 'zh'}&live=1`
 ---
 
 <section class="weather-bottle" aria-label={en ? 'A bottle of weather' : '装着天气的玻璃瓶'}>
   <div class="weather-scene embed" data-weather-scene data-locale={locale} data-state="waiting" set:html={markup} />
-  <div class="bottle-links">
-    <span>{en ? 'Approximate IP region; may be affected by VPN. A default scene appears if unavailable.' : '按 IP 大致地区展示，可能受 VPN 影响；获取不到则显示默认场景。'}</span>
-    <a href={url} target="_blank" rel="noopener noreferrer">{en ? 'Open full view ↗' : '展开观察 ↗'}</a>
-    <a href="/widgets/weather-bottle/index.html" download="index.html" data-astro-reload>{en ? 'Download HTML' : '下载 HTML'}</a>
-  </div>
 </section>
 
 <script>
-  type Scene = ReturnType<typeof import('./weather-bottle/scene.js')['mountWeatherBottle']>
-  const instances = new Map<HTMLElement, () => void>()
+type Scene = ReturnType<typeof import('./weather-bottle/scene.js')['mountWeatherBottle']>
+const instances = new Map<HTMLElement, () => void>()
 
-  function initWeatherBottles() {
-    document.querySelectorAll<HTMLElement>('[data-weather-scene]').forEach((host) => {
-      if (instances.has(host))
-        return
-      let active = true
-      let loading = false
-      let scene: Scene | undefined
-      const isDark = () => document.documentElement.classList.contains('dark')
-      const theme = new MutationObserver(() => {
-        host.classList.toggle('dark', isDark())
-        scene?.setTheme(isDark())
-      })
+function initWeatherBottles() {
+  document.querySelectorAll<HTMLElement>('[data-weather-scene]').forEach((host) => {
+    if (instances.has(host))
+      return
+    let active = true
+    let loading = false
+    let scene: Scene | undefined
+    const isDark = () => document.documentElement.classList.contains('dark')
+    const theme = new MutationObserver(() => {
       host.classList.toggle('dark', isDark())
-      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+      scene?.setTheme(isDark())
+    })
+    host.classList.toggle('dark', isDark())
+    theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
-      const mount = async () => {
-        if (!active || loading)
+    const mount = async () => {
+      if (!active || loading)
+        return
+      loading = true
+      scene?.dispose()
+      try {
+        const { mountWeatherBottle } = await import('./weather-bottle/scene.js')
+        if (!active || !host.isConnected)
           return
-        loading = true
-        scene?.dispose()
-        try {
-          const { mountWeatherBottle } = await import('./weather-bottle/scene.js')
-          if (!active || !host.isConnected)
-            return
-          scene = mountWeatherBottle(host, {
-            locale: host.dataset.locale,
-            embedded: true,
-            dark: isDark(),
-            live: true,
-            debug: new URLSearchParams(location.search).get('debug') === '1',
-            onRetry: () => {
-              void mount()
-            },
-          })
-          await scene.ready
-        }
-        catch (error) {
-          if (!active)
-            return
-          host.dataset.state = 'error'
-          const message = host.querySelector<HTMLElement>('[data-bottle-part=message]')!
-          message.hidden = false
-          message.setAttribute('role', 'alert')
-          host.querySelector('[data-bottle-part=message-text]')!.textContent = host.dataset.locale === 'en' ? 'Unable to load the scene. Check your connection and retry.' : '场景加载失败，请检查网络后重试。'
-          const retry = host.querySelector<HTMLButtonElement>('[data-bottle-part=retry]')!
-          retry.hidden = false
-          retry.onclick = () => {
+        scene = mountWeatherBottle(host, {
+          locale: host.dataset.locale,
+          embedded: true,
+          dark: isDark(),
+          live: true,
+          debug: new URLSearchParams(location.search).get('debug') === '1',
+          onRetry: () => {
             void mount()
-          }
-          console.error(error)
-        }
-        finally {
-          loading = false
-        }
+          },
+        })
+        await scene.ready
       }
-      const visibility = new IntersectionObserver((entries) => {
-        if (entries.some(entry => entry.isIntersecting)) {
-          visibility.disconnect()
+      catch (error) {
+        if (!active)
+          return
+        host.dataset.state = 'error'
+        const message = host.querySelector<HTMLElement>('[data-bottle-part=message]')!
+        message.hidden = false
+        message.setAttribute('role', 'alert')
+        host.querySelector('[data-bottle-part=message-text]')!.textContent = host.dataset.locale === 'en' ? 'Unable to load the scene. Check your connection and retry.' : '场景加载失败，请检查网络后重试。'
+        host.querySelector('[data-bottle-part=stage]')!.setAttribute('aria-label', host.dataset.locale === 'en' ? 'Scene unavailable. Press Enter or tap to retry.' : '场景暂不可用，按回车或轻点重试。')
+        host.querySelector<HTMLElement>('[data-bottle-part=stage]')!.onclick = () => {
           void mount()
         }
-      }, { rootMargin: '240px' })
-      visibility.observe(host)
-      instances.set(host, () => {
-        active = false
+        host.querySelector<HTMLElement>('[data-bottle-part=stage]')!.onkeydown = (event) => {
+          if (event.key === 'Enter')
+            void mount()
+        }
+        console.error(error)
+      }
+      finally {
+        loading = false
+      }
+    }
+    const visibility = new IntersectionObserver((entries) => {
+      if (entries.some(entry => entry.isIntersecting)) {
         visibility.disconnect()
-        theme.disconnect()
-        scene?.dispose()
-        host.querySelectorAll('button').forEach(button => button.onclick = null)
-        host.dataset.state = 'disposed'
-      })
+        void mount()
+      }
+    }, { rootMargin: '240px' })
+    visibility.observe(host)
+    instances.set(host, () => {
+      active = false
+      visibility.disconnect()
+      theme.disconnect()
+      scene?.dispose()
+      const stage = host.querySelector<HTMLElement>('[data-bottle-part=stage]')!
+      stage.onclick = null
+      stage.onkeydown = null
+      host.dataset.state = 'disposed'
     })
-  }
-  document.addEventListener('astro:page-load', initWeatherBottles)
-  document.addEventListener('astro:before-swap', () => {
-    instances.forEach(dispose => dispose())
-    instances.clear()
   })
-  initWeatherBottles()
+}
+document.addEventListener('astro:page-load', initWeatherBottles)
+document.addEventListener('astro:before-swap', () => {
+  instances.forEach(dispose => dispose())
+  instances.clear()
+})
+initWeatherBottles()
 </script>
 
 <style>
-  .weather-bottle { margin: 0 0 3rem; border: 1px solid rgb(var(--color-border-card) / .65); border-radius: 14px; background: rgb(var(--color-bg-card)); overflow: hidden; }
-  .bottle-links { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; padding: 12px 20px; font-size: 11px; line-height: 1.7; color: rgb(var(--color-text-muted)); border-top: 1px solid rgb(var(--color-border-card) / .65); }
-  .bottle-links span { flex-basis: 100%; }
-  .bottle-links a { display: inline-flex; align-items: center; min-height: 44px; color: rgb(var(--color-text-main)); text-decoration: underline; text-underline-offset: 3px; }
-  .bottle-links a:focus-visible { outline: 2px solid rgb(var(--color-brand)); outline-offset: 4px; border-radius: 2px; }
+  .weather-bottle { margin: 0 0 2rem; background: transparent; }
 </style>

@@ -1,443 +1,77 @@
 .weather-scene {
-  font-family:
-    system-ui,
-    -apple-system,
-    "PingFang SC",
-    sans-serif;
-  color: #35483f;
-  background: #eeeee6;
-  --ink: #35483f;
-  --muted: #68776e;
-  --line: #b9c4b8;
-  --panel: #f7f8efdd;
-  --active: #3e594b;
-  --on-active: #fffdf4;
+  position: relative;
+  width: min(100%, 460px);
+  margin-inline: auto;
+  color: inherit;
+  background: transparent;
 }
 .weather-scene * {
   box-sizing: border-box;
-}
-.weather-scene {
-  margin: 0;
-}
-.weather-scene button,
-.weather-scene a {
-  -webkit-tap-highlight-color: transparent;
-}
-.weather-scene button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-.weather-scene button:disabled {
-  cursor: wait;
-  opacity: 0.5;
-}
-.weather-scene button:focus-visible,
-.weather-scene a:focus-visible,
-.weather-scene [data-bottle-part=stage]:focus-visible {
-  outline: 2px solid #ae7247;
-  outline-offset: 4px;
-}
-.weather-scene button {
-  min-height: 44px;
-  border: 0;
-  background: transparent;
-  border-radius: 22px;
-  padding: 10px 16px;
-  touch-action: manipulation;
-}
-.weather-scene button[aria-pressed="true"] {
-  background: var(--active);
-  color: var(--on-active);
-}
-.weather-scene svg {
-  width: 18px;
-  height: 18px;
-  vertical-align: -4px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 .weather-scene .app {
   position: relative;
   isolation: isolate;
   width: 100%;
-  height: 100svh;
-  min-height: 660px;
-  overflow: hidden;
-  background: radial-gradient(
-    ellipse at 50% 42%,
-    #fcfcf1 0,
-    #e9ede4 58%,
-    #e0e5db 100%
-  );
+  height: clamp(300px, 80svh, 540px);
+  background: transparent;
 }
-.weather-scene header {
+.weather-scene.embed .app {
+  height: clamp(280px, 32vw, 350px);
+}
+.weather-scene [data-bottle-part="stage"] {
   position: absolute;
-  top: 30px;
-  left: 36px;
-  right: 36px;
-  z-index: 2;
-  pointer-events: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 20px;
+  inset: 0;
+  touch-action: pan-y pinch-zoom;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.weather-scene .eyebrow {
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 12px;
-}
-.weather-scene h2 {
-  font-family: "Songti SC", "Noto Serif SC", Georgia, serif;
-  font-size: clamp(21px, 3vw, 30px);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  margin: 0;
-  line-height: 1.4;
-}
-.weather-scene .subhead {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 10px;
-  line-height: 1.7;
-}
-.weather-scene .edition {
-  text-align: right;
-  font:
-    italic 14px Georgia,
-    serif;
-  line-height: 1.8;
-  color: var(--muted);
-}
-.weather-scene [data-bottle-part=stage] {
-  position: absolute;
-  inset: 82px 0 155px;
-  touch-action: none;
+.weather-scene [data-bottle-part="stage"].over-glass {
   cursor: grab;
-  outline-offset: -5px;
 }
-.weather-scene [data-bottle-part=stage].wipe {
-  cursor: crosshair;
-}
-.weather-scene [data-bottle-part=stage].dragging {
+.weather-scene [data-bottle-part="stage"].dragging {
   cursor: grabbing;
 }
-.weather-scene [data-bottle-part=stage] canvas {
+.weather-scene [data-bottle-part="stage"]:focus-visible {
+  outline: 1px dashed rgb(var(--color-text-muted, 110 115 120) / .45);
+  outline-offset: -5px;
+  border-radius: 24px;
+}
+.weather-scene canvas {
   display: block;
   width: 100%;
   height: 100%;
+  background: transparent;
 }
-.weather-scene .bottle-note {
-  position: absolute;
-  right: max(24px, calc(50% - 300px));
-  top: 48%;
-  z-index: 1;
-  pointer-events: none;
-  font-size: 10px;
-  letter-spacing: 0.17em;
-  line-height: 1.9;
-  color: #6f8277;
-  writing-mode: vertical-rl;
-}
-.weather-scene .controls {
-  position: absolute;
-  bottom: 23px;
-  left: 18px;
-  right: 18px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 12px;
-}
-.weather-scene .weather {
-  display: flex;
-  gap: 4px;
-  padding: 5px;
-  background: var(--panel);
-  border: 1px solid #b9c4b878;
-  border-radius: 32px;
-  box-shadow: 0 8px 30px #43574709;
-}
-.weather-scene .weather button {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  min-width: 88px;
-  font-size: 13px;
-}
-.weather-scene .tools {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.weather-scene .modes {
-  display: flex;
-  gap: 2px;
-  border: 1px solid #b9c4b878;
-  padding: 3px;
-  border-radius: 25px;
-}
-.weather-scene .modes button {
-  font-size: 11px;
-  padding: 8px 13px;
-  min-height: 36px;
-}
-.weather-scene .quiet {
-  font-size: 11px;
-  padding: 8px 10px;
-  min-height: 40px;
-}
-.weather-scene .quiet:hover:not([aria-pressed="true"]) {
-  background: #758c7812;
-}
-.weather-scene [data-bottle-part=hint] {
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-  margin: 0;
-  line-height: 1.6;
-  max-width: 540px;
-}
-.weather-scene [data-bottle-part=status] {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10px;
-  letter-spacing: 0.09em;
-  color: var(--muted);
-}
-.weather-scene [data-bottle-part=status]:before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  background: #809a82;
-  border-radius: 50%;
-}
-.weather-scene .status-row {
-  position: absolute;
-  left: 36px;
-  bottom: 32px;
-  z-index: 2;
-}
-.weather-scene .corner {
-  position: absolute;
-  right: 36px;
-  bottom: 32px;
-  font:
-    italic 12px Georgia,
-    serif;
-  color: var(--muted);
-}
-.weather-scene [data-bottle-part=message] {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  z-index: 5;
-  text-align: center;
-  background: var(--panel);
-  padding: 30px;
-}
-.weather-scene [data-bottle-part=message] p {
-  max-width: 380px;
-  line-height: 1.8;
-  margin: 0;
-  font-size: 14px;
-}
-.weather-scene [data-bottle-part=message][hidden] {
-  display: none;
-}
-.weather-scene [data-bottle-part=retry] {
-  border: 1px solid var(--line);
-}
-.weather-scene [data-bottle-part=retry][hidden] {
-  display: none;
-}
-.weather-scene .local-weather {
-  position: absolute;
-  top: 135px;
-  left: 36px;
-  z-index: 2;
-  max-width: 230px;
-  font-size: 11px;
-  line-height: 1.9;
-  color: var(--muted);
-}
-.weather-scene .local-weather span {
-  display: block;
-}
-.weather-scene .local-weather a {
-  color: inherit;
-  text-underline-offset: 3px;
-}
-.weather-scene .local-weather button {
-  font-size: 10px;
-  padding: 3px 10px;
-  min-height: 32px;
-  border: 1px solid var(--line);
-  margin-top: 6px;
-}
-.weather-scene.embed .local-weather {
-  top: 49px;
-  left: 20px;
-  font-size: 10px;
-  max-width: 210px;
-}
-.weather-scene.embed .local-weather [data-bottle-part=weather-source] {
-  font-size: 9px;
-}
-@media (max-width: 600px) {
-.weather-scene .local-weather {
-    top: 125px;
-    left: 22px;
-    font-size: 10px;
-    max-width: 210px;
-  }
-.weather-scene .app [data-bottle-part=stage] {
-    top: 150px;
-  }
-.weather-scene.embed [data-bottle-part=stage] {
-    top: 82px;
-  }
-}
-.weather-scene .sr-only {
+.weather-scene .bottle-sr {
   position: absolute;
   width: 1px;
   height: 1px;
   padding: 0;
+  margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
-.weather-scene.embed .app {
-  min-height: 540px;
-  height: 540px;
+.weather-scene [data-bottle-part="message"],
+.weather-scene .bottle-error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  text-align: center;
+  font: 12px/1.8 system-ui, sans-serif;
 }
-.weather-scene.embed header {
-  top: 18px;
-  left: 20px;
-  right: 20px;
+.weather-scene [data-bottle-part="message"] {
+  pointer-events: none;
 }
-.weather-scene.embed h2 {
-  font-size: 18px;
+.weather-scene [data-bottle-part="message"] p {
+  margin: 0;
 }
-.weather-scene.embed .eyebrow,
-.weather-scene.embed .subhead,
-.weather-scene.embed .edition,
-.weather-scene.embed .corner,
-.weather-scene.embed .bottle-note,
-.weather-scene.embed .status-row {
+.weather-scene [data-bottle-part="message"][hidden] {
   display: none;
 }
-.weather-scene.embed [data-bottle-part=stage] {
-  inset: 40px 0 150px;
-}
-.weather-scene.embed .controls {
-  bottom: 14px;
-  gap: 8px;
-}
-.weather-scene.dark {
-  --ink: #d5dfd3;
-  --muted: #a9b9ac;
-  --line: #56675b;
-  --panel: #263a32e8;
-  --active: #b8cabb;
-  --on-active: #23352b;
-  color: var(--ink);
-  background: #1c2d28;
-}
-.weather-scene.dark .app {
-  background: radial-gradient(
-    ellipse at 50% 42%,
-    #394d41 0,
-    #263b32 55%,
-    #1c2d28 100%
-  );
-}
-.weather-scene.dark .bottle-note {
-  color: #9bac9b;
-}
-.weather-scene.dark .weather,
-.weather-scene.dark .modes {
-  border-color: #84998040;
-}
-.weather-scene.dark .quiet:hover:not([aria-pressed="true"]) {
-  background: #bdcdbd14;
-}
-@media (max-width: 600px) {
-.weather-scene .app {
-    min-height: 670px;
-  }
-.weather-scene header {
-    top: 24px;
-    left: 22px;
-    right: 22px;
-  }
-.weather-scene .edition {
-    display: none;
-  }
-.weather-scene .subhead {
-    font-size: 11px;
-    max-width: 245px;
-  }
-.weather-scene .status-row,
-.weather-scene .corner {
-    display: none;
-  }
-.weather-scene .bottle-note {
-    right: 15px;
-    font-size: 9px;
-  }
-.weather-scene [data-bottle-part=stage] {
-    inset: 110px 0 170px;
-  }
-.weather-scene .controls {
-    bottom: 19px;
-    gap: 10px;
-  }
-.weather-scene .weather button {
-    min-width: 82px;
-    padding: 10px 13px;
-  }
-.weather-scene .tools {
-    gap: 2px;
-  }
-.weather-scene .modes button {
-    padding: 8px 11px;
-  }
-.weather-scene .quiet {
-    padding: 8px;
-  }
-.weather-scene [data-bottle-part=hint] {
-    font-size: 10px;
-    max-width: 310px;
-  }
-.weather-scene.embed [data-bottle-part=stage] {
-    inset: 40px 0 160px;
-  }
-.weather-scene.embed .app {
-    min-height: 500px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-.weather-scene * {
-    scroll-behavior: auto !important;
-  }
-}
-.weather-scene.embed [data-bottle-part=stage] { touch-action: pan-y; }
-.weather-scene.embed [data-bottle-part=stage].wipe { touch-action: none; }
-
