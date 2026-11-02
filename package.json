@@ -19,11 +19,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:smoke": "node scripts/check-dist.mjs",
-    "verify": "pnpm test:dependencies && pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
+    "verify": "pnpm test:dependencies && pnpm test:weather && pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
     "oss:sync": "node scripts/oss-sync.mjs",
     "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run",
     "test:browser": "playwright test",
-    "test:dependencies": "node scripts/check-dependencies.mjs"
+    "test:dependencies": "node scripts/check-dependencies.mjs",
+    "test:weather": "node --test scripts/check-weather-api.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
