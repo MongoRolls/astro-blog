@@ -9,6 +9,7 @@ import Nav from '../components/Nav.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
 import TableOfContents from '../components/TableOfContents.astro'
 import { alternateLocale, defaultLocale, getDefaultAlternates, localizedPath, stripLocalePrefix } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 
 interface Heading {
   depth: number
@@ -20,6 +21,7 @@ export type Props = HeadProps & { headings?: Heading[], languageFallbackPath?: s
 const { headings = [], languageFallbackPath, ...head } = Astro.props
 const locale: Locale = head.locale ?? defaultLocale
 const alternateUrls = head.alternateUrls ?? getDefaultAlternates(Astro.url.pathname)
+const t = useTranslations(locale)
 const targetLocale = alternateLocale(locale)
 const exactAlternateUrl = alternateUrls[targetLocale]
 const languageUrl = exactAlternateUrl
@@ -49,10 +51,11 @@ const hasTableOfContents = headings.some(({ depth }) => depth === 2 || depth ===
         <ClientRouter />
     </head>
     <body class="bg-main text-main relative">
+        <a class="skip-link" href="#main-content" data-astro-reload>{t.common.skipToContent}</a>
         <div class="flex flex-col min-h-screen pt-28 md:pt-36">
             <Nav locale={locale} languageUrl={languageUrl} exactLanguageMatch={Boolean(exactAlternateUrl)} />
             <!-- 正常框架 -->
-            <main class:list={['flex justify-between w-full max-w-[1012px] max-md:px-5 mx-auto z-0', { 'xl:max-w-[1170px]': hasTableOfContents }]}>
+            <main id="main-content" tabindex="-1" class:list={['flex justify-between w-full max-w-[1012px] max-md:px-5 mx-auto z-0', { 'xl:max-w-[1170px]': hasTableOfContents }]}>
                 <div class:list={['hidden lg:block w-40 shrink-0', { 'xl:w-[248px]': hasTableOfContents }]}></div>
                 <div class="w-full min-w-0 max-w-[var(--content-width)] mx-auto">
                     <slot />
