@@ -212,7 +212,7 @@
         padding: 8px 10px;
         min-height: 40px;
       }
-      .quiet:hover {
+      .quiet:hover:not([aria-pressed="true"]) {
         background: #758c7812;
       }
       #hint {
@@ -390,7 +390,7 @@
       .dark .modes {
         border-color: #84998040;
       }
-      .dark .quiet:hover {
+      .dark .quiet:hover:not([aria-pressed="true"]) {
         background: #bdcdbd14;
       }
       @media (max-width: 600px) {
@@ -1895,6 +1895,12 @@
           } else requestFrame();
         });
         observer.observe(stage);
+        // Reserve the actual control height, including wrapped rows on narrow embeds.
+        const toolbar = document.querySelector(".controls");
+        const toolbarResize = new ResizeObserver(() => {
+          stage.style.bottom = `${toolbar.offsetHeight + parseFloat(getComputedStyle(toolbar).bottom) + 14}px`;
+        });
+        toolbarResize.observe(toolbar);
         const resize = new ResizeObserver(() => {
           const w = stage.clientWidth,
             h = stage.clientHeight;
@@ -2290,6 +2296,7 @@
             alive = false;
             cancelAnimationFrame(raf);
             resize.disconnect();
+            toolbarResize.disconnect();
             observer.disconnect();
             renderer.dispose();
             target.dispose();
