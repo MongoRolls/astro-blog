@@ -1,0 +1,1919 @@
+// Shared by the native Astro component and the generated standalone HTML.
+let instanceCount = 0
+const cdnFailures = new Map()
+/**
+ * @param {HTMLElement} host
+ * @param {{locale?: string, embedded?: boolean, dark?: boolean, live?: boolean, debug?: boolean, onRetry?: () => void}} options
+ */
+export function mountWeatherBottle(host, options = {}) {
+  const lifetime = new AbortController()
+  const cleanups = []
+  let dark = options.dark ?? matchMedia('(prefers-color-scheme: dark)').matches
+  let disposed = false
+  let applyTheme = () => {}
+  function listen(target, type, listener, settings = {}) {
+    target.addEventListener(type, listener, { ...settings, signal: lifetime.signal })
+  }
+  function dispose() {
+    if (disposed)
+      return
+    disposed = true
+    lifetime.abort()
+    for (const cleanup of cleanups.splice(0).reverse()) cleanup()
+    host.querySelectorAll('button').forEach((button) => {
+      button.onclick = null
+    })
+    host.dataset.state = 'disposed'
+  }
+  function setTheme(value) {
+    if (disposed)
+      return
+    dark = value === true
+    host.classList.toggle('dark', dark)
+    applyTheme()
+  }
+  // Procedural assets only. Both CDNs serve the same pinned Three.js module.
+
+  const en = options.locale === 'en'
+  const copy = {
+    title: ['装着天气的玻璃瓶', 'A bottle of weather'],
+    subtitle: [
+      '把一小片天空，留在手心。',
+      'A small piece of sky, held in your hands.',
+    ],
+    rain: ['细雨', 'Rain'],
+    snow: ['落雪', 'Snow'],
+    storm: ['雷暴', 'Storm'],
+    observe: ['转动观察', 'Observe'],
+    wipe: ['擦拭雾气', 'Wipe mist'],
+    shake: ['轻摇一下', 'Shake'],
+    reset: ['回正', 'Reset'],
+    pause: ['暂停', 'Pause'],
+    resume: ['继续', 'Play'],
+    observeHint: [
+      '拖动旋转与倾斜 · 快速往返摇出一场雪 · 方向键也可观察',
+      'Drag to turn & tilt · Move back and forth to stir snow · Arrow keys work too',
+    ],
+    wipeHint: [
+      '在瓶身上按住并擦拭 · 雾气会慢慢回来 · 切回观察可转动瓶子',
+      'Press and wipe the glass · Mist slowly returns · Switch to Observe to turn',
+    ],
+    clearStatus: ['一片晴朗的天空', 'A little clear sky'],
+    cloudStatus: ['云在慢慢走', 'Clouds drifting by'],
+    fogStatus: ['雾中的安静时刻', 'A quiet mist'],
+    quiet: ['雪慢慢落下', 'Snow, falling softly'],
+    rainStatus: ['听一场小雨', 'A little rain'],
+    stormStatus: ['远处有雷声的天空', 'A passing storm'],
+    shakeStatus: ['一场小小的暴风雪', 'A tiny snowstorm'],
+    paused: ['时间暂时停住', 'A moment, paused'],
+    loading: ['正在装入一小片天气…', 'Gathering a little weather…'],
+    retry: ['重新加载', 'Reload'],
+    loadError: [
+      'Three.js 加载失败。请检查网络是否允许访问 jsDelivr 或 unpkg，然后重试。',
+      'Three.js could not load. Check your connection to jsDelivr or unpkg, then retry.',
+    ],
+    gpuError: [
+      '无法启动 3D 场景。请使用支持 WebGL 2 的浏览器并开启硬件加速。',
+      'Unable to start 3D. Use a browser with WebGL 2 and enable hardware acceleration.',
+    ],
+    lost: [
+      '图形上下文已丢失。请重新加载以恢复瓶中天气。',
+      'The graphics context was lost. Reload to restore the scene.',
+    ],
+  }
+  const tr = key => copy[key][en ? 1 : 0]
+  host.lang = en ? 'en' : 'zh-CN'
+
+  host
+    .querySelectorAll('[data-i18n]')
+    .forEach(el => (el.textContent = tr(el.dataset.i18n)))
+  const embed = options.embedded === true
+  host.classList.toggle('embed', embed)
+  host.classList.toggle('dark', dark)
+  const stage = host.querySelector('[data-bottle-part=stage]')
+  const message = host.querySelector('[data-bottle-part=message]')
+  const messageText = host.querySelector('[data-bottle-part=message-text]')
+  const retry = host.querySelector('[data-bottle-part=retry]')
+  const hint = host.querySelector('[data-bottle-part=hint]')
+  const status = host.querySelector('[data-bottle-part=status]')
+  stage.setAttribute(
+    'aria-label',
+    en
+      ? 'Interactive weather bottle. Drag or use arrow keys to observe.'
+      : '可交互天气玻璃瓶，拖动或使用方向键观察',
+  )
+  host
+    .querySelector('.weather')
+    .setAttribute('aria-label', en ? 'Weather' : '瓶中天气')
+  host
+    .querySelector('.modes')
+    .setAttribute('aria-label', en ? 'Interaction mode' : '操作模式')
+  const observeHint = options.embedded && matchMedia('(pointer: coarse)').matches
+    ? (en ? 'Swipe sideways to turn · Swipe up/down to scroll · Switch to Wipe for mist' : '横向滑动观察 · 上下滑动页面 · 切换擦雾后擦拭瓶身')
+    : tr('observeHint')
+  hint.textContent = observeHint
+  messageText.textContent = tr('loading')
+  retry.textContent = tr('retry')
+  retry.onclick = () => options.onRetry?.()
+  message.hidden = false
+  retry.hidden = true
+  host.dataset.state = 'loading'
+  stage.classList.remove('wipe', 'dragging')
+  hint.id = `weather-bottle-hint-${++instanceCount}`
+  stage.setAttribute('aria-describedby', hint.id)
+  const controls = [...host.querySelectorAll('.controls button')]
+  controls.forEach(button => (button.disabled = true))
+  function fail(key, error) {
+    dispose()
+    retry.onclick = () => options.onRetry?.()
+    message.hidden = false
+    message.setAttribute('role', 'alert')
+    messageText.textContent = tr(key)
+    retry.hidden = false
+    controls.forEach(button => (button.disabled = true))
+    host.dataset.state = 'error'
+    console.error(error)
+  }
+  const cdns = [
+    'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+    'https://unpkg.com/three@0.170.0/build/three.module.js',
+  ]
+  const ready = initialize()
+  return { dispose, setTheme, ready }
+
+  async function initialize() {
+    let THREE
+    try {
+      for (const baseUrl of cdns) {
+        // Browsers cache failed dynamic imports; a retry needs a fresh URL for the same pinned version.
+        const failures = cdnFailures.get(baseUrl) || 0
+        const url = failures ? `${baseUrl}?weather-retry=${failures}` : baseUrl
+        if (disposed)
+          return
+        let timeout
+        let abortLoad
+        try {
+          THREE = await Promise.race([
+            import(/* @vite-ignore */ url),
+            new Promise((_, reject) => {
+              abortLoad = () => reject(new DOMException('Scene disposed', 'AbortError'))
+              lifetime.signal.addEventListener('abort', abortLoad, { once: true })
+              timeout = setTimeout(
+                () => reject(new Error('CDN timeout')),
+                9000,
+              )
+            }),
+          ])
+          break
+        }
+        catch (error) {
+          if (disposed)
+            return
+          cdnFailures.set(baseUrl, failures + 1)
+          if (baseUrl === cdns.at(-1))
+            throw error
+        }
+        finally {
+          clearTimeout(timeout)
+          if (abortLoad)
+            lifetime.signal.removeEventListener('abort', abortLoad)
+        }
+      }
+    }
+    catch (error) {
+      if (!disposed)
+        fail('loadError', error)
+    }
+    if (THREE && !disposed) {
+      try {
+        start(THREE)
+      }
+      catch (error) {
+        fail('gpuError', error)
+      }
+    }
+  }
+
+  function start(T) {
+    const clamp = T.MathUtils.clamp
+    const lerp = T.MathUtils.lerp
+    const mobile
+      = matchMedia('(pointer: coarse)').matches || host.clientWidth < 600
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    let reduced = motion.matches
+    let paused = reduced
+    let outside = false
+    let alive = true
+    let raf = 0
+    let last = 0
+    let time = 0
+    let accumulator = 0
+    let weather = 'snow'
+    let fogMat
+    let liveMode = false
+    let weatherRequest = null
+    let weatherRequestId = 0
+    const renderer = new T.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'low-power',
+    })
+    cleanups.push(() => {
+      alive = false
+      cancelAnimationFrame(raf)
+      renderer.dispose()
+      renderer.forceContextLoss()
+      renderer.domElement.remove()
+    })
+    if (!renderer.extensions.has('EXT_color_buffer_float'))
+      throw new Error('Floating-point render targets are unavailable')
+    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.6))
+    renderer.outputColorSpace = T.SRGBColorSpace
+    renderer.toneMapping = T.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.1
+    stage.append(renderer.domElement)
+    renderer.domElement.setAttribute('aria-hidden', 'true')
+    listen(renderer.domElement, 'webglcontextlost', (event) => {
+      event.preventDefault()
+      alive = false
+      cancelAnimationFrame(raf)
+      fail('lost', new Error('WebGL context lost'))
+    })
+    const scene = new T.Scene()
+    const root = new T.Group()
+    scene.add(root)
+    cleanups.push(() => {
+      const geometries = new Set()
+      const materials = new Set()
+      const textures = new Set()
+      scene.traverse((object) => {
+        if (object.geometry)
+          geometries.add(object.geometry)
+        if (object.material) {
+          for (const material of Array.isArray(object.material) ? object.material : [object.material]) materials.add(material)
+        }
+      })
+      for (const material of materials) {
+        for (const value of Object.values(material)) {
+          if (value?.isTexture)
+            textures.add(value)
+        }
+        for (const uniform of Object.values(material.uniforms || {})) {
+          if (uniform.value?.isTexture)
+            textures.add(uniform.value)
+        }
+        material.dispose()
+      }
+      for (const geometry of geometries) geometry.dispose()
+      for (const texture of textures) texture.dispose()
+      scene.clear()
+    })
+    const camera = new T.PerspectiveCamera(35, 1, 0.1, 40)
+    camera.position.set(3.2, 1.65, 6.8)
+    camera.lookAt(0, 0.2, 0)
+    const hemi = new T.HemisphereLight(0xE6F5FF, 0x786B4E, 1.8)
+    scene.add(hemi)
+    const key = new T.DirectionalLight(0xFFF4DA, 2.8)
+    key.position.set(-3, 5, 4)
+    scene.add(key)
+    const rim = new T.DirectionalLight(0xB9E4E3, 2.0)
+    rim.position.set(3, 2, -3)
+    scene.add(rim)
+    const flash = new T.PointLight(0xC9DFFF, 0, 7, 2)
+    flash.position.set(0, 0.8, 0.2)
+    root.add(flash)
+    // Procedural studio environment: broad softboxes, a warm horizon and a cool ceiling.
+    const envCanvas = document.createElement('canvas')
+    envCanvas.width = 512
+    envCanvas.height = 256
+    const ec = envCanvas.getContext('2d')
+    const eg = ec.createLinearGradient(0, 0, 0, 256)
+    eg.addColorStop(0, '#c9dfe4')
+    eg.addColorStop(0.48, '#f0f0de')
+    eg.addColorStop(0.53, '#8a9e91')
+    eg.addColorStop(1, '#4c6053')
+    ec.fillStyle = eg
+    ec.fillRect(0, 0, 512, 256)
+    for (const [x, w] of [
+      [70, 36],
+      [320, 65],
+      [470, 10],
+    ]) {
+      const g = ec.createLinearGradient(x - w, 0, x + w, 0)
+      g.addColorStop(0, '#ffffff00')
+      g.addColorStop(0.5, '#ffffff')
+      g.addColorStop(1, '#ffffff00')
+      ec.fillStyle = g
+      ec.fillRect(x - w, 30, w * 2, 155)
+    }
+    const envTex = new T.CanvasTexture(envCanvas)
+    envTex.mapping = T.EquirectangularReflectionMapping
+    envTex.colorSpace = T.SRGBColorSpace
+    const pmrem = new T.PMREMGenerator(renderer)
+    const env = pmrem.fromEquirectangular(envTex)
+    scene.environment = env.texture
+    pmrem.dispose()
+    cleanups.push(() => {
+      env.dispose()
+      envTex.dispose()
+    })
+    // Bottle coordinates are shared by geometry, collision checks and fog raycasts.
+    const profile = [
+      [0, -1.56],
+      [0.88, -1.56],
+      [1.02, -1.5],
+      [1.08, -1.38],
+      [1.08, 0.93],
+      [1.04, 1.08],
+      [0.94, 1.22],
+      [0.78, 1.38],
+      [0.55, 1.55],
+      [0.47, 1.67],
+      [0.47, 1.98],
+      [0.49, 2.02],
+      [0.49, 2.08],
+      [0.4, 2.08],
+      [0.4, 1.68],
+      [0.49, 1.58],
+      [0.73, 1.37],
+      [0.89, 1.2],
+      [0.98, 1.06],
+      [1.01, 0.92],
+      [1.01, -1.35],
+      [0.93, -1.43],
+      [0, -1.43],
+    ]
+    const bottleGeo = new T.LatheGeometry(
+      profile.map(([r, y]) => new T.Vector2(r, y)),
+      96,
+    )
+    for (let i = 0; i < bottleGeo.attributes.uv.count; i++) {
+      bottleGeo.attributes.uv.setY(
+        i,
+        (bottleGeo.attributes.position.getY(i) + 1.56) / 3.64,
+      )
+    }
+    function innerRadius(y) {
+      if (y < -1.43)
+        return 0
+      if (y < -1.35)
+        return lerp(0.93, 1.01, (y + 1.43) / 0.08)
+      if (y <= 0.92)
+        return 1.01
+      if (y <= 1.06)
+        return lerp(1.01, 0.98, (y - 0.92) / 0.14)
+      if (y <= 1.2)
+        return lerp(0.98, 0.89, (y - 1.06) / 0.14)
+      if (y <= 1.37)
+        return lerp(0.89, 0.73, (y - 1.2) / 0.17)
+      if (y <= 1.58)
+        return lerp(0.73, 0.49, (y - 1.37) / 0.21)
+      return 0.4
+    }
+    const target = new T.WebGLRenderTarget(1, 1, {
+      depthBuffer: true,
+      type: T.HalfFloatType,
+    })
+    cleanups.push(() => target.dispose())
+    const glassUniforms = {
+      uScene: { value: target.texture },
+      uResolution: { value: new T.Vector2(1, 1) },
+      uEye: { value: camera.position },
+      uFlash: { value: 0 },
+      uDark: { value: dark ? 1 : 0 },
+    }
+    const glassMat = new T.ShaderMaterial({
+      uniforms: glassUniforms,
+      transparent: true,
+      depthWrite: false,
+      side: T.FrontSide,
+      vertexShader: `varying vec3 vNormal;varying vec3 vWorld;void main(){vec4 world=modelMatrix*vec4(position,1.);vWorld=world.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*world;}`,
+      fragmentShader: `uniform sampler2D uScene;uniform vec2 uResolution;uniform vec3 uEye;uniform float uFlash;uniform float uDark;varying vec3 vNormal;varying vec3 vWorld;
+    void main(){vec3 n=normalize(vNormal),v=normalize(uEye-vWorld);float fres=pow(1.-abs(dot(n,v)),3.);vec2 uv=gl_FragCoord.xy/uResolution;
+    // A thin curved wall refracts the rendered interior, including transparent snow/water.
+    vec2 bend=(mat3(viewMatrix)*n).xy*(.0025+fres*.008);vec3 through=texture2D(uScene,clamp(uv+bend,vec2(.002),vec2(.998))).rgb;
+    vec3 r=reflect(-v,n);float strip=pow(max(0.,dot(r,normalize(vec3(-.65,.4,.7)))),28.);float strip2=pow(max(0.,dot(r,normalize(vec3(.8,.3,-.2)))),42.);
+    vec3 tint=mix(vec3(.70,.83,.77),vec3(.34,.55,.45),uDark);vec3 color=mix(through,through*tint,.055+fres*.18);color+=vec3(.85,.98,.91)*(fres*.24+strip*.24+strip2*.16)+uFlash*.045;gl_FragColor=vec4(color,1.);
+#include <tonemapping_fragment>
+#include <colorspace_fragment>
+}`,
+    })
+    const glass = new T.Mesh(bottleGeo, glassMat)
+    glass.renderOrder = 20
+    root.add(glass)
+    const lipMat = new T.MeshPhysicalMaterial({
+      color: 0xDCEBE0,
+      roughness: 0.16,
+      metalness: 0.05,
+      transparent: true,
+      opacity: 0.48,
+      clearcoat: 1,
+    })
+    function torus(radius, tube, y, material) {
+      const mesh = new T.Mesh(
+        new T.TorusGeometry(radius, tube, 10, 72),
+        material,
+      )
+      mesh.rotation.x = Math.PI / 2
+      mesh.position.y = y
+      root.add(mesh)
+      return mesh
+    }
+    torus(0.45, 0.044, 2.055, lipMat)
+    torus(1.015, 0.026, -1.44, lipMat)
+    // Wood is entirely procedural, with longitudinal grain and knots.
+    function woodTexture() {
+      const c = document.createElement('canvas')
+      c.width = 512
+      c.height = 256
+      const x = c.getContext('2d')
+      x.fillStyle = '#a67b4d'
+      x.fillRect(0, 0, 512, 256)
+      for (let i = 0; i < 210; i++) {
+        const y = i * 1.25
+        x.strokeStyle = `rgba(${i % 4 === 0 ? '61,33,16' : '228,184,119'},${0.09 + (i % 7) * 0.027})`
+        x.lineWidth = i % 3 === 0 ? 1.3 : 0.6
+        x.beginPath()
+        for (let p = 0; p <= 512; p += 4) {
+          const yy
+            = y
+              + Math.sin(p * 0.022 + i * 0.31) * 1.8
+              + Math.sin(p * 0.052 + i) * 0.65
+          x.lineTo(p, yy)
+        }
+        x.stroke()
+      }
+      for (const [a, b] of [
+        [110, 72],
+        [350, 178],
+      ]) {
+        for (let i = 1; i < 8; i++) {
+          x.strokeStyle = '#67432b33'
+          x.beginPath()
+          x.ellipse(a, b, i * 5, i * 1.35, 0.07, 0, Math.PI * 2)
+          x.stroke()
+        }
+      }
+      const tex = new T.CanvasTexture(c)
+      tex.colorSpace = T.SRGBColorSpace
+      tex.anisotropy = Math.min(
+        4,
+        renderer.capabilities.getMaxAnisotropy(),
+      )
+      return tex
+    }
+    const woodMap = woodTexture()
+    const wood = new T.MeshStandardMaterial({
+      map: woodMap,
+      color: 0xC89760,
+      roughness: 0.76,
+    })
+    const darkWood = new T.MeshStandardMaterial({
+      map: woodMap,
+      color: 0x8E5B32,
+      roughness: 0.69,
+    })
+    const cork = new T.Mesh(
+      new T.CylinderGeometry(0.397, 0.407, 0.23, 48),
+      new T.MeshStandardMaterial({
+        map: woodMap,
+        color: 0xB99A6E,
+        roughness: 0.94,
+      }),
+    )
+    cork.position.y = 2.15
+    root.add(cork)
+    const corkTop = new T.Mesh(
+      new T.CylinderGeometry(0.398, 0.398, 0.018, 48),
+      wood,
+    )
+    corkTop.position.y = 2.272
+    root.add(corkTop)
+    // Grounding shadow is a generated radial texture; no external bitmap.
+    const sc = document.createElement('canvas')
+    sc.width = sc.height = 128
+    const sx = sc.getContext('2d')
+    const sg = sx.createRadialGradient(64, 64, 0, 64, 64, 64)
+    sg.addColorStop(0, '#233f3550')
+    sg.addColorStop(0.45, '#233f3528')
+    sg.addColorStop(1, '#233f3500')
+    sx.fillStyle = sg
+    sx.fillRect(0, 0, 128, 128)
+    const shadow = new T.Mesh(
+      new T.PlaneGeometry(4.2, 3.1),
+      new T.MeshBasicMaterial({
+        map: new T.CanvasTexture(sc),
+        transparent: true,
+        depthWrite: false,
+      }),
+    )
+    shadow.rotation.x = -Math.PI / 2
+    shadow.position.y = -1.74
+    scene.add(shadow)
+    // Water is a closed, deformed cylinder wholly within the straight bottle body.
+    // The volume's mean height is conserved: every wave is zero-mean on the polar grid.
+    const R = 0.975
+    const LEVEL = -0.62
+    const BOTTOM = -1.34
+    const SEG = 72
+    const RINGS = 14
+    let slopeX = 0
+    let slopeZ = 0
+    let velX = 0
+    let velZ = 0
+    let waveEnergy = 0
+    let shakeEnergy = 0
+    let meanWave = 0
+    const rawWave = (x, z) => {
+      const edge = Math.max(0, 1 - (x * x + z * z) / (R * R))
+      return (
+        edge
+        * ((0.009 + waveEnergy * 0.025)
+          * Math.sin(5 * x + time * 2.3)
+          * Math.cos(4 * z - time * 1.7)
+          + waveEnergy * 0.012 * Math.sin(9 * z + time * 3))
+      )
+    }
+    const waterHeight = (x, z) =>
+      LEVEL + slopeX * x + slopeZ * z + rawWave(x, z) - meanWave
+    const topPos = []
+    const topUV = []
+    const indices = []
+    for (let j = 0; j <= RINGS; j++) {
+      for (let i = 0; i <= SEG; i++) {
+        const a = (i / SEG) * Math.PI * 2
+        const r = (j / RINGS) * R
+        topPos.push(Math.cos(a) * r, LEVEL, Math.sin(a) * r)
+        topUV.push(
+          0.5 + (Math.cos(a) * r) / (2 * R),
+          0.5 + (Math.sin(a) * r) / (2 * R),
+        )
+      }
+    }
+    for (let j = 0; j < RINGS; j++) {
+      for (let i = 0; i < SEG; i++) {
+        const a = j * (SEG + 1) + i
+        const b = a + SEG + 1
+        indices.push(a, b + 1, b, a, a + 1, b + 1)
+      }
+    }
+    const topGeo = new T.BufferGeometry()
+    topGeo.setAttribute(
+      'position',
+      new T.Float32BufferAttribute(topPos, 3),
+    )
+    topGeo.setAttribute('uv', new T.Float32BufferAttribute(topUV, 2))
+    topGeo.setIndex(indices)
+    topGeo.computeVertexNormals()
+    const waterMat = new T.MeshPhysicalMaterial({
+      color: 0x207E79,
+      roughness: 0.23,
+      metalness: 0,
+      transparent: true,
+      opacity: 0.78,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+      side: T.DoubleSide,
+      envMapIntensity: 0.35,
+      specularIntensity: 0.25,
+    })
+    const surface = new T.Mesh(topGeo, waterMat)
+    surface.renderOrder = 3
+    root.add(surface)
+    const sideGeo = new T.CylinderGeometry(
+      R,
+      R,
+      LEVEL - BOTTOM,
+      SEG,
+      1,
+      true,
+    )
+    sideGeo.translate(0, (LEVEL + BOTTOM) / 2, 0)
+    const volume = new T.Mesh(
+      sideGeo,
+      new T.MeshPhysicalMaterial({
+        color: 0x4EABA2,
+        transparent: true,
+        opacity: 0.24,
+        roughness: 0.2,
+        metalness: 0.05,
+        side: T.DoubleSide,
+        depthWrite: false,
+      }),
+    )
+    volume.renderOrder = 2
+    root.add(volume)
+    const bottom = new T.Mesh(
+      new T.CircleGeometry(R, SEG),
+      new T.MeshStandardMaterial({
+        color: 0x55998B,
+        transparent: true,
+        opacity: 0.18,
+        roughness: 0.3,
+      }),
+    )
+    bottom.rotation.x = -Math.PI / 2
+    bottom.position.y = BOTTOM
+    root.add(bottom)
+    const edgeGeo = new T.BufferGeometry()
+    const edgePositions = new Float32Array((SEG + 1) * 3)
+    edgeGeo.setAttribute(
+      'position',
+      new T.BufferAttribute(edgePositions, 3),
+    )
+    const meniscus = new T.Line(
+      edgeGeo,
+      new T.LineBasicMaterial({
+        color: 0xD7F8DC,
+        transparent: true,
+        opacity: 0.6,
+      }),
+    )
+    meniscus.renderOrder = 4
+    root.add(meniscus)
+    const sideBase = sideGeo.attributes.position.array.slice()
+    function updateWater() {
+      let sum = 0
+      let weight = 0
+      for (let j = 1; j <= RINGS; j++) {
+        for (let i = 0; i < SEG; i++) {
+          const a = (i / SEG) * Math.PI * 2
+          const r = (j / RINGS) * R
+          sum += rawWave(Math.cos(a) * r, Math.sin(a) * r) * j
+          weight += j
+        }
+      }
+      meanWave = sum / weight
+      const p = topGeo.attributes.position
+      for (let i = 0; i < p.count; i++)
+        p.setY(i, waterHeight(p.getX(i), p.getZ(i)))
+      p.needsUpdate = true
+      topGeo.computeVertexNormals()
+      const s = sideGeo.attributes.position
+      for (let i = 0; i < s.count; i++) {
+        if (sideBase[i * 3 + 1] > BOTTOM + 0.01)
+          s.setY(i, waterHeight(s.getX(i), s.getZ(i)))
+      }
+      s.needsUpdate = true
+      sideGeo.computeVertexNormals()
+      for (let i = 0; i <= SEG; i++) {
+        const a = (i / SEG) * Math.PI * 2
+        edgePositions[i * 3] = Math.cos(a) * R
+        edgePositions[i * 3 + 2] = Math.sin(a) * R
+        edgePositions[i * 3 + 1]
+          = waterHeight(edgePositions[i * 3], edgePositions[i * 3 + 2])
+            + 0.003
+      }
+      edgeGeo.attributes.position.needsUpdate = true
+    }
+    // A hollow clinker-like hull, separate rim, floorboards, benches and brass pins.
+    const boat = new T.Group()
+    root.add(boat)
+    const hullP = []
+    const hullUV = []
+    const hullI = []
+    const N = 48
+    function outline(a, scale = 1) {
+      return new T.Vector3(
+        Math.cos(a) * 0.48 * scale,
+        0.13,
+        Math.sin(a) * 0.205 * scale * (0.78 + 0.22 * Math.abs(Math.sin(a))),
+      )
+    }
+    for (let ring = 0; ring < 3; ring++) {
+      for (let i = 0; i <= N; i++) {
+        const p = outline((i / N) * Math.PI * 2, [1, 0.73, 0.1][ring])
+        hullP.push(p.x, [0.13, -0.075, -0.13][ring], p.z)
+        hullUV.push(i / N, ring * 0.5)
+      }
+    }
+    for (let j = 0; j < 2; j++) {
+      for (let i = 0; i < N; i++) {
+        const a = j * (N + 1) + i
+        const b = a + N + 1
+        hullI.push(a, b, a + 1, a + 1, b, b + 1)
+      }
+    }
+    const hullGeo = new T.BufferGeometry()
+    hullGeo.setAttribute(
+      'position',
+      new T.Float32BufferAttribute(hullP, 3),
+    )
+    hullGeo.setAttribute('uv', new T.Float32BufferAttribute(hullUV, 2))
+    hullGeo.setIndex(hullI)
+    hullGeo.computeVertexNormals()
+    const hullMat = wood.clone()
+    hullMat.side = T.DoubleSide
+    boat.add(new T.Mesh(hullGeo, hullMat))
+    const railCurve = new T.CatmullRomCurve3(
+      Array.from({ length: 48 }, (_, i) => outline((i / 48) * Math.PI * 2)),
+      true,
+    )
+    boat.add(
+      new T.Mesh(
+        new T.TubeGeometry(railCurve, 64, 0.019, 6, true),
+        darkWood,
+      ),
+    )
+    for (let i = -2; i <= 2; i++) {
+      const board = new T.Mesh(
+        new T.BoxGeometry(0.64 - Math.abs(i) * 0.055, 0.025, 0.055),
+        wood,
+      )
+      board.position.set(0, -0.045, i * 0.057)
+      boat.add(board)
+    }
+    for (const x of [-0.2, 0.19]) {
+      const bench = new T.Mesh(new T.BoxGeometry(0.09, 0.025, 0.31), wood)
+      bench.position.set(x, 0.09, 0)
+      boat.add(bench)
+      for (const z of [-0.11, 0.11]) {
+        const pin = new T.Mesh(
+          new T.SphereGeometry(0.009, 6, 4),
+          new T.MeshStandardMaterial({
+            color: 0xC4A466,
+            metalness: 0.7,
+            roughness: 0.4,
+          }),
+        )
+        pin.position.set(x, 0.107, z)
+        boat.add(pin)
+      }
+    }
+    const snowMat = new T.MeshStandardMaterial({
+      color: 0xF1F7EE,
+      roughness: 0.98,
+    })
+    const snowRail = new T.Mesh(
+      new T.TubeGeometry(railCurve, 64, 0.026, 6, true).translate(
+        0,
+        -0.13,
+        0,
+      ),
+      snowMat,
+    )
+    snowRail.position.y = 0.153
+    snowRail.visible = false
+    boat.add(snowRail)
+    const snowBenches = []
+    for (const x of [-0.2, 0.19]) {
+      const patch = new T.Mesh(
+        new T.BoxGeometry(0.075, 0.018, 0.27),
+        snowMat,
+      )
+      patch.position.set(x, 0.115, 0)
+      boat.add(patch)
+      snowBenches.push(patch)
+    }
+    let snowCover = 0
+    let boatX = 0.06
+    let boatZ = 0.03
+    let boatVX = 0
+    let boatVZ = 0
+    const up = new T.Vector3(0, 1, 0)
+    const normal = new T.Vector3()
+    const boatTarget = new T.Quaternion()
+    const yawQ = new T.Quaternion()
+    const invBoat = new T.Matrix4()
+    const hitPoint = new T.Vector3()
+    function updateBoat(dt) {
+      const k = dt ? Math.min(1, dt * 2.2) : 1
+      boatVX += (-boatX * 1.6 - boatVX * 2.3 + velX * 0.16) * dt
+      boatVZ += (-boatZ * 1.6 - boatVZ * 2.3 + velZ * 0.16) * dt
+      boatX += boatVX * dt
+      boatZ += boatVZ * dt
+      const d = Math.hypot(boatX, boatZ)
+      if (d > 0.32) {
+        boatX *= 0.32 / d
+        boatZ *= 0.32 / d
+        boatVX *= 0.3
+        boatVZ *= 0.3
+      }
+      boat.position.set(boatX, waterHeight(boatX, boatZ) + 0.035, boatZ)
+      const e = 0.035
+      const gx
+        = (waterHeight(boatX + e, boatZ) - waterHeight(boatX - e, boatZ))
+          / (2 * e)
+      const gz
+        = (waterHeight(boatX, boatZ + e) - waterHeight(boatX, boatZ - e))
+          / (2 * e)
+      normal.set(-gx, 1, -gz).normalize()
+      boatTarget.setFromUnitVectors(up, normal)
+      yawQ.setFromAxisAngle(
+        up,
+        -0.35
+        + Math.sin(time * 0.23) * 0.1
+        + shakeEnergy * Math.sin(time * 2) * 0.045,
+      )
+      boatTarget.multiply(yawQ)
+      boat.quaternion.slerp(boatTarget, k)
+      boat.updateMatrix()
+      invBoat.copy(boat.matrix).invert()
+      snowCover = Math.max(
+        0,
+        snowCover - dt * (weather === 'snow' ? 0.001 : 0.017),
+      )
+      snowRail.visible = snowCover > 0.01
+      snowRail.scale.y = 0.15 + snowCover * 0.85
+      snowBenches.forEach((p) => {
+        p.visible = snowCover > 0.04
+        p.scale.y = 0.05 + snowCover
+      })
+    }
+    // Layered, softly lit cloud lobes stay below the bottle's shoulder.
+    const clouds = new T.Group()
+    root.add(clouds)
+    const cloudMat = new T.MeshStandardMaterial({
+      color: 0xE7EBE3,
+      roughness: 1,
+    })
+    const cloudParts = []
+    for (let i = 0; i < 19; i++) {
+      const a = i * 2.39996
+      const r = 0.12 + (((i * 7) % 11) / 11) * 0.35
+      const sphere = new T.Mesh(new T.SphereGeometry(1, 20, 14), cloudMat)
+      const size = 0.17 + (i % 4) * 0.033
+      const base = new T.Vector3(
+        Math.cos(a) * r,
+        0.73 + (i % 3) * 0.095,
+        Math.sin(a) * r * 0.72,
+      )
+      sphere.position.copy(base)
+      sphere.scale.set(size * 1.25, size * 0.66, size)
+      clouds.add(sphere)
+      cloudParts.push({ mesh: sphere, base, phase: i * 0.8 })
+    }
+    const sun = new T.Mesh(
+      new T.SphereGeometry(0.15, 20, 14),
+      new T.MeshStandardMaterial({
+        color: 0xEEC879,
+        emissive: 0x9C6825,
+        emissiveIntensity: 0.3,
+        roughness: 0.8,
+        transparent: true,
+        opacity: 0,
+      }),
+    )
+    sun.position.set(-0.4, 0.94, -0.22)
+    root.add(sun)
+    const lightCloud = new T.Color(0xE6EDE7)
+    const stormCloud = new T.Color(0x748B8A)
+    // Reusable ripple pool, each ring fits the exact water disk and follows its slope.
+    const ripples = []
+    let rippleCursor = 0
+    let rippleHits = 0
+    let snowHits = 0
+    let melted = 0
+    for (let i = 0; i < (mobile ? 14 : 24); i++) {
+      const g = new T.BufferGeometry()
+      g.setAttribute(
+        'position',
+        new T.BufferAttribute(new Float32Array(33 * 3), 3),
+      )
+      const m = new T.LineBasicMaterial({
+        color: 0xDCF8E9,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      })
+      const mesh = new T.Line(g, m)
+      mesh.renderOrder = 5
+      root.add(mesh)
+      ripples.push({ mesh, x: 0, z: 0, age: 10, life: 1 })
+    }
+    function ripple(x, z, strength = 1) {
+      if (Math.hypot(x, z) > 0.91)
+        return
+      const p = ripples[rippleCursor++ % ripples.length]
+      p.x = x
+      p.z = z
+      p.age = 0
+      p.life = 0.7 + strength * 0.35
+      rippleHits++
+    }
+    function updateRipples(dt) {
+      for (const p of ripples) {
+        p.age += dt
+        p.mesh.visible = p.age < p.life
+        if (!p.mesh.visible)
+          continue
+        const radius = Math.min(
+          0.015 + p.age * 0.2,
+          R - Math.hypot(p.x, p.z) - 0.008,
+        )
+        const a = p.mesh.geometry.attributes.position
+        for (let i = 0; i <= 32; i++) {
+          const t = (i / 32) * Math.PI * 2
+          const x = p.x + Math.cos(t) * radius
+          const z = p.z + Math.sin(t) * radius
+          a.setXYZ(i, x, waterHeight(x, z) + 0.008, z)
+        }
+        a.needsUpdate = true
+        p.mesh.material.opacity = (1 - p.age / p.life) * 0.5
+      }
+    }
+    // Snow and rain have individual trajectories; collision occurs before drawing.
+    const SNOW = mobile ? 180 : 300
+    const RAIN = mobile ? 100 : 170
+    const snowPos = new Float32Array(SNOW * 3)
+    const snowSizes = new Float32Array(SNOW)
+    const snowAlpha = new Float32Array(SNOW)
+    const snowGeo = new T.BufferGeometry()
+    snowGeo.setAttribute('position', new T.BufferAttribute(snowPos, 3))
+    snowGeo.setAttribute('aSize', new T.BufferAttribute(snowSizes, 1))
+    snowGeo.setAttribute('aAlpha', new T.BufferAttribute(snowAlpha, 1))
+    const snowShader = new T.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      uniforms: { uScale: { value: 300 }, uFlash: { value: 0 } },
+      vertexShader: `attribute float aSize;attribute float aAlpha;uniform float uScale;varying float vAlpha;void main(){vAlpha=aAlpha;vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_PointSize=clamp(aSize*uScale/-p.z,1.0,9.0);}`,
+      fragmentShader: `varying float vAlpha;uniform float uFlash;void main(){vec2 p=gl_PointCoord-.5;float d=length(p);float core=1.-smoothstep(.12,.5,d);float spokes=pow(abs(cos(atan(p.y,p.x)*3.)),12.);float a=core*(.6+.4*spokes)*vAlpha;if(a<.02)discard;gl_FragColor=vec4(vec3(.94,1.,.97)+uFlash*.05,a);}`,
+    })
+    const snowPoints = new T.Points(snowGeo, snowShader)
+    snowPoints.frustumCulled = false
+    snowPoints.renderOrder = 6
+    root.add(snowPoints)
+    const rainGeo = new T.BufferGeometry()
+    const rainPos = new Float32Array(RAIN * 6)
+    rainGeo.setAttribute('position', new T.BufferAttribute(rainPos, 3))
+    const rainMat = new T.LineBasicMaterial({
+      color: 0xB3DFDD,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    })
+    const rainLines = new T.LineSegments(rainGeo, rainMat)
+    rainLines.frustumCulled = false
+    rainLines.renderOrder = 5
+    root.add(rainLines)
+    const snowflakes = Array.from({ length: SNOW }, (_, i) => ({
+      x: 0,
+      y: 0,
+      z: 0,
+      speed: 0.15 + (i % 17) * 0.013,
+      phase: i * 2.4,
+      size: 0.032 + (i % 7) * 0.006,
+      melt: 0,
+    }))
+    const drops = Array.from({ length: RAIN }, (_, i) => ({
+      x: 0,
+      y: 0,
+      z: 0,
+      speed: 1.7 + (i % 11) * 0.12,
+    }))
+    function spawn(p, initial = false) {
+      const a = Math.random() * Math.PI * 2
+      const r = Math.sqrt(Math.random()) * 0.77
+      p.x = Math.cos(a) * r
+      p.z = Math.sin(a) * r
+      p.y = initial
+        ? LEVEL + 0.12 + Math.random() * 1.45
+        : 0.72 + Math.random() * 0.25
+      p.melt = 0
+    }
+    snowflakes.forEach(p => spawn(p, true))
+    drops.forEach(p => spawn(p, true))
+    let snowMix = 1
+    let rainMix = 0
+    let stormMix = 0
+    let clearMix = 0
+    let fogMix = 0
+    let nextLightning = 7
+    let lightningAge = 10
+    let flashCount = 0
+    const boltGeo = new T.BufferGeometry()
+    boltGeo.setAttribute(
+      'position',
+      new T.BufferAttribute(new Float32Array(8 * 3), 3),
+    )
+    const bolt = new T.Line(
+      boltGeo,
+      new T.LineBasicMaterial({
+        color: 0xE7F1FF,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      }),
+    )
+    bolt.renderOrder = 7
+    root.add(bolt)
+    function lightning() {
+      lightningAge = 0
+      flashCount++
+      const a = boltGeo.attributes.position
+      let x = (Math.random() - 0.5) * 0.5
+      const z = -0.12
+      for (let i = 0; i < 8; i++) {
+        x = clamp(x + (Math.random() - 0.5) * 0.16, -0.5, 0.5)
+        a.setXYZ(i, x, 0.82 - i * 0.14, z)
+      }
+      a.needsUpdate = true
+    }
+    const localGravity = new T.Vector3()
+    function updateWeather(dt) {
+      const mix = 1 - Math.exp(-dt * 2)
+      snowMix = lerp(snowMix, weather === 'snow' ? 1 : 0, mix)
+      rainMix = lerp(
+        rainMix,
+        ['rain', 'storm'].includes(weather) ? 1 : 0,
+        mix,
+      )
+      clearMix = lerp(clearMix, weather === 'clear' ? 1 : 0, mix)
+      fogMix = lerp(fogMix, weather === 'fog' ? 1 : 0, mix)
+      stormMix = lerp(stormMix, weather === 'storm' ? 1 : 0, mix)
+      clouds.scale.setScalar(1 - clearMix * 0.7)
+      clouds.position.y = clearMix * 0.57
+      sun.material.opacity = clearMix
+      sun.visible = clearMix > 0.01
+      key.intensity = 2.8 + clearMix * 0.8
+      fogMat.uniforms.uDensity.value = 1 + fogMix
+      cloudMat.color.copy(lightCloud).lerp(stormCloud, stormMix * 0.85)
+      cloudParts.forEach(({ mesh, base, phase }) => {
+        mesh.position.x = base.x + Math.sin(time * 0.16 + phase) * 0.035
+        mesh.position.y = base.y + Math.sin(time * 0.25 + phase) * 0.017
+      })
+      const snowAmount = Math.max(snowMix, shakeEnergy * 0.95)
+      for (let i = 0; i < SNOW; i++) {
+        const p = snowflakes[i]
+        const prevY = p.y
+        let alpha = snowAmount
+        if (p.melt > 0) {
+          p.melt += dt
+          p.y -= dt * 0.035
+          alpha *= Math.max(0, 1 - p.melt / 0.85)
+          if (p.melt > 0.85) {
+            melted++
+            spawn(p)
+          }
+        }
+        else {
+          p.x
+            += (localGravity.x * p.speed
+              + Math.sin(time * 0.8 + p.phase) * 0.045
+              - shakeEnergy * p.z * 2.5)
+            * dt
+          p.z
+            += (localGravity.z * p.speed
+              + Math.cos(time * 0.6 + p.phase) * 0.035
+              + shakeEnergy * p.x * 2.5)
+            * dt
+          p.y
+            += localGravity.y * p.speed * dt
+              + shakeEnergy * Math.sin(p.phase + time * 2) * dt * 0.32
+          const r = Math.hypot(p.x, p.z)
+          const limit = Math.min(0.93, innerRadius(p.y) - 0.065)
+          if (r > limit) {
+            p.x *= limit / r
+            p.z *= limit / r
+          }
+          p.y = Math.min(p.y, 1.04)
+          hitPoint.set(p.x, p.y, p.z).applyMatrix4(invBoat)
+          const onBoat
+            = (hitPoint.x / 0.49) ** 2 + (hitPoint.z / 0.22) ** 2 < 1
+          if (
+            dt > 0
+            && onBoat
+            && hitPoint.y < 0.155
+            && prevY >= p.y
+            && p.y > waterHeight(p.x, p.z) - 0.06
+          ) {
+            if (alpha > 0.08) {
+              snowCover = clamp(snowCover + 0.004 * alpha, 0, 1)
+              snowHits++
+            }
+            spawn(p)
+          }
+          else if (p.y <= waterHeight(p.x, p.z)) {
+            p.melt = 0.001
+            p.y = waterHeight(p.x, p.z) - 0.008
+          }
+        }
+        snowPos[i * 3] = p.x
+        snowPos[i * 3 + 1] = p.y
+        snowPos[i * 3 + 2] = p.z
+        snowSizes[i] = p.size
+        snowAlpha[i] = alpha
+      }
+      snowGeo.attributes.position.needsUpdate = true
+      snowGeo.attributes.aSize.needsUpdate = true
+      snowGeo.attributes.aAlpha.needsUpdate = true
+      rainMat.opacity = rainMix * (0.37 + stormMix * 0.17)
+      rainLines.visible = rainMix > 0.005
+      for (let i = 0; i < RAIN; i++) {
+        const p = drops[i]
+        p.x += localGravity.x * p.speed * dt
+        p.z += localGravity.z * p.speed * dt
+        p.y += localGravity.y * p.speed * dt
+        const level = waterHeight(p.x, p.z)
+        if (p.y <= level) {
+          if (rainMix > 0.1)
+            ripple(p.x, p.z)
+          spawn(p)
+        }
+        if (Math.hypot(p.x, p.z) > 0.92)
+          spawn(p)
+        const j = i * 6
+        rainPos[j] = p.x
+        rainPos[j + 1] = p.y
+        rainPos[j + 2] = p.z
+        rainPos[j + 3] = clamp(p.x - localGravity.x * 0.075, -0.93, 0.93)
+        rainPos[j + 4] = Math.min(1.07, p.y - localGravity.y * 0.075)
+        rainPos[j + 5] = clamp(p.z - localGravity.z * 0.075, -0.93, 0.93)
+        const tailR = Math.hypot(rainPos[j + 3], rainPos[j + 5])
+        if (tailR > 0.94) {
+          rainPos[j + 3] *= 0.94 / tailR
+          rainPos[j + 5] *= 0.94 / tailR
+        }
+      }
+      rainGeo.attributes.position.needsUpdate = true
+      nextLightning -= dt
+      if (nextLightning <= 0) {
+        if (stormMix > 0.7 && !reduced)
+          lightning()
+        nextLightning = 7 + Math.random() * 7
+      }
+      lightningAge += dt
+      // One soft pulse, separated by at least seven seconds; no rapid strobe.
+      const pulse
+        = lightningAge < 0.38 ? Math.sin((lightningAge / 0.38) * Math.PI) : 0
+      flash.intensity = pulse * 9
+      cloudMat.emissive.setRGB(pulse * 0.13, pulse * 0.17, pulse * 0.2)
+      glassUniforms.uFlash.value = pulse
+      snowShader.uniforms.uFlash.value = pulse
+      bolt.material.opacity = pulse * 0.8
+      bolt.visible = pulse > 0
+    }
+    // Fog is another actual bottle surface. Painting uses raycast UVs, never screen coordinates.
+    const fogCanvas = document.createElement('canvas')
+    fogCanvas.width = 512
+    fogCanvas.height = 256
+    const fc = fogCanvas.getContext('2d')
+    fc.fillStyle = '#fff'
+    fc.fillRect(0, 0, 512, 256)
+    const fogTex = new T.CanvasTexture(fogCanvas)
+    fogTex.wrapS = T.RepeatWrapping
+    fogMat = new T.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: T.FrontSide,
+      uniforms: {
+        uMask: { value: fogTex },
+        uDensity: { value: 1 },
+        uEye: { value: camera.position },
+        uDark: { value: dark ? 1 : 0 },
+      },
+      vertexShader: `varying vec2 vUv;varying vec3 vNormal;varying vec3 vWorld;void main(){vUv=uv;vec4 p=modelMatrix*vec4(position,1.);vWorld=p.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*p;}`,
+      fragmentShader: `uniform sampler2D uMask;uniform float uDensity;uniform vec3 uEye;uniform float uDark;varying vec2 vUv;varying vec3 vNormal;varying vec3 vWorld;void main(){float f=texture2D(uMask,vUv).r;float edge=pow(1.-abs(dot(normalize(vNormal),normalize(uEye-vWorld))),2.);float noise=fract(sin(dot(vUv,vec2(732.13,395.7)))*43758.54);vec3 color=mix(vec3(.85,.91,.85),vec3(.57,.70,.61),uDark);gl_FragColor=vec4(color,f*uDensity*(.055+.13*edge+noise*.018));}`,
+    })
+    const fog = new T.Mesh(bottleGeo, fogMat)
+    fog.scale.setScalar(1.0008)
+    fog.renderOrder = 21
+    root.add(fog)
+    const ray = new T.Raycaster()
+    const pointer = new T.Vector2()
+    let lastUV = null
+    let fogClock = 0
+    let wipeCount = 0
+    let painted = false
+    function fogHit(clientX, clientY) {
+      const rect = stage.getBoundingClientRect()
+      pointer.set(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        (-(clientY - rect.top) / rect.height) * 2 + 1,
+      )
+      root.updateMatrixWorld(true)
+      camera.updateMatrixWorld()
+      ray.setFromCamera(pointer, camera)
+      return ray.intersectObject(glass)[0]
+    }
+    function wipeAt(x, y) {
+      const hit = fogHit(x, y)
+      if (!hit || hit.point.y > 2.03) {
+        lastUV = null
+        return
+      }
+      const uv = hit.uv
+      if (!uv) {
+        lastUV = null
+        return
+      }
+      const current = { x: uv.x * 512, y: (1 - uv.y) * 256 }
+      const previous = lastUV || current
+      let dx = current.x - previous.x
+      if (Math.abs(dx) > 256)
+        dx -= Math.sign(dx) * 512
+      const dy = current.y - previous.y
+      // Sampling in texture space joins strokes and wraps continuously over the seam.
+      const steps = Math.ceil(Math.hypot(dx, dy) / 2)
+      fc.globalCompositeOperation = 'source-over'
+      for (let i = 0; i <= steps; i++) {
+        const t = steps ? i / steps : 1
+        const px = previous.x + dx * t
+        const py = previous.y + dy * t
+        for (const offset of [-512, 0, 512]) {
+          const g = fc.createRadialGradient(
+            px + offset,
+            py,
+            1,
+            px + offset,
+            py,
+            11,
+          )
+          g.addColorStop(0, 'rgba(0,0,0,.88)')
+          g.addColorStop(0.55, 'rgba(0,0,0,.6)')
+          g.addColorStop(1, 'rgba(0,0,0,0)')
+          fc.fillStyle = g
+          fc.fillRect(px + offset - 11, py - 11, 22, 22)
+        }
+      }
+      lastUV = current
+      painted = true
+      wipeCount++
+      fogTex.needsUpdate = true
+    }
+    // Rotation uses spring damping; water follows world gravity in bottle-local coordinates.
+    let mode = 'observe'
+    let down = false
+    let pointerId = null
+    let lastX = 0
+    let lastY = 0
+    let lastMove = 0
+    let lastDirection = 0
+    let lastReverse = 0
+    let yaw = 0.12
+    let targetYaw = 0.12
+    let tiltX = 0
+    let tiltZ = 0
+    let targetX = 0
+    let targetZ = 0
+    const inverseRoot = new T.Quaternion()
+    const euler = new T.Euler(0, 0, 0, 'YXZ')
+    function limitTilt() {
+      const d = Math.hypot(targetX, targetZ)
+      const max = 0.34
+      if (d > max) {
+        targetX *= max / d
+        targetZ *= max / d
+      }
+    }
+    function stir(strength = 1) {
+      shakeEnergy = Math.min(1.5, shakeEnergy + 0.65 * strength)
+      waveEnergy = Math.min(1.5, waveEnergy + 0.7 * strength)
+      velX += 0.48 * strength
+      velZ -= 0.28 * strength
+      setStatus()
+      requestFrame()
+    }
+    function setStatus() {
+      status.textContent = tr(
+        paused
+          ? 'paused'
+          : shakeEnergy > 0.35
+            ? 'shakeStatus'
+            : weather === 'rain'
+              ? 'rainStatus'
+              : weather === 'storm'
+                ? 'stormStatus'
+                : weather === 'clear'
+                  ? 'clearStatus'
+                  : weather === 'cloud'
+                    ? 'cloudStatus'
+                    : weather === 'fog'
+                      ? 'fogStatus'
+                      : 'quiet',
+      )
+      host.querySelector('[data-bottle-part=pause]').textContent = tr(
+        paused ? 'resume' : 'pause',
+      )
+      host
+        .querySelector('[data-bottle-part=pause]')
+        .setAttribute('aria-pressed', String(paused))
+    }
+    function requestFrame() {
+      if (alive && !raf)
+        raf = requestAnimationFrame(frame)
+    }
+    function cancelPointer() {
+      down = false
+      lastUV = null
+      lastDirection = 0
+      lastReverse = 0
+      stage.classList.remove('dragging')
+      if (pointerId !== null && stage.hasPointerCapture(pointerId))
+        stage.releasePointerCapture(pointerId)
+      pointerId = null
+    }
+    listen(stage, 'pointerdown', (event) => {
+      if (pointerId !== null)
+        return
+      down = true
+      pointerId = event.pointerId
+      lastX = event.clientX
+      lastY = event.clientY
+      lastMove = performance.now()
+      stage.setPointerCapture(event.pointerId)
+      stage.focus({ preventScroll: true })
+      lastUV = null
+      if (mode === 'wipe')
+        wipeAt(event.clientX, event.clientY)
+      else stage.classList.add('dragging')
+      requestFrame()
+    })
+    listen(stage, 'pointermove', (event) => {
+      if (!down || event.pointerId !== pointerId)
+        return
+      if (mode === 'wipe') {
+        const events = event.getCoalescedEvents?.() || []
+        for (const e of events.length ? events : [event])
+          wipeAt(e.clientX, e.clientY)
+        requestFrame()
+        return
+      }
+      const now = performance.now()
+      const dx = event.clientX - lastX
+      const dy = event.clientY - lastY
+      const dt = Math.max(8, now - lastMove)
+      targetYaw += dx * 0.008
+      targetX += dy * 0.004
+      if (embed && event.pointerType === 'touch')
+        targetZ -= dx * 0.001
+      targetZ -= dx * 0.0015
+      limitTilt()
+      const direction = Math.sign(dx)
+      if (Math.abs(dx) > 5 && Math.abs(dx) / dt > 0.25) {
+        if (lastDirection && direction !== lastDirection) {
+          if (now - lastReverse < 650)
+            stir(0.7)
+          lastReverse = now
+        }
+        lastDirection = direction
+      }
+      waveEnergy = Math.min(1.5, waveEnergy + Math.hypot(dx, dy) * 0.001)
+      lastX = event.clientX
+      lastY = event.clientY
+      lastMove = now
+      requestFrame()
+    })
+    listen(stage, 'pointerup', cancelPointer)
+    listen(stage, 'pointercancel', cancelPointer)
+    listen(stage, 'lostpointercapture', cancelPointer)
+    listen(stage, 'keydown', (event) => {
+      if (mode !== 'observe')
+        return
+      const keys = [
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Home',
+      ]
+      if (!keys.includes(event.key))
+        return
+      event.preventDefault()
+      if (event.key === 'ArrowLeft') {
+        targetYaw -= 0.15
+        targetZ += 0.025
+      }
+      if (event.key === 'ArrowRight') {
+        targetYaw += 0.15
+        targetZ -= 0.025
+      }
+      if (event.key === 'ArrowUp')
+        targetX -= 0.06
+      if (event.key === 'ArrowDown')
+        targetX += 0.06
+      if (event.key === 'Home')
+        reset()
+      limitTilt()
+      requestFrame()
+    })
+    function reset() {
+      targetYaw = 0.12
+      targetX = targetZ = 0
+      waveEnergy *= 0.4
+      shakeEnergy *= 0.4
+      requestFrame()
+    }
+    host.querySelectorAll('[data-mode]').forEach(
+      button =>
+        (button.onclick = () => {
+          cancelPointer()
+          mode = button.dataset.mode
+          stage.classList.toggle('wipe', mode === 'wipe')
+          host
+            .querySelectorAll('[data-mode]')
+            .forEach(b =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            )
+          hint.textContent = mode === 'wipe' ? tr('wipeHint') : observeHint
+        }),
+    )
+    host.querySelectorAll('[data-weather]').forEach(
+      button =>
+        (button.onclick = () => {
+          weather = button.dataset.weather
+          weatherRequestId++
+          weatherRequest?.abort()
+          liveMode = false
+          showWeatherData()
+          host
+            .querySelectorAll('[data-weather]')
+            .forEach(b =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            )
+          if (weather === 'storm')
+            nextLightning = 2.5
+          setStatus()
+          if (paused) {
+            snowMix = weather === 'snow' ? 1 : 0
+            rainMix = ['rain', 'storm'].includes(weather) ? 1 : 0
+            stormMix = weather === 'storm' ? 1 : 0
+            clearMix = weather === 'clear' ? 1 : 0
+            fogMix = weather === 'fog' ? 1 : 0
+          }
+          requestFrame()
+        }),
+    )
+    host.querySelector('[data-bottle-part=shake]').onclick = () => stir()
+    host.querySelector('[data-bottle-part=reset]').onclick = reset
+    host.querySelector('[data-bottle-part=pause]').onclick = () => {
+      paused = !paused
+      last = 0
+      setStatus()
+      requestFrame()
+    }
+    listen(motion, 'change', (event) => {
+      reduced = event.matches
+      if (reduced) {
+        paused = true
+        flash.intensity = 0
+        lightningAge = 10
+      }
+      last = 0
+      setStatus()
+      requestFrame()
+    })
+    listen(document, 'visibilitychange', () => {
+      last = 0
+      if (document.hidden) {
+        cancelAnimationFrame(raf)
+        raf = 0
+        cancelPointer()
+      }
+      else {
+        requestFrame()
+      }
+    })
+    const observer = new IntersectionObserver((entries) => {
+      outside = !entries[0].isIntersecting
+      last = 0
+      if (outside) {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
+      else {
+        requestFrame()
+      }
+    })
+    observer.observe(stage)
+    cleanups.push(() => observer.disconnect())
+    // Reserve the actual control height, including wrapped rows on narrow embeds.
+    const toolbar = host.querySelector('.controls')
+    const toolbarResize = new ResizeObserver(() => {
+      stage.style.bottom = `${toolbar.offsetHeight + Number.parseFloat(getComputedStyle(toolbar).bottom) + 14}px`
+    })
+    toolbarResize.observe(toolbar)
+    cleanups.push(() => toolbarResize.disconnect())
+    const resize = new ResizeObserver(() => {
+      const w = stage.clientWidth
+      const h = stage.clientHeight
+      if (!w || !h)
+        return
+      renderer.setSize(w, h, false)
+      camera.aspect = w / h
+      camera.position
+        .set(3.2, 1.65, 6.8)
+        .multiplyScalar(camera.aspect < 0.8 ? 1.13 : 1)
+      camera.lookAt(0, 0.25, 0)
+      camera.updateProjectionMatrix()
+      const size = renderer.getDrawingBufferSize(new T.Vector2())
+      target.setSize(
+        Math.max(1, Math.round(size.x * 0.75)),
+        Math.max(1, Math.round(size.y * 0.75)),
+      )
+      glassUniforms.uResolution.value.copy(size)
+      snowShader.uniforms.uScale.value = size.y * 0.9
+      requestFrame()
+    })
+    resize.observe(stage)
+    cleanups.push(() => resize.disconnect())
+    applyTheme = () => {
+      glassUniforms.uDark.value = dark ? 1 : 0
+      fogMat.uniforms.uDark.value = dark ? 1 : 0
+      requestFrame()
+    }
+    function physics(dt) {
+      const ease = paused ? 1 : 1 - Math.exp(-dt * 7)
+      yaw = lerp(yaw, targetYaw, ease)
+      tiltX = lerp(tiltX, targetX, ease)
+      tiltZ = lerp(tiltZ, targetZ, ease)
+      root.quaternion.setFromEuler(euler.set(tiltX, yaw, tiltZ))
+      inverseRoot.copy(root.quaternion).invert()
+      localGravity.set(0, -1, 0).applyQuaternion(inverseRoot)
+      const equilibriumX = -localGravity.x / localGravity.y
+      const equilibriumZ = -localGravity.z / localGravity.y
+      // Semi-implicit substeps keep the slosh spring stable even on a slow phone.
+      let remaining = dt
+      while (remaining > 0) {
+        const step = Math.min(remaining, 1 / 120)
+        velX += ((equilibriumX - slopeX) * 19 - velX * 3.5) * step
+        velZ += ((equilibriumZ - slopeZ) * 19 - velZ * 3.5) * step
+        slopeX += velX * step
+        slopeZ += velZ * step
+        remaining -= step
+      }
+      const d = Math.hypot(slopeX, slopeZ)
+      if (d > 0.62) {
+        slopeX *= 0.62 / d
+        slopeZ *= 0.62 / d
+        velX *= 0.65
+        velZ *= 0.65
+      }
+      waveEnergy *= Math.exp(-dt * 0.8)
+      shakeEnergy *= Math.exp(-dt * 0.6)
+    }
+    function render() {
+      glass.visible = false
+      fog.visible = false
+      renderer.setRenderTarget(target)
+      renderer.setClearColor(dark ? 0x2C4035 : 0xECEFE5, 1)
+      renderer.render(scene, camera)
+      glass.visible = true
+      fog.visible = true
+      renderer.setRenderTarget(null)
+      renderer.setClearColor(0, 0)
+      renderer.render(scene, camera)
+    }
+    let statusClock = 0
+    let rendered = 0
+    function frame(now) {
+      raf = 0
+      if (!alive || document.hidden || outside)
+        return
+      const raw = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60
+      last = now
+      accumulator += raw
+      const interval = mobile ? 1 / 30 : 1 / 60
+      if (!paused && accumulator < interval * 0.9) {
+        requestFrame()
+        return
+      }
+      const dt = paused ? 0 : Math.min(accumulator, 0.05)
+      accumulator = 0
+      time += dt
+      physics(dt)
+      updateWater()
+      updateBoat(dt)
+      updateWeather(dt)
+      updateRipples(dt)
+      fogClock += dt
+      if (fogClock > 0.12) {
+        if (painted) {
+          fc.fillStyle = `rgba(255,255,255,${1 - Math.exp(-fogClock / 24)})`
+          fc.fillRect(0, 0, 512, 256)
+          fogTex.needsUpdate = true
+        }
+        fogClock = 0
+      }
+      statusClock += dt
+      if (statusClock > 0.5) {
+        setStatus()
+        statusClock = 0
+      }
+      render()
+      rendered++
+      if (!paused)
+        requestFrame()
+    }
+    // Site-only enhancement: same-origin Vercel city weather. file:// remains standalone.
+    // No Geolocation API, third-party IP lookup, persistent location or permission prompt.
+    const dataLabel = host.querySelector('[data-bottle-part=weather-data]')
+    const sourceLabel = host.querySelector('[data-bottle-part=weather-source]')
+    const liveButton = host.querySelector('[data-bottle-part=live]')
+    let liveData = null
+    let lastWeatherRequest = 0
+    let weatherTimer = 0
+    cleanups.push(() => {
+      weatherRequestId++
+      weatherRequest?.abort()
+      clearInterval(weatherTimer)
+    })
+    const siteWeather
+      = options.live === true
+        && ['http:', 'https:'].includes(location.protocol)
+    const weatherCode = code =>
+      code === 0 || code === 1
+        ? 'clear'
+        : code === 2 || code === 3
+          ? 'cloud'
+          : code === 45 || code === 48
+            ? 'fog'
+            : [71, 73, 75, 77, 85, 86].includes(code)
+                ? 'snow'
+                : [95, 96, 99].includes(code)
+                    ? 'storm'
+                    : [
+                        51,
+                        53,
+                        55,
+                        56,
+                        57,
+                        61,
+                        63,
+                        65,
+                        66,
+                        67,
+                        80,
+                        81,
+                        82,
+                      ].includes(code)
+                        ? 'rain'
+                        : null
+    function showWeatherData() {
+      const fresh
+        = liveData && Date.now() - liveData.observedAt < 2 * 60 * 60 * 1000
+      sourceLabel.hidden = !fresh
+      if (fresh) {
+        const place
+          = liveData.place
+            || liveData.country
+            || (en ? 'Nearby region' : '大致地区')
+        dataLabel.textContent = `${liveMode ? (en ? 'Local weather' : '当地天气') : en ? 'Demo scene · Local data' : '演示场景 · 当地数据'} · ${place}  ${Math.round(liveData.temperature)}°C · ${en ? 'Humidity' : '湿度'} ${Math.round(liveData.humidity)}%`
+        const date = new Date(liveData.observedAt).toLocaleTimeString(
+          en ? 'en-GB' : 'zh-CN',
+          { hour: '2-digit', minute: '2-digit' },
+        )
+        sourceLabel.replaceChildren(
+          document.createTextNode(
+            `${en ? 'Approx. IP region · VPN may affect it' : 'IP 大致地区 · 可能受 VPN 影响'} · ${date} · `,
+          ),
+        )
+        const a = document.createElement('a')
+        a.href = 'https://open-meteo.com/'
+        a.target = '_blank'
+        a.rel = 'noopener noreferrer'
+        a.textContent = 'Open-Meteo'
+        sourceLabel.append(a)
+      }
+      else {
+        dataLabel.textContent = en
+          ? 'Default scene · Demo weather'
+          : '默认场景 · 非实况'
+        sourceLabel.replaceChildren()
+      }
+      liveButton.hidden = !siteWeather
+      liveButton.textContent = liveMode
+        ? en
+          ? 'Refresh weather'
+          : '刷新天气'
+        : en
+          ? 'Local weather'
+          : '当地天气'
+    }
+    function applyLive() {
+      if (!liveData)
+        return
+      liveMode = true
+      weather = weatherCode(liveData.code)
+      host
+        .querySelectorAll('[data-weather]')
+        .forEach(b =>
+          b.setAttribute(
+            'aria-pressed',
+            String(b.dataset.weather === weather),
+          ),
+        )
+      if (paused) {
+        snowMix = weather === 'snow' ? 1 : 0
+        rainMix = ['rain', 'storm'].includes(weather) ? 1 : 0
+        stormMix = weather === 'storm' ? 1 : 0
+        clearMix = weather === 'clear' ? 1 : 0
+        fogMix = weather === 'fog' ? 1 : 0
+      }
+      setStatus()
+      showWeatherData()
+      requestFrame()
+    }
+    async function loadWeather() {
+      if (!siteWeather || document.hidden || disposed || outside)
+        return
+      if (lastWeatherRequest && Date.now() - lastWeatherRequest < 60000) {
+        if (liveData)
+          applyLive()
+        return
+      }
+      lastWeatherRequest = Date.now()
+      const id = ++weatherRequestId
+      weatherRequest?.abort()
+      weatherRequest = new AbortController()
+      const requestController = weatherRequest
+      const timeout = setTimeout(() => requestController.abort(), 6500)
+      liveButton.disabled = true
+      try {
+        const response = await fetch('/api/weather', {
+          signal: weatherRequest.signal,
+          credentials: 'omit',
+          cache: 'no-store',
+        })
+        if (!response.ok)
+          throw new Error('Weather unavailable')
+        const data = await response.json()
+        if (
+          !data.available
+          || typeof data.temperature !== 'number'
+          || !Number.isFinite(data.temperature)
+          || typeof data.humidity !== 'number'
+          || data.humidity < 0
+          || data.humidity > 100
+          || !weatherCode(data.code)
+          || !Number.isFinite(data.observedAt)
+          || Math.abs(Date.now() - data.observedAt) > 2 * 60 * 60 * 1000
+        ) {
+          throw new Error('Weather unavailable')
+        }
+        if (disposed || id !== weatherRequestId)
+          return
+        liveData = data
+        applyLive()
+      }
+      catch {
+        if (disposed || id !== weatherRequestId)
+          return
+        liveData = null
+        liveMode = false
+        weather = 'snow'
+        host
+          .querySelectorAll('[data-weather]')
+          .forEach(b =>
+            b.setAttribute(
+              'aria-pressed',
+              String(b.dataset.weather === 'snow'),
+            ),
+          )
+        if (paused) {
+          snowMix = 1
+          rainMix = stormMix = clearMix = fogMix = 0
+        }
+        showWeatherData()
+        setStatus()
+        requestFrame()
+      }
+      finally {
+        clearTimeout(timeout)
+        if (!disposed && id === weatherRequestId)
+          liveButton.disabled = false
+      }
+    }
+    liveButton.onclick = () => {
+      if (
+        liveData
+        && !liveMode
+        && Date.now() - liveData.fetchedAt < 15 * 60 * 1000
+      ) {
+        applyLive()
+      }
+      else {
+        loadWeather()
+      }
+    }
+    showWeatherData()
+    if (siteWeather) {
+      loadWeather()
+      weatherTimer = setInterval(
+        () => {
+          if (!document.hidden && liveMode)
+            loadWeather()
+          else showWeatherData()
+        },
+        15 * 60 * 1000,
+      )
+    }
+    // Read-only opt-in diagnostics keep browser regression tests grounded in real scene geometry.
+    if (options.debug) {
+      host.__weatherBottle = {
+        snapshot() {
+          const p = topGeo.attributes.position
+          let minY = Infinity
+          let maxY = -Infinity
+          let maxR = 0
+          for (let i = 0; i < p.count; i++) {
+            minY = Math.min(minY, p.getY(i))
+            maxY = Math.max(maxY, p.getY(i))
+            maxR = Math.max(maxR, Math.hypot(p.getX(i), p.getZ(i)))
+          }
+          let snowOutside = 0
+          for (const p of snowflakes) {
+            if (Math.hypot(p.x, p.z) > 0.96 || p.y > 1.1 || p.y < BOTTOM)
+              snowOutside++
+          }
+          const boatBounds = new T.Box3()
+          boat.updateMatrixWorld(true)
+          let boatOutside = 0
+          boat.traverse((o) => {
+            if (o.isMesh && o.visible) {
+              const a = o.geometry.attributes.position
+              const point = new T.Vector3()
+              for (let i = 0; i < a.count; i++) {
+                point.fromBufferAttribute(a, i).applyMatrix4(o.matrixWorld)
+                root.worldToLocal(point)
+                if (
+                  Math.hypot(point.x, point.z)
+                  > innerRadius(point.y) - 0.01
+                  || point.y < BOTTOM
+                ) {
+                  boatOutside++
+                }
+                boatBounds.expandByPoint(point)
+              }
+            }
+          })
+          const normalWorld = new T.Vector3(-slopeX, 1, -slopeZ)
+            .normalize()
+            .applyQuaternion(root.quaternion)
+          return {
+            disposed,
+            outside,
+            weather,
+            liveMode,
+            liveData,
+            clearMix,
+            fogMix,
+            mode,
+            paused,
+            time,
+            rendered,
+            yaw,
+            tiltX,
+            tiltZ,
+            slopeX,
+            slopeZ,
+            normalWorld: normalWorld.toArray(),
+            waveEnergy,
+            shakeEnergy,
+            snowMix,
+            rainMix,
+            stormMix,
+            snowCover,
+            snowHits,
+            melted,
+            rippleHits,
+            flashCount,
+            wipeCount,
+            fogMean:
+            fc
+              .getImageData(0, 0, 512, 256)
+              .data
+              .filter((_, i) => i % 4 === 0)
+              .reduce((a, b) => a + b, 0)
+              / (512 * 256),
+            water: { minY, maxY, maxR },
+            boat: {
+              x: boatX,
+              z: boatZ,
+              y: boat.position.y,
+              waterY: waterHeight(boatX, boatZ),
+              quaternion: boat.quaternion.toArray(),
+              outside: boatOutside,
+            },
+            snowOutside,
+            drawCalls: renderer.info.render.calls,
+            triangles: renderer.info.render.triangles,
+            dpr: renderer.getPixelRatio(),
+            particles: SNOW + RAIN,
+            width: stage.clientWidth,
+            height: stage.clientHeight,
+          }
+        },
+      }
+    }
+    listen(window, 'pageshow', () => {
+      last = 0
+      requestFrame()
+    })
+    listen(window, 'pagehide', (event) => {
+      if (event.persisted) {
+        cancelAnimationFrame(raf)
+        raf = 0
+        return
+      }
+      dispose()
+    })
+    host.querySelectorAll('[data-weather]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.weather === weather)))
+    host.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)))
+    controls.forEach(button => (button.disabled = false))
+    message.hidden = true
+    host.dataset.state = 'ready'
+    setStatus()
+    requestFrame()
+  }
+}
