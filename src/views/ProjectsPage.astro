@@ -1,6 +1,5 @@
 ---
 import type { Locale } from '../i18n/config'
-import Button from '../components/Button.astro'
 import { getPostCoverSrc } from '../config/image'
 import { defaultLocale } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
@@ -10,31 +9,15 @@ const { locale = defaultLocale } = Astro.props
 const copy = {
     'zh-CN': {
         title: '项目',
-        intro: '做一些自己想用的小东西。',
-        category: '个人阅读聚合站',
-        description: '把散落的信息收好，把时间留给阅读。简报、博客、资讯与收藏，在一个安静的地方各有归处。',
-        sections: ['简报', '博客', '资讯', '收藏'],
-        preview: '功能一瞥',
-        messageLabel: '资讯 · 消息卡片',
-        messageTitle: '按批次整理，轻一点阅读。',
-        messageBody: '资讯以消息卡片呈现，只保留最近一周。博客可按来源与作者，回看已导入的历史内容。',
-        importNote: '支持 Grok Bot 结构化导入',
-        visit: '打开 Mango Reader',
+        description: '聚合简报、博客、资讯与收藏，让阅读更专注。',
+        visit: '打开阅读站',
         newTab: '（在新标签页打开）',
         coverAlt: '陶土橙色的芒果由奶白书页折成，悬浮在炭黑书签上，周围漂着纸质消息卡片。',
     },
     'en': {
         title: 'Projects',
-        intro: 'Small things I wanted to use myself.',
-        category: 'A personal reading hub',
-        description: 'Gather scattered stories and make room for reading. Briefings, blogs, news, and bookmarks, each with a place of their own.',
-        sections: ['Briefings', 'Blogs', 'News', 'Bookmarks'],
-        preview: 'A closer look',
-        messageLabel: 'News · Message cards',
-        messageTitle: 'A little less noise. A little more reading.',
-        messageBody: 'News is grouped into message cards by batch, keeping the past week. Browse imported blog history by source and author.',
-        importNote: 'Structured imports with Grok Bot',
-        visit: 'Open Mango Reader',
+        description: 'Briefings, blogs, news, and bookmarks in one quiet reading space.',
+        visit: 'Visit site',
         newTab: '(opens in a new tab)',
         coverAlt: 'A terracotta mango made of ivory book pages floats above a charcoal bookmark, surrounded by folded paper message cards.',
     },
@@ -46,92 +29,117 @@ const cover = {
 ---
 
 <BaseLayout title={copy.title} description={`Mango Reader — ${copy.description}`} image={cover} locale={locale}>
-    <section aria-labelledby="projects-title" class="pb-8">
-        <header class="mb-8 md:mb-10">
-            <h1 id="projects-title" class="text-3xl md:text-4xl font-semibold">{copy.title}</h1>
-            <p class="text-muted mt-3 leading-relaxed">{copy.intro}</p>
-        </header>
+    <section aria-labelledby="projects-title">
+        <h1 id="projects-title" class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-6">{copy.title}</h1>
 
-        <article aria-labelledby="mango-reader-title" class="project-card">
-            <img
-              src={cover.src}
-              srcset="/cover-images/mango-reader-600.webp 600w, /cover-images/mango-reader.webp 1200w"
-              sizes="(max-width: 713px) calc(100vw - 40px), 674px"
-              alt={cover.alt}
-              width="1200"
-              height="630"
-              loading="lazy"
-              decoding="async"
-              class="project-cover"
-            />
-            <div class="p-5 md:p-8">
-                <p class="text-muted text-xs tracking-wide">{copy.category}</p>
-                <h2 id="mango-reader-title" class="mt-2 text-3xl md:text-4xl font-medium">Mango Reader</h2>
-                <p class="project-description mt-4 leading-relaxed">{copy.description}</p>
-                <ul class="reading-sections mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label={copy.category}>
-                    {copy.sections.map(section => <li>{section}</li>)}
-                </ul>
-
-                <section class="message-preview my-6 p-4 md:p-5" aria-labelledby="message-preview-title">
-                    <div class="text-muted flex flex-wrap justify-between gap-2 text-xs">
-                        <span>{copy.messageLabel}</span>
-                        <span>{copy.preview}</span>
-                    </div>
-                    <h3 id="message-preview-title" class="mt-3 text-lg font-medium leading-snug">{copy.messageTitle}</h3>
-                    <p class="project-description mt-2 text-sm leading-relaxed">{copy.messageBody}</p>
-                </section>
-
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <p class="text-muted text-xs leading-relaxed">{copy.importNote}</p>
-                    <Button
-                      href="https://mango-reader.vercel.app/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="project-visit min-h-11 gap-2 text-sm"
-                    >
+        <article aria-labelledby="mango-reader-title">
+            <a
+              href="https://mango-reader.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-labelledby="mango-reader-title"
+              aria-describedby="mango-reader-description mango-reader-new-tab"
+              class="project-card"
+            >
+                <div class="min-w-0">
+                    <h2 id="mango-reader-title" class="project-title">Mango Reader</h2>
+                    <p id="mango-reader-description" class="project-description">{copy.description}</p>
+                    <span class="project-action">
                         {copy.visit}
-                        <span class="sr-only">{copy.newTab}</span>
+                        <span id="mango-reader-new-tab" class="sr-only">{copy.newTab}</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M7 17 17 7M7 7h10v10" />
                         </svg>
-                    </Button>
+                    </span>
                 </div>
-            </div>
+                <img
+                  src={getPostCoverSrc({ image: '/cover-images/mango-reader-600.webp' })}
+                  alt={cover.alt}
+                  width="600"
+                  height="315"
+                  loading="lazy"
+                  decoding="async"
+                  class="project-cover"
+                />
+            </a>
         </article>
     </section>
 </BaseLayout>
 
 <style>
     .project-card {
-        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 7rem;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1rem 1.25rem;
         border: 1px solid rgb(var(--color-border-card));
-        border-radius: 0.75rem;
+        border-radius: 0.625rem;
         background: rgb(var(--color-bg-card));
+        color: rgb(var(--color-text-main));
+        text-decoration: none;
+        transition: border-color 0.15s ease;
     }
 
     .project-cover {
         display: block;
-        width: 100%;
-        height: auto;
-        border-radius: 0;
+        width: 7rem;
+        height: 5.25rem;
+        object-fit: cover;
+        border-radius: 0.375rem;
+    }
+
+    .project-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1.4;
     }
 
     .project-description {
+        margin-top: 0.375rem;
+        font-size: 0.875rem;
+        line-height: 1.6;
         color: rgb(var(--color-text-p));
     }
 
-    .reading-sections {
+    .project-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.625rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
         color: rgb(var(--color-text-muted));
     }
 
-    .message-preview {
-        border: 1px solid rgb(var(--color-border-card));
-        border-radius: 0.5rem;
-        background: rgb(var(--color-bg-muted) / 0.4);
+    .project-card:hover {
+        border-color: rgb(var(--color-text-muted));
     }
 
-    .project-visit:focus-visible {
+    .project-card:is(:hover, :focus-visible) .project-title {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    .project-card:focus-visible {
         outline: 2px solid rgb(var(--color-brand));
         outline-offset: 4px;
+    }
+
+    @media (max-width: 767px) {
+        .project-card {
+            grid-template-columns: minmax(0, 1fr) 4.5rem;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .project-cover {
+            width: 4.5rem;
+            height: 4.5rem;
+        }
+
+        .project-title {
+            font-size: 1.125rem;
+        }
     }
 </style>
