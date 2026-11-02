@@ -13,7 +13,7 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light dark" />
 <title>装着天气的玻璃瓶 · A bottle of weather</title>
-<style>body { margin: 0; }\n${css}</style>
+<style>body { margin: 0; min-height: 100svh; display: grid; place-items: center; }\n${css}</style>
 </head>
 <body>
 <div class="weather-scene" data-weather-scene>${markup}</div>

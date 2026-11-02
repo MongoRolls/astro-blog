@@ -8,6 +8,7 @@ const cdnFailures = new Map()
 export function mountWeatherBottle(host, options = {}) {
   const lifetime = new AbortController()
   const cleanups = []
+  const stage = host.querySelector('[data-bottle-part=stage]')
   let dark = options.dark ?? matchMedia('(prefers-color-scheme: dark)').matches
   let disposed = false
   let applyTheme = () => {}
@@ -20,9 +21,8 @@ export function mountWeatherBottle(host, options = {}) {
     disposed = true
     lifetime.abort()
     for (const cleanup of cleanups.splice(0).reverse()) cleanup()
-    host.querySelectorAll('button').forEach((button) => {
-      button.onclick = null
-    })
+    stage.onclick = null
+    stage.onkeydown = null
     host.dataset.state = 'disposed'
   }
   function setTheme(value) {
@@ -36,29 +36,7 @@ export function mountWeatherBottle(host, options = {}) {
 
   const en = options.locale === 'en'
   const copy = {
-    title: ['装着天气的玻璃瓶', 'A bottle of weather'],
-    subtitle: [
-      '把一小片天空，留在手心。',
-      'A small piece of sky, held in your hands.',
-    ],
-    rain: ['细雨', 'Rain'],
-    snow: ['落雪', 'Snow'],
-    storm: ['雷暴', 'Storm'],
-    observe: ['转动观察', 'Observe'],
-    wipe: ['擦拭雾气', 'Wipe mist'],
-    shake: ['轻摇一下', 'Shake'],
-    reset: ['回正', 'Reset'],
-    pause: ['暂停', 'Pause'],
-    resume: ['继续', 'Play'],
-    observeHint: [
-      '拖动旋转与倾斜 · 快速往返摇出一场雪 · 方向键也可观察',
-      'Drag to turn & tilt · Move back and forth to stir snow · Arrow keys work too',
-    ],
-    wipeHint: [
-      '在瓶身上按住并擦拭 · 雾气会慢慢回来 · 切回观察可转动瓶子',
-      'Press and wipe the glass · Mist slowly returns · Switch to Observe to turn',
-    ],
-    clearStatus: ['一片晴朗的天空', 'A little clear sky'],
+    clearStatus: ['阳光下的一叶小船', 'A little boat in the sunlight'],
     cloudStatus: ['云在慢慢走', 'Clouds drifting by'],
     fogStatus: ['雾中的安静时刻', 'A quiet mist'],
     quiet: ['雪慢慢落下', 'Snow, falling softly'],
@@ -66,71 +44,58 @@ export function mountWeatherBottle(host, options = {}) {
     stormStatus: ['远处有雷声的天空', 'A passing storm'],
     shakeStatus: ['一场小小的暴风雪', 'A tiny snowstorm'],
     paused: ['时间暂时停住', 'A moment, paused'],
-    loading: ['正在装入一小片天气…', 'Gathering a little weather…'],
-    retry: ['重新加载', 'Reload'],
     loadError: [
-      'Three.js 加载失败。请检查网络是否允许访问 jsDelivr 或 unpkg，然后重试。',
-      'Three.js could not load. Check your connection to jsDelivr or unpkg, then retry.',
+      '天气瓶暂未加载，请检查网络后轻点此处或按回车重试。',
+      'The bottle could not load. Check your connection, then tap here or press Enter to retry.',
     ],
     gpuError: [
-      '无法启动 3D 场景。请使用支持 WebGL 2 的浏览器并开启硬件加速。',
-      'Unable to start 3D. Use a browser with WebGL 2 and enable hardware acceleration.',
+      '无法启动天气瓶，请使用支持 WebGL 2 的浏览器并开启硬件加速。',
+      'The bottle needs WebGL 2 and hardware acceleration.',
     ],
     lost: [
-      '图形上下文已丢失。请重新加载以恢复瓶中天气。',
-      'The graphics context was lost. Reload to restore the scene.',
+      '图形上下文已丢失，轻点此处或按回车恢复天气瓶。',
+      'Graphics were interrupted. Tap here or press Enter to restore the bottle.',
     ],
   }
   const tr = key => copy[key][en ? 1 : 0]
-  host.lang = en ? 'en' : 'zh-CN'
-
-  host
-    .querySelectorAll('[data-i18n]')
-    .forEach(el => (el.textContent = tr(el.dataset.i18n)))
   const embed = options.embedded === true
+  host.lang = en ? 'en' : 'zh-CN'
   host.classList.toggle('embed', embed)
   host.classList.toggle('dark', dark)
-  const stage = host.querySelector('[data-bottle-part=stage]')
   const message = host.querySelector('[data-bottle-part=message]')
   const messageText = host.querySelector('[data-bottle-part=message-text]')
-  const retry = host.querySelector('[data-bottle-part=retry]')
   const hint = host.querySelector('[data-bottle-part=hint]')
   const status = host.querySelector('[data-bottle-part=status]')
-  stage.setAttribute(
-    'aria-label',
-    en
-      ? 'Interactive weather bottle. Drag or use arrow keys to observe.'
-      : '可交互天气玻璃瓶，拖动或使用方向键观察',
-  )
-  host
-    .querySelector('.weather')
-    .setAttribute('aria-label', en ? 'Weather' : '瓶中天气')
-  host
-    .querySelector('.modes')
-    .setAttribute('aria-label', en ? 'Interaction mode' : '操作模式')
-  const observeHint = options.embedded && matchMedia('(pointer: coarse)').matches
-    ? (en ? 'Swipe sideways to turn · Swipe up/down to scroll · Switch to Wipe for mist' : '横向滑动观察 · 上下滑动页面 · 切换擦雾后擦拭瓶身')
-    : tr('observeHint')
-  hint.textContent = observeHint
-  messageText.textContent = tr('loading')
-  retry.textContent = tr('retry')
-  retry.onclick = () => options.onRetry?.()
-  message.hidden = false
-  retry.hidden = true
-  host.dataset.state = 'loading'
-  stage.classList.remove('wipe', 'dragging')
+  stage.onclick = null
+  stage.onkeydown = null
+  stage.setAttribute('aria-label', en ? 'A bottle of weather' : '装着天气的玻璃瓶')
+  hint.textContent = en
+    ? 'Drag to turn and tilt; move the mouse over the glass to wipe mist. On touchscreens, swipe sideways to turn, tap the glass to clear a little mist, and swipe vertically to scroll. Arrow keys turn, Home resets, Space pauses or resumes. Weather follows the approximate IP region, which may be affected by VPN; sunlight is the default when unavailable.'
+    : '拖动旋转与倾斜，鼠标轻扫玻璃擦雾。触屏横滑观察、轻点玻璃擦去一小片雾，上下滑动页面。方向键观察，Home 回正，空格暂停或继续。天气自动随 IP 大致地区变化，可能受 VPN 影响；获取不到时显示默认阳光场景。'
   hint.id = `weather-bottle-hint-${++instanceCount}`
-  stage.setAttribute('aria-describedby', hint.id)
-  const controls = [...host.querySelectorAll('.controls button')]
-  controls.forEach(button => (button.disabled = true))
+  status.id = `weather-bottle-status-${instanceCount}`
+  const dataLabel = host.querySelector('[data-bottle-part=weather-data]')
+  const sourceLabel = host.querySelector('[data-bottle-part=weather-source]')
+  dataLabel.id = `weather-bottle-data-${instanceCount}`
+  sourceLabel.id = `weather-bottle-source-${instanceCount}`
+  stage.setAttribute('aria-describedby', `${hint.id} ${dataLabel.id} ${sourceLabel.id}`)
+  message.hidden = true
+  status.textContent = en ? 'Gathering a little sunlight…' : '正在装入一小片阳光…'
+  host.dataset.state = 'loading'
+  stage.classList.remove('dragging', 'over-glass')
   function fail(key, error) {
     dispose()
-    retry.onclick = () => options.onRetry?.()
     message.hidden = false
     message.setAttribute('role', 'alert')
     messageText.textContent = tr(key)
-    retry.hidden = false
-    controls.forEach(button => (button.disabled = true))
+    stage.setAttribute('aria-label', tr(key))
+    stage.onclick = () => options.onRetry?.()
+    stage.onkeydown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        options.onRetry?.()
+      }
+    }
     host.dataset.state = 'error'
     console.error(error)
   }
@@ -208,7 +173,7 @@ export function mountWeatherBottle(host, options = {}) {
     let last = 0
     let time = 0
     let accumulator = 0
-    let weather = 'snow'
+    let weather = 'clear'
     let fogMat
     let liveMode = false
     let weatherRequest = null
@@ -230,7 +195,7 @@ export function mountWeatherBottle(host, options = {}) {
     renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.6))
     renderer.outputColorSpace = T.SRGBColorSpace
     renderer.toneMapping = T.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.1
+    renderer.toneMappingExposure = 1.0
     stage.append(renderer.domElement)
     renderer.domElement.setAttribute('aria-hidden', 'true')
     listen(renderer.domElement, 'webglcontextlost', (event) => {
@@ -385,18 +350,28 @@ export function mountWeatherBottle(host, options = {}) {
     const glassMat = new T.ShaderMaterial({
       uniforms: glassUniforms,
       transparent: true,
+      blending: T.NoBlending,
       depthWrite: false,
       side: T.FrontSide,
       vertexShader: `varying vec3 vNormal;varying vec3 vWorld;void main(){vec4 world=modelMatrix*vec4(position,1.);vWorld=world.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*world;}`,
+      // Replace pixels inside the bottle with a premultiplied RGBA refraction.
+      // Empty glass transmits the actual page underneath, without a baked background.
       fragmentShader: `uniform sampler2D uScene;uniform vec2 uResolution;uniform vec3 uEye;uniform float uFlash;uniform float uDark;varying vec3 vNormal;varying vec3 vWorld;
     void main(){vec3 n=normalize(vNormal),v=normalize(uEye-vWorld);float fres=pow(1.-abs(dot(n,v)),3.);vec2 uv=gl_FragCoord.xy/uResolution;
-    // A thin curved wall refracts the rendered interior, including transparent snow/water.
-    vec2 bend=(mat3(viewMatrix)*n).xy*(.0025+fres*.008);vec3 through=texture2D(uScene,clamp(uv+bend,vec2(.002),vec2(.998))).rgb;
+    vec2 bend=(mat3(viewMatrix)*n).xy*(.0025+fres*.008);vec4 inside=texture2D(uScene,clamp(uv+bend,vec2(.002),vec2(.998)));
     vec3 r=reflect(-v,n);float strip=pow(max(0.,dot(r,normalize(vec3(-.65,.4,.7)))),28.);float strip2=pow(max(0.,dot(r,normalize(vec3(.8,.3,-.2)))),42.);
-    vec3 tint=mix(vec3(.70,.83,.77),vec3(.34,.55,.45),uDark);vec3 color=mix(through,through*tint,.055+fres*.18);color+=vec3(.85,.98,.91)*(fres*.24+strip*.24+strip2*.16)+uFlash*.045;gl_FragColor=vec4(color,1.);
+    float film=clamp(.025+fres*.34+strip*.22+strip2*.15+uFlash*.035,0.,.7);
+    float alpha=inside.a+(1.-inside.a)*film;
+    vec3 reflection=mix(vec3(.29,.42,.46),vec3(.65,.82,.88),uDark);
+    vec3 tint=mix(vec3(1.),vec3(.87,.97,.97),fres*.2);
+    vec3 light=reflection*film+vec3(1.,.94,.80)*(strip*.13+strip2*.08+uFlash*.07);
+    vec3 color=(inside.rgb*tint+light*(1.-inside.a))/max(alpha,.001);
+    gl_FragColor=vec4(color,alpha);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
+    gl_FragColor.rgb*=gl_FragColor.a;
 }`,
+
     })
     const glass = new T.Mesh(bottleGeo, glassMat)
     glass.renderOrder = 20
@@ -406,7 +381,7 @@ export function mountWeatherBottle(host, options = {}) {
       roughness: 0.16,
       metalness: 0.05,
       transparent: true,
-      opacity: 0.48,
+      opacity: 0.34,
       clearcoat: 1,
     })
     function torus(radius, tube, y, material) {
@@ -494,13 +469,13 @@ export function mountWeatherBottle(host, options = {}) {
     sc.width = sc.height = 128
     const sx = sc.getContext('2d')
     const sg = sx.createRadialGradient(64, 64, 0, 64, 64, 64)
-    sg.addColorStop(0, '#233f3550')
-    sg.addColorStop(0.45, '#233f3528')
-    sg.addColorStop(1, '#233f3500')
+    sg.addColorStop(0, '#30322c29')
+    sg.addColorStop(0.45, '#30322c13')
+    sg.addColorStop(1, '#30322c00')
     sx.fillStyle = sg
     sx.fillRect(0, 0, 128, 128)
     const shadow = new T.Mesh(
-      new T.PlaneGeometry(4.2, 3.1),
+      new T.PlaneGeometry(3.6, 2.5),
       new T.MeshBasicMaterial({
         map: new T.CanvasTexture(sc),
         transparent: true,
@@ -570,7 +545,7 @@ export function mountWeatherBottle(host, options = {}) {
       roughness: 0.23,
       metalness: 0,
       transparent: true,
-      opacity: 0.78,
+      opacity: 0.46,
       clearcoat: 1,
       clearcoatRoughness: 0.1,
       side: T.DoubleSide,
@@ -594,7 +569,7 @@ export function mountWeatherBottle(host, options = {}) {
       new T.MeshPhysicalMaterial({
         color: 0x4EABA2,
         transparent: true,
-        opacity: 0.24,
+        opacity: 0.16,
         roughness: 0.2,
         metalness: 0.05,
         side: T.DoubleSide,
@@ -608,7 +583,7 @@ export function mountWeatherBottle(host, options = {}) {
       new T.MeshStandardMaterial({
         color: 0x55998B,
         transparent: true,
-        opacity: 0.18,
+        opacity: 0.10,
         roughness: 0.3,
       }),
     )
@@ -848,7 +823,7 @@ export function mountWeatherBottle(host, options = {}) {
       new T.MeshStandardMaterial({
         color: 0xEEC879,
         emissive: 0x9C6825,
-        emissiveIntensity: 0.3,
+        emissiveIntensity: 0.55,
         roughness: 0.8,
         transparent: true,
         opacity: 0,
@@ -856,6 +831,9 @@ export function mountWeatherBottle(host, options = {}) {
     )
     sun.position.set(-0.4, 0.94, -0.22)
     root.add(sun)
+    const sunlight = new T.PointLight(0xFFE1A0, 0.55, 3.5, 2)
+    sunlight.position.copy(sun.position)
+    root.add(sunlight)
     const lightCloud = new T.Color(0xE6EDE7)
     const stormCloud = new T.Color(0x748B8A)
     // Reusable ripple pool, each ring fits the exact water disk and follows its slope.
@@ -973,10 +951,10 @@ export function mountWeatherBottle(host, options = {}) {
     }
     snowflakes.forEach(p => spawn(p, true))
     drops.forEach(p => spawn(p, true))
-    let snowMix = 1
+    let snowMix = 0
     let rainMix = 0
     let stormMix = 0
-    let clearMix = 0
+    let clearMix = 1
     let fogMix = 0
     let nextLightning = 7
     let lightningAge = 10
@@ -1025,8 +1003,9 @@ export function mountWeatherBottle(host, options = {}) {
       clouds.position.y = clearMix * 0.57
       sun.material.opacity = clearMix
       sun.visible = clearMix > 0.01
+      sunlight.intensity = clearMix * 0.55
       key.intensity = 2.8 + clearMix * 0.8
-      fogMat.uniforms.uDensity.value = 1 + fogMix
+      fogMat.uniforms.uDensity.value = 0.35 + fogMix * 1.1 + snowMix * 0.3
       cloudMat.color.copy(lightCloud).lerp(stormCloud, stormMix * 0.85)
       cloudParts.forEach(({ mesh, base, phase }) => {
         mesh.position.x = base.x + Math.sin(time * 0.16 + phase) * 0.035
@@ -1158,12 +1137,12 @@ export function mountWeatherBottle(host, options = {}) {
       side: T.FrontSide,
       uniforms: {
         uMask: { value: fogTex },
-        uDensity: { value: 1 },
+        uDensity: { value: 0.35 },
         uEye: { value: camera.position },
         uDark: { value: dark ? 1 : 0 },
       },
       vertexShader: `varying vec2 vUv;varying vec3 vNormal;varying vec3 vWorld;void main(){vUv=uv;vec4 p=modelMatrix*vec4(position,1.);vWorld=p.xyz;vNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*p;}`,
-      fragmentShader: `uniform sampler2D uMask;uniform float uDensity;uniform vec3 uEye;uniform float uDark;varying vec2 vUv;varying vec3 vNormal;varying vec3 vWorld;void main(){float f=texture2D(uMask,vUv).r;float edge=pow(1.-abs(dot(normalize(vNormal),normalize(uEye-vWorld))),2.);float noise=fract(sin(dot(vUv,vec2(732.13,395.7)))*43758.54);vec3 color=mix(vec3(.85,.91,.85),vec3(.57,.70,.61),uDark);gl_FragColor=vec4(color,f*uDensity*(.055+.13*edge+noise*.018));}`,
+      fragmentShader: `uniform sampler2D uMask;uniform float uDensity;uniform vec3 uEye;uniform float uDark;varying vec2 vUv;varying vec3 vNormal;varying vec3 vWorld;void main(){float f=texture2D(uMask,vUv).r;float edge=pow(1.-abs(dot(normalize(vNormal),normalize(uEye-vWorld))),2.);float noise=fract(sin(dot(vUv,vec2(732.13,395.7)))*43758.54);vec3 color=mix(vec3(.82,.88,.90),vec3(.64,.75,.80),uDark);gl_FragColor=vec4(color,f*uDensity*(.055+.13*edge+noise*.018));}`,
     })
     const fog = new T.Mesh(bottleGeo, fogMat)
     fog.scale.setScalar(1.0008)
@@ -1232,8 +1211,10 @@ export function mountWeatherBottle(host, options = {}) {
       fogTex.needsUpdate = true
     }
     // Rotation uses spring damping; water follows world gravity in bottle-local coordinates.
-    let mode = 'observe'
     let down = false
+    let touchTap = false
+    let startX = 0
+    let startY = 0
     let pointerId = null
     let lastX = 0
     let lastY = 0
@@ -1265,7 +1246,7 @@ export function mountWeatherBottle(host, options = {}) {
       requestFrame()
     }
     function setStatus() {
-      status.textContent = tr(
+      const text = tr(
         paused
           ? 'paused'
           : shakeEnergy > 0.35
@@ -1282,19 +1263,17 @@ export function mountWeatherBottle(host, options = {}) {
                       ? 'fogStatus'
                       : 'quiet',
       )
-      host.querySelector('[data-bottle-part=pause]').textContent = tr(
-        paused ? 'resume' : 'pause',
-      )
-      host
-        .querySelector('[data-bottle-part=pause]')
-        .setAttribute('aria-pressed', String(paused))
+      if (status.textContent !== text)
+        status.textContent = text
     }
+
     function requestFrame() {
       if (alive && !raf)
         raf = requestAnimationFrame(frame)
     }
     function cancelPointer() {
       down = false
+      touchTap = false
       lastUV = null
       lastDirection = 0
       lastReverse = 0
@@ -1304,30 +1283,43 @@ export function mountWeatherBottle(host, options = {}) {
       pointerId = null
     }
     listen(stage, 'pointerdown', (event) => {
-      if (pointerId !== null)
+      if (pointerId !== null || event.button !== 0 || !fogHit(event.clientX, event.clientY))
         return
       down = true
       pointerId = event.pointerId
-      lastX = event.clientX
-      lastY = event.clientY
+      startX = lastX = event.clientX
+      startY = lastY = event.clientY
+      touchTap = event.pointerType === 'touch'
       lastMove = performance.now()
       stage.setPointerCapture(event.pointerId)
       stage.focus({ preventScroll: true })
       lastUV = null
-      if (mode === 'wipe')
-        wipeAt(event.clientX, event.clientY)
-      else stage.classList.add('dragging')
+      stage.classList.add('dragging')
       requestFrame()
     })
     listen(stage, 'pointermove', (event) => {
-      if (!down || event.pointerId !== pointerId)
+      if (!down) {
+        // Hover wipes; dragging observes. A touch scroll never paints the glass.
+        if (event.pointerType !== 'touch' && event.buttons === 0) {
+          const hit = fogHit(event.clientX, event.clientY)
+          stage.classList.toggle('over-glass', !!hit)
+          const events = event.getCoalescedEvents?.() || []
+          for (const point of events.length ? events : [event]) wipeAt(point.clientX, point.clientY)
+          if (hit)
+            requestFrame()
+        }
         return
-      if (mode === 'wipe') {
-        const events = event.getCoalescedEvents?.() || []
-        for (const e of events.length ? events : [event])
-          wipeAt(e.clientX, e.clientY)
-        requestFrame()
+      }
+      if (event.pointerId !== pointerId)
         return
+      if (touchTap) {
+        if (Math.hypot(event.clientX - startX, event.clientY - startY) < 8)
+          return
+        if (Math.abs(event.clientY - startY) > Math.abs(event.clientX - startX)) {
+          cancelPointer()
+          return
+        }
+        touchTap = false
       }
       const now = performance.now()
       const dx = event.clientX - lastX
@@ -1354,18 +1346,29 @@ export function mountWeatherBottle(host, options = {}) {
       lastMove = now
       requestFrame()
     })
-    listen(stage, 'pointerup', cancelPointer)
+    listen(stage, 'pointerup', (event) => {
+      if (event.pointerId !== pointerId)
+        return
+      if (touchTap) {
+        wipeAt(event.clientX, event.clientY)
+        requestFrame()
+      }
+      cancelPointer()
+    })
+    listen(stage, 'pointerleave', () => {
+      lastUV = null
+      stage.classList.remove('over-glass')
+    })
     listen(stage, 'pointercancel', cancelPointer)
     listen(stage, 'lostpointercapture', cancelPointer)
     listen(stage, 'keydown', (event) => {
-      if (mode !== 'observe')
-        return
       const keys = [
         'ArrowLeft',
         'ArrowRight',
         'ArrowUp',
         'ArrowDown',
         'Home',
+        ' ',
       ]
       if (!keys.includes(event.key))
         return
@@ -1384,6 +1387,11 @@ export function mountWeatherBottle(host, options = {}) {
         targetX += 0.06
       if (event.key === 'Home')
         reset()
+      if (event.key === ' ') {
+        paused = !paused
+        last = 0
+        setStatus()
+      }
       limitTilt()
       requestFrame()
     })
@@ -1392,54 +1400,6 @@ export function mountWeatherBottle(host, options = {}) {
       targetX = targetZ = 0
       waveEnergy *= 0.4
       shakeEnergy *= 0.4
-      requestFrame()
-    }
-    host.querySelectorAll('[data-mode]').forEach(
-      button =>
-        (button.onclick = () => {
-          cancelPointer()
-          mode = button.dataset.mode
-          stage.classList.toggle('wipe', mode === 'wipe')
-          host
-            .querySelectorAll('[data-mode]')
-            .forEach(b =>
-              b.setAttribute('aria-pressed', String(b === button)),
-            )
-          hint.textContent = mode === 'wipe' ? tr('wipeHint') : observeHint
-        }),
-    )
-    host.querySelectorAll('[data-weather]').forEach(
-      button =>
-        (button.onclick = () => {
-          weather = button.dataset.weather
-          weatherRequestId++
-          weatherRequest?.abort()
-          liveMode = false
-          showWeatherData()
-          host
-            .querySelectorAll('[data-weather]')
-            .forEach(b =>
-              b.setAttribute('aria-pressed', String(b === button)),
-            )
-          if (weather === 'storm')
-            nextLightning = 2.5
-          setStatus()
-          if (paused) {
-            snowMix = weather === 'snow' ? 1 : 0
-            rainMix = ['rain', 'storm'].includes(weather) ? 1 : 0
-            stormMix = weather === 'storm' ? 1 : 0
-            clearMix = weather === 'clear' ? 1 : 0
-            fogMix = weather === 'fog' ? 1 : 0
-          }
-          requestFrame()
-        }),
-    )
-    host.querySelector('[data-bottle-part=shake]').onclick = () => stir()
-    host.querySelector('[data-bottle-part=reset]').onclick = reset
-    host.querySelector('[data-bottle-part=pause]').onclick = () => {
-      paused = !paused
-      last = 0
-      setStatus()
       requestFrame()
     }
     listen(motion, 'change', (event) => {
@@ -1461,6 +1421,7 @@ export function mountWeatherBottle(host, options = {}) {
         cancelPointer()
       }
       else {
+        refreshWeatherIfNeeded()
         requestFrame()
       }
     })
@@ -1472,18 +1433,12 @@ export function mountWeatherBottle(host, options = {}) {
         raf = 0
       }
       else {
+        refreshWeatherIfNeeded()
         requestFrame()
       }
     })
     observer.observe(stage)
     cleanups.push(() => observer.disconnect())
-    // Reserve the actual control height, including wrapped rows on narrow embeds.
-    const toolbar = host.querySelector('.controls')
-    const toolbarResize = new ResizeObserver(() => {
-      stage.style.bottom = `${toolbar.offsetHeight + Number.parseFloat(getComputedStyle(toolbar).bottom) + 14}px`
-    })
-    toolbarResize.observe(toolbar)
-    cleanups.push(() => toolbarResize.disconnect())
     const resize = new ResizeObserver(() => {
       const w = stage.clientWidth
       const h = stage.clientHeight
@@ -1546,7 +1501,7 @@ export function mountWeatherBottle(host, options = {}) {
       glass.visible = false
       fog.visible = false
       renderer.setRenderTarget(target)
-      renderer.setClearColor(dark ? 0x2C4035 : 0xECEFE5, 1)
+      renderer.setClearColor(0, 0)
       renderer.render(scene, camera)
       glass.visible = true
       fog.visible = true
@@ -1597,9 +1552,6 @@ export function mountWeatherBottle(host, options = {}) {
     }
     // Site-only enhancement: same-origin Vercel city weather. file:// remains standalone.
     // No Geolocation API, third-party IP lookup, persistent location or permission prompt.
-    const dataLabel = host.querySelector('[data-bottle-part=weather-data]')
-    const sourceLabel = host.querySelector('[data-bottle-part=weather-source]')
-    const liveButton = host.querySelector('[data-bottle-part=live]')
     let liveData = null
     let lastWeatherRequest = 0
     let weatherTimer = 0
@@ -1611,6 +1563,10 @@ export function mountWeatherBottle(host, options = {}) {
     const siteWeather
       = options.live === true
         && ['http:', 'https:'].includes(location.protocol)
+    function refreshWeatherIfNeeded() {
+      if (!lastWeatherRequest || Date.now() - lastWeatherRequest >= 15 * 60 * 1000)
+        loadWeather()
+    }
     const weatherCode = code =>
       code === 0 || code === 1
         ? 'clear'
@@ -1642,13 +1598,12 @@ export function mountWeatherBottle(host, options = {}) {
     function showWeatherData() {
       const fresh
         = liveData && Date.now() - liveData.observedAt < 2 * 60 * 60 * 1000
-      sourceLabel.hidden = !fresh
       if (fresh) {
         const place
           = liveData.place
             || liveData.country
             || (en ? 'Nearby region' : '大致地区')
-        dataLabel.textContent = `${liveMode ? (en ? 'Local weather' : '当地天气') : en ? 'Demo scene · Local data' : '演示场景 · 当地数据'} · ${place}  ${Math.round(liveData.temperature)}°C · ${en ? 'Humidity' : '湿度'} ${Math.round(liveData.humidity)}%`
+        dataLabel.textContent = `${en ? 'Local weather' : '当地天气'} · ${place}  ${Math.round(liveData.temperature)}°C · ${en ? 'Humidity' : '湿度'} ${Math.round(liveData.humidity)}%`
         const date = new Date(liveData.observedAt).toLocaleTimeString(
           en ? 'en-GB' : 'zh-CN',
           { hour: '2-digit', minute: '2-digit' },
@@ -1662,37 +1617,21 @@ export function mountWeatherBottle(host, options = {}) {
         a.href = 'https://open-meteo.com/'
         a.target = '_blank'
         a.rel = 'noopener noreferrer'
-        a.textContent = 'Open-Meteo'
+        a.textContent = 'Open-Meteo · CC BY 4.0'
+        a.tabIndex = -1
         sourceLabel.append(a)
       }
       else {
         dataLabel.textContent = en
-          ? 'Default scene · Demo weather'
-          : '默认场景 · 非实况'
+          ? 'Default sunlight scene · Demo weather'
+          : '默认阳光场景 · 非实况'
         sourceLabel.replaceChildren()
       }
-      liveButton.hidden = !siteWeather
-      liveButton.textContent = liveMode
-        ? en
-          ? 'Refresh weather'
-          : '刷新天气'
-        : en
-          ? 'Local weather'
-          : '当地天气'
     }
-    function applyLive() {
-      if (!liveData)
-        return
-      liveMode = true
-      weather = weatherCode(liveData.code)
-      host
-        .querySelectorAll('[data-weather]')
-        .forEach(b =>
-          b.setAttribute(
-            'aria-pressed',
-            String(b.dataset.weather === weather),
-          ),
-        )
+    function transitionTo(next) {
+      weather = next
+      if (weather === 'storm')
+        nextLightning = 2.5
       if (paused) {
         snowMix = weather === 'snow' ? 1 : 0
         rainMix = ['rain', 'storm'].includes(weather) ? 1 : 0
@@ -1703,6 +1642,13 @@ export function mountWeatherBottle(host, options = {}) {
       setStatus()
       showWeatherData()
       requestFrame()
+    }
+
+    function applyLive() {
+      if (!liveData)
+        return
+      liveMode = true
+      transitionTo(weatherCode(liveData.code))
     }
     async function loadWeather() {
       if (!siteWeather || document.hidden || disposed || outside)
@@ -1718,7 +1664,6 @@ export function mountWeatherBottle(host, options = {}) {
       weatherRequest = new AbortController()
       const requestController = weatherRequest
       const timeout = setTimeout(() => requestController.abort(), 6500)
-      liveButton.disabled = true
       try {
         const response = await fetch('/api/weather', {
           signal: weatherRequest.signal,
@@ -1751,39 +1696,10 @@ export function mountWeatherBottle(host, options = {}) {
           return
         liveData = null
         liveMode = false
-        weather = 'snow'
-        host
-          .querySelectorAll('[data-weather]')
-          .forEach(b =>
-            b.setAttribute(
-              'aria-pressed',
-              String(b.dataset.weather === 'snow'),
-            ),
-          )
-        if (paused) {
-          snowMix = 1
-          rainMix = stormMix = clearMix = fogMix = 0
-        }
-        showWeatherData()
-        setStatus()
-        requestFrame()
+        transitionTo('clear')
       }
       finally {
         clearTimeout(timeout)
-        if (!disposed && id === weatherRequestId)
-          liveButton.disabled = false
-      }
-    }
-    liveButton.onclick = () => {
-      if (
-        liveData
-        && !liveMode
-        && Date.now() - liveData.fetchedAt < 15 * 60 * 1000
-      ) {
-        applyLive()
-      }
-      else {
-        loadWeather()
       }
     }
     showWeatherData()
@@ -1791,7 +1707,7 @@ export function mountWeatherBottle(host, options = {}) {
       loadWeather()
       weatherTimer = setInterval(
         () => {
-          if (!document.hidden && liveMode)
+          if (!document.hidden)
             loadWeather()
           else showWeatherData()
         },
@@ -1801,6 +1717,42 @@ export function mountWeatherBottle(host, options = {}) {
     // Read-only opt-in diagnostics keep browser regression tests grounded in real scene geometry.
     if (options.debug) {
       host.__weatherBottle = {
+        capture() {
+          if (disposed)
+            return null
+          render()
+          return renderer.domElement.toDataURL('image/png')
+        },
+        transparency() {
+          if (disposed)
+            return null
+          render()
+          const gl = renderer.getContext()
+          const width = gl.drawingBufferWidth
+          const height = gl.drawingBufferHeight
+          const pixels = new Uint8Array(width * height * 4)
+          gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+          let clear = 0
+          let translucent = 0
+          let solid = 0
+          for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] === 0)
+              clear++
+            else if (pixels[i] < 250)
+              translucent++
+            else solid++
+          }
+          const air = new T.Vector3(0.4, 0.2, 0.99).applyMatrix4(root.matrixWorld).project(camera)
+          const x = Math.round((air.x + 1) / 2 * (width - 1))
+          const y = Math.round((air.y + 1) / 2 * (height - 1))
+          return {
+            clearRatio: clear / (width * height),
+            translucentRatio: translucent / (width * height),
+            solidRatio: solid / (width * height),
+            glassAirAlpha: pixels[(y * width + x) * 4 + 3],
+            cornerAlphas: [3, width * 4 - 1, (height - 1) * width * 4 + 3, pixels.length - 1].map(i => pixels[i]),
+          }
+        },
         snapshot() {
           const p = topGeo.attributes.position
           let minY = Infinity
@@ -1848,7 +1800,7 @@ export function mountWeatherBottle(host, options = {}) {
             liveData,
             clearMix,
             fogMix,
-            mode,
+            interaction: down ? 'observe' : 'rest',
             paused,
             time,
             rendered,
@@ -1908,9 +1860,6 @@ export function mountWeatherBottle(host, options = {}) {
       }
       dispose()
     })
-    host.querySelectorAll('[data-weather]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.weather === weather)))
-    host.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)))
-    controls.forEach(button => (button.disabled = false))
     message.hidden = true
     host.dataset.state = 'ready'
     setStatus()
