@@ -85,6 +85,8 @@ test('sunlight is the quiet default, with no visual controls and real canvas alp
   expect(alpha.solidRatio).toBeGreaterThan(0.005)
   expect(alpha.glassAirAlpha).toBeGreaterThan(0)
   expect(alpha.glassAirAlpha).toBeLessThan(100)
+  // Clear walls, but the glass thickens toward its silhouette.
+  expect(alpha.rimAlpha).toBeGreaterThan(alpha.glassAirAlpha + 100)
   await expect(page.locator(stage)).toHaveAttribute('aria-describedby', /weather-bottle-hint/)
 })
 
@@ -242,6 +244,11 @@ test('native bottle blends into both page themes, loads near the viewport and pa
     return { background: wrapper.backgroundColor, border: wrapper.borderTopWidth, backgrounds: [...el.querySelectorAll('.weather-scene, .app, canvas')].map(e => getComputedStyle(e).backgroundColor) }
   })
   expect(layout).toEqual({ background: 'rgba(0, 0, 0, 0)', border: '0px', backgrounds: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0)'] })
+  // A compact accent: about half of the 674px content column, at 4:3.
+  const size = await page.locator('.weather-bottle').evaluate(el => ({ content: el.clientWidth, ...el.querySelector('[data-bottle-part=stage]')!.getBoundingClientRect().toJSON() }))
+  expect(size.content).toBe(674)
+  expect(size.width / size.content).toBeCloseTo(0.5, 1)
+  expect(size.height).toBeCloseTo(size.width * 0.75, 0)
   await page.evaluate(() => window.scrollTo(0, 0))
   await expect.poll(async () => (await state(page)).outside).toBe(true)
   const frames = (await state(page)).rendered
@@ -366,8 +373,10 @@ test('320px touch observes horizontally, wipes on tap, scrolls vertically and re
   expect((await state(page)).yaw).toBe(turned.yaw)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
   await expect(page.locator(`${host} button, .bottle-links`)).toHaveCount(0)
+  expect((await state(page)).width).toBe(240)
   await page.setViewportSize({ width: 700, height: 700 })
-  await expect.poll(async () => (await state(page)).width).toBe(460)
+  const content = await page.locator('.weather-bottle').evaluate(el => el.clientWidth)
+  await expect.poll(async () => (await state(page)).width / content).toBeCloseTo(0.5, 1)
   expect((await state(page)).boat.outside).toBe(0)
   await context.close()
 })
