@@ -51,6 +51,7 @@ const messages = {
     common: {
       content: '目录',
       backToTop: '回到顶部',
+      skipToContent: '跳到正文',
       visits: '访问量：',
       commentsUnavailable: '评论区暂时无法加载，请稍后重试。',
       allRightsReserved: '版权所有。',
@@ -109,6 +110,7 @@ const messages = {
     common: {
       content: 'Contents',
       backToTop: 'Back to top',
+      skipToContent: 'Skip to content',
       visits: 'Views: ',
       commentsUnavailable: 'Comments are temporarily unavailable. Please try again later.',
       allRightsReserved: 'All rights reserved.',

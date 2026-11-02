@@ -236,3 +236,26 @@ html.dark .astro-code span {
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+
+/* Keep the keyboard shortcut above the floating navigation without changing layout. */
+.skip-link {
+  position: fixed;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  left: 1.25rem;
+  z-index: 10001;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgb(var(--color-bg-main));
+  color: rgb(var(--color-text-main));
+  transform: translateY(calc(-100% - 2rem - env(safe-area-inset-top, 0px)));
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid rgb(var(--color-brand));
+  outline-offset: 2px;
+}
+
+#main-content {
+  scroll-margin-top: 6rem;
+}

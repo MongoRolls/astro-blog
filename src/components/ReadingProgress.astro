@@ -41,38 +41,54 @@ function initReadingProgress() {
   const controller = new AbortController()
   const listenerOptions = { signal: controller.signal, passive: true }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  let ticking = false
+  let frame = 0
+  let max = 0
+  let dimensionsDirty = true
+  let wasVisible = false
 
   function update() {
-    const root = document.documentElement
-    const max = root.scrollHeight - root.clientHeight
+    frame = 0
+    if (dimensionsDirty) {
+      const root = document.documentElement
+      max = root.scrollHeight - root.clientHeight
+      dimensionsDirty = false
+    }
     const progress = max > 0 ? Math.min(window.scrollY / max, 1) : 0
     progressBar.style.transform = `scaleX(${progress})`
 
     const visible = window.scrollY > 480
-    backToTopButton.classList.toggle('is-visible', visible)
-    backToTopButton.setAttribute('aria-hidden', String(!visible))
-    backToTopButton.tabIndex = visible ? 0 : -1
+    if (visible !== wasVisible) {
+      backToTopButton.classList.toggle('is-visible', visible)
+      backToTopButton.setAttribute('aria-hidden', String(!visible))
+      backToTopButton.tabIndex = visible ? 0 : -1
+      wasVisible = visible
+    }
   }
 
   function onScroll() {
-    if (ticking)
-      return
-    ticking = true
-    requestAnimationFrame(() => {
-      update()
-      ticking = false
-    })
+    if (!frame)
+      frame = requestAnimationFrame(update)
   }
 
+  function onResize() {
+    dimensionsDirty = true
+    onScroll()
+  }
+
+  const observer = new ResizeObserver(onResize)
+  observer.observe(document.body)
   update()
   window.addEventListener('scroll', onScroll, listenerOptions)
-  window.addEventListener('resize', onScroll, listenerOptions)
+  window.addEventListener('resize', onResize, listenerOptions)
   backToTopButton.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
   }, { signal: controller.signal })
 
-  disposeReadingProgress = () => controller.abort()
+  disposeReadingProgress = () => {
+    controller.abort()
+    observer.disconnect()
+    cancelAnimationFrame(frame)
+  }
 }
 
 document.addEventListener('astro:page-load', initReadingProgress)
