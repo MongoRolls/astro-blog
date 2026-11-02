@@ -162,8 +162,8 @@ export function mountWeatherBottle(host, options = {}) {
   function start(T) {
     const clamp = T.MathUtils.clamp
     const lerp = T.MathUtils.lerp
-    const mobile
-      = matchMedia('(pointer: coarse)').matches || host.clientWidth < 600
+    const coarse = matchMedia('(pointer: coarse)').matches
+    const mobile = coarse || host.clientWidth < 600
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
     let reduced = motion.matches
     let paused = reduced
@@ -192,7 +192,6 @@ export function mountWeatherBottle(host, options = {}) {
     })
     if (!renderer.extensions.has('EXT_color_buffer_float'))
       throw new Error('Floating-point render targets are unavailable')
-    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.6))
     renderer.outputColorSpace = T.SRGBColorSpace
     renderer.toneMapping = T.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.0
@@ -1444,6 +1443,8 @@ export function mountWeatherBottle(host, options = {}) {
       const h = stage.clientHeight
       if (!w || !h)
         return
+      // Thin glass edges need real pixels; a fixed budget keeps larger standalone views as cheap as before.
+      renderer.setPixelRatio(Math.min(devicePixelRatio, coarse ? 1.75 : 2, Math.sqrt(360000 / (w * h))))
       renderer.setSize(w, h, false)
       camera.aspect = w / h
       camera.position

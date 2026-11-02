@@ -15,8 +15,12 @@
   height: clamp(300px, 80svh, 540px);
   background: transparent;
 }
+.weather-scene.embed {
+  width: min(100%, clamp(240px, 50%, 340px));
+}
 .weather-scene.embed .app {
-  height: clamp(280px, 32vw, 350px);
+  height: auto;
+  aspect-ratio: 4 / 3;
 }
 .weather-scene [data-bottle-part="stage"] {
   position: absolute;
