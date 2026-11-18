@@ -1,0 +1,21 @@
+---
+import WeatherCard from '../../../components/WeatherCard.astro'
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>本地天气 · Local weather</title>
+  </head>
+  <body>
+    <WeatherCard standalone />
+    <style is:inline>
+      body { box-sizing: border-box; margin: 0; padding: 1rem; min-height: 100svh; display: grid; place-items: center; }
+      blog-weather { margin: 0; }
+    </style>
+  </body>
+</html>

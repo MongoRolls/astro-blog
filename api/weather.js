@@ -1,4 +1,4 @@
-// Optional Vercel endpoint. The static HTML works without it (default/demo weather).
+// Optional Vercel endpoint. The card shows its unavailable state without it.
 // Only the hosting platform's approximate city coordinates leave this server;
 // visitor IPs, cookies, user agents and request headers are never forwarded.
 import process from 'node:process'
@@ -98,6 +98,6 @@ export default async function handler(req, res) {
     if (forecast)
       return res.status(200).json({ available: true, ...forecast, place, country })
   }
-  catch { /* Upstream failures use the default scene. */ }
+  catch { /* Upstream failures use the unavailable response. */ }
   return unavailable()
 }
