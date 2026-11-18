@@ -50,8 +50,8 @@ export function getPageUrl(page: CollectionEntry<'pages'>) {
   return localizedPath(page.data.lang, `/${getPageSlug(page)}/`)
 }
 
-export function getAllTags(posts: CollectionEntry<'blog'>[]) {
-  const tagsById = new Map<string, { name: string, id: string, value: number }>()
+export function groupPostsByTag(posts: CollectionEntry<'blog'>[]) {
+  const tagsById = new Map<string, { name: string, posts: CollectionEntry<'blog'>[] }>()
 
   for (const post of posts) {
     const seen = new Set<string>()
@@ -64,17 +64,13 @@ export function getAllTags(posts: CollectionEntry<'blog'>[]) {
       seen.add(id)
       const existing = tagsById.get(id)
       if (existing)
-        existing.value += 1
+        existing.posts.push(post)
       else
-        tagsById.set(id, { name: tag, id, value: 1 })
+        tagsById.set(id, { name: tag, posts: [post] })
     }
   }
 
-  return [...tagsById.values()]
-}
-
-export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagId: string) {
-  return posts.filter(post => (post.data.tags ?? []).some(tag => slugify(tag) === tagId))
+  return tagsById
 }
 
 export async function getBlogPostStaticPaths(locale: Locale) {
@@ -111,14 +107,18 @@ export async function getTagPageStaticPaths(
   paginate: GetStaticPathsOptions['paginate'],
   pageSize: number,
 ) {
-  const posts = await getPublishedBlogPosts(locale)
-  const tags = getAllTags(posts)
+  const now = new Date()
+  const [posts, translatedPosts] = await Promise.all([
+    getPublishedBlogPosts(locale, now),
+    getPublishedBlogPosts(alternateLocale(locale), now),
+  ])
+  const translatedTags = groupPostsByTag(translatedPosts)
 
-  return tags.flatMap((tag) => {
-    const filteredPosts = getPostsByTag(posts, tag.id)
-    return paginate(filteredPosts, {
-      params: { id: tag.id },
-      props: { tagName: tag.name },
+  return [...groupPostsByTag(posts)].flatMap(([id, tag]) => {
+    const translatedCount = translatedTags.get(id)?.posts.length ?? 0
+    return paginate(tag.posts, {
+      params: { id },
+      props: { tagName: tag.name, targetLastPage: Math.ceil(translatedCount / pageSize) },
       pageSize,
     })
   })

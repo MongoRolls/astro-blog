@@ -2,12 +2,13 @@
 import type { Locale } from '../i18n/config'
 import { defaultLocale, localizedPath } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getAllTags, getPublishedBlogPosts } from '../utils/data-utils'
+import { getPublishedBlogPosts, groupPostsByTag } from '../utils/data-utils'
 
 type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
 const posts = await getPublishedBlogPosts(locale)
-const tags = getAllTags(posts).toSorted((tagA, tagB) => tagB.value - tagA.value)
+const tags = Array.from(groupPostsByTag(posts), ([id, tag]) => ({ id, name: tag.name, value: tag.posts.length }))
+  .sort((tagA, tagB) => tagB.value - tagA.value)
 
 ---
 
