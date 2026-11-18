@@ -4,19 +4,14 @@ import type { CollectionEntry } from 'astro:content'
 import type { Locale } from '../i18n/config'
 import Pagination from '../components/Pagination.astro'
 import PostPreview from '../components/PostPreview.astro'
-import siteConfig from '../data/site-config'
 import { alternateLocale, defaultLocale, localizedPath, stripLocalePrefix } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPostsByTag, getPublishedBlogPosts } from '../utils/data-utils'
 
-type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string, locale?: Locale }
+type Props = { page: Page<CollectionEntry<'blog'>>, tagName: string, targetLastPage: number, locale?: Locale }
 
-const { page, tagName, locale = defaultLocale } = Astro.props
+const { page, tagName, targetLastPage, locale = defaultLocale } = Astro.props
 const blog = page.data
 const targetLocale = alternateLocale(locale)
-const tagId = Astro.params.id ?? ''
-const targetPosts = getPostsByTag(await getPublishedBlogPosts(targetLocale), tagId)
-const targetLastPage = Math.ceil(targetPosts.length / (siteConfig.postsPerPage || 4))
 const alternateUrls = {
     [locale]: page.url.current,
     ...(targetLastPage > 0 && page.currentPage <= targetLastPage

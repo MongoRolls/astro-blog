@@ -1,0 +1,76 @@
+---
+import type { Locale } from '../i18n/config'
+import client from '../scripts/weather-card.js?raw'
+
+type Props = { locale?: Locale, standalone?: boolean }
+const { locale = 'zh-CN', standalone = false } = Astro.props
+const title = locale === 'en' ? 'Local weather' : '本地天气'
+---
+
+<blog-weather lang={locale} data-standalone={standalone || undefined} role="region" aria-label={title}>
+  <div class="weather-reading" aria-live="polite" aria-atomic="true">
+    <h2 data-place>{title}</h2>
+    <p class="weather-temperature" data-temperature hidden></p>
+    <p data-condition>{locale === 'en' ? 'Weather unavailable' : '天气暂不可用'}</p>
+    <p class="weather-detail" data-detail hidden></p>
+  </div>
+  <span class="weather-symbol" aria-hidden="true"></span>
+  <a class="weather-credit" href="https://open-meteo.com/" hidden>Open-Meteo · CC BY 4.0 ↗</a>
+</blog-weather>
+
+<script is:inline type="module" set:html={client} />
+
+<style is:inline>
+  blog-weather {
+    --sky-top: #244b6a;
+    --sky-bottom: #48647c;
+    --glow: rgb(170 223 232 / .52);
+    position: relative;
+    isolation: isolate;
+    display: block;
+    box-sizing: border-box;
+    width: min(100%, 23rem);
+    margin-block-end: 2rem;
+    padding: 1.25rem 1.5rem;
+    overflow: hidden;
+    border: 1px solid rgb(224 241 255 / .55);
+    border-radius: 1.65rem;
+    background: radial-gradient(ellipse at 110% -25%, var(--glow), transparent 60%),
+      linear-gradient(125deg, var(--sky-top), var(--sky-bottom));
+    color: #fff;
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / .4), 0 .45rem 1.25rem rgb(31 63 95 / .14);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.35;
+  }
+  .dark blog-weather, blog-weather[data-night] {
+    --sky-top: #17263f;
+    --sky-bottom: #364562;
+    --glow: rgb(159 170 215 / .48);
+  }
+  blog-weather::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 105% 85% at 104% 120%,
+      transparent 50%, rgb(227 248 255 / .13) 97%, rgb(255 255 255 / .26) 98%, transparent 99%);
+    backdrop-filter: blur(7px);
+  }
+  blog-weather .weather-reading { position: relative; z-index: 1; }
+  blog-weather h2 { margin: 0 3.5rem .55rem 0; font-family: inherit; font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+  blog-weather p { margin: 0; }
+  blog-weather .weather-temperature { font-size: clamp(2.8rem, 8vw, 3.6rem); font-weight: 350; line-height: 1; letter-spacing: -.055em; }
+  blog-weather [data-condition] { margin-top: .4rem; font-size: 1rem; font-weight: 550; }
+  blog-weather .weather-detail, blog-weather .weather-credit { font-size: .8rem; }
+  blog-weather .weather-detail { margin-top: .55rem; }
+  blog-weather .weather-credit { display: inline-block; margin-top: .7rem; color: inherit; text-underline-offset: .2em; text-decoration: underline; }
+  blog-weather .weather-credit:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  blog-weather .weather-symbol { position: absolute; inset: .85rem 1.25rem auto auto; font: 2.8rem/1 Georgia, serif; color: #fff0c9; }
+  blog-weather [hidden] { display: none; }
+  @media (forced-colors: active) {
+    blog-weather { border-color: CanvasText; }
+    blog-weather::before { display: none; }
+  }
+</style>

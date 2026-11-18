@@ -62,7 +62,7 @@ export default defineConfig({
       },
       filter: (page) => {
         const pathname = normalizePathname(page)
-        if (redirectPaths.has(pathname))
+        if (redirectPaths.has(pathname) || pathname === '/widgets/weather-bottle')
           return false
         if (pathname.endsWith('/search-index.json') || pathname === '/search-index.json')
           return false

@@ -5,7 +5,7 @@ import ArticleCarousel from '../components/ArticleCarousel.astro'
 import Button from '../components/Button.astro'
 import FormattedDate from '../components/FormattedDate.astro'
 import PostPreview from '../components/PostPreview.astro'
-import WeatherBottle from '../components/WeatherBottle.astro'
+import WeatherCard from '../components/WeatherCard.astro'
 import { getHeroImageSrc } from '../config/image'
 import { getSiteConfig } from '../data/site-config'
 import { defaultLocale, localizedPath } from '../i18n/config'
@@ -104,7 +104,7 @@ const heroData = {
         <hr class="my-8 border-dashed border-main" />
     </section>
 
-    <WeatherBottle locale={locale} />
+    <WeatherCard locale={locale} />
 
     {
         featuredPosts?.length > 0 && (
