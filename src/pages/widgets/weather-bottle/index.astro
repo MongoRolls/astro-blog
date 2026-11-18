@@ -14,8 +14,10 @@ import WeatherCard from '../../../components/WeatherCard.astro'
   <body>
     <WeatherCard standalone />
     <style is:inline>
-      body { box-sizing: border-box; margin: 0; padding: 1rem; min-height: 100svh; display: grid; place-items: center; }
-      blog-weather { margin: 0; }
+      html { color-scheme: light; }
+      html.dark { color-scheme: dark; }
+      body { box-sizing: border-box; margin: 0; padding: 1rem; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; }
+      blog-weather { max-width: 42rem; margin: 0; }
     </style>
   </body>
 </html>
