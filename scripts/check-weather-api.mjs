@@ -79,3 +79,55 @@ test('optional weather endpoint validates, minimizes location, caches by coarse 
       process.env.VERCEL = originalVercel
   }
 })
+
+test('concurrent weather lookups share a forecast per grid without sharing visitor labels', async (t) => {
+  const originalVercel = process.env.VERCEL
+  process.env.VERCEL = '1'
+  t.after(() => {
+    if (originalVercel === undefined)
+      delete process.env.VERCEL
+    else
+      process.env.VERCEL = originalVercel
+  })
+
+  let calls = 0
+  let fail = true
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    calls++
+    if (fail)
+      throw new Error('upstream unavailable')
+    const temperature = Number(url.searchParams.get('latitude'))
+    return Response.json({ current: { temperature_2m: temperature, relative_humidity_2m: 63, weather_code: 61, is_day: 1, time: Math.floor(Date.now() / 1000) } })
+  })
+
+  function burst(latitude) {
+    return Promise.all(Array.from({ length: 20 }, (_, i) => request({
+      ...geo,
+      'x-vercel-ip-latitude': latitude,
+      'x-vercel-ip-city': `Town ${i}`,
+    })))
+  }
+
+  const failed = await burst('30.01')
+  assert.ok(failed.every(result => result.body.available === false))
+  assert.equal(calls, 1)
+
+  fail = false
+  const [first, second] = await Promise.all([burst('30.02'), burst('31.01')])
+  assert.equal(calls, 3)
+  for (const [temperature, results] of [[30, first], [31, second]]) {
+    for (const [i, result] of results.entries()) {
+      assert.equal(result.body.temperature, temperature)
+      assert.equal(result.body.place, `Town ${i}`)
+    }
+  }
+
+  await burst('30.03')
+  assert.equal(calls, 3)
+
+  const expired = Date.now() + 15 * 60 * 1000
+  t.mock.method(Date, 'now', () => expired)
+  const refreshed = await burst('30.03')
+  assert.ok(refreshed.every(result => result.body.fetchedAt === expired))
+  assert.equal(calls, 4)
+})
