@@ -52,11 +52,10 @@ const title = locale === 'en' ? 'Local weather' : '本地天气'
     position: absolute;
     z-index: -1;
     pointer-events: none;
-    inset: 40% -18% -62% 20%;
-    border: 1px solid rgb(255 255 255 / .24);
-    border-radius: 50%;
-    transform: rotate(-16deg);
-    background: linear-gradient(155deg, rgb(227 248 255 / .15), transparent 55%);
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 105% 85% at 104% 120%,
+      transparent 50%, rgb(227 248 255 / .13) 97%, rgb(255 255 255 / .26) 98%, transparent 99%);
     backdrop-filter: blur(7px);
   }
   blog-weather .weather-reading { position: relative; z-index: 1; }

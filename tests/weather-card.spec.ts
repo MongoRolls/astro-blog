@@ -21,7 +21,9 @@ for (const [path, locale, condition, humidity] of [['/', 'zh-CN', '雨', '湿度
     await expect(card.locator('[data-condition]')).toHaveText(condition)
     await expect(card.locator('[data-detail]')).toContainText(`${humidity} 63%`)
     await expect(card.getByRole('link')).toHaveAttribute('href', 'https://open-meteo.com/')
-    expect(await card.evaluate(el => el.scrollWidth <= el.clientWidth && el.getBoundingClientRect().right <= innerWidth)).toBe(true)
+    const bounds = await card.evaluate(el => ({ scroll: el.scrollWidth, width: el.clientWidth, right: el.getBoundingClientRect().right }))
+    expect(bounds.scroll).toBeLessThanOrEqual(bounds.width)
+    expect(bounds.right).toBeLessThanOrEqual(320)
     await expect(card.locator('canvas')).toHaveCount(0)
   })
 }
