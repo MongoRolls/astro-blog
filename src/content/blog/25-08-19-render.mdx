@@ -14,7 +14,7 @@ seo:
   pageType: article
 ---
 
-## CSR
+### CSR
 
 目前国内主流的前端框架，比如 Vue 和 React，基本上都采用 CSR（Client Side Rendering，客户端渲染）。用户访问页面时，浏览器先拿到一份几乎为空的 HTML，以及相关 JS：
 
@@ -45,7 +45,7 @@ CSR 里点页面内导航通常不会再向服务端要一整页。React 推荐�
 > - 首屏慢，初始 HTML 为空，容易白屏。
 > - 对 SEO 不友好，搜索引擎不好抓实际内容。
 
-## SSR
+### SSR
 
 SSR（Server Side Rendering）以 Next.js 为例：服务端先把 HTML 渲好再返回给客户端。
 
@@ -53,7 +53,7 @@ SSR（Server Side Rendering）以 Next.js 为例：服务端先把 HTML 渲好�
 
 CSR 的流程是返回简单 HTML，再下载 JS 改 DOM。SSR 是服务器预先渲好，直接返回完整 HTML，所以首屏更好。Next、Nuxt 都是常见方案。
 
-### 为什么需要水合？
+#### 为什么需要水合？
 
 为什么不能把 JS 逻辑在服务端渲染时一起处理完？React、Vue 的组件系统天生不太具备「状态序列化」能力，依赖运行时的 JavaScript，尤其是闭包和事件处理函数。
 
@@ -94,7 +94,7 @@ Hydration 的难点在于：要知道附加哪些事件处理函数、附加到�
 > - 服务端有并发和性能压力，需要部署和压测。
 > - TTI 可能变长，要等 JS 下载和水合完才能交互。
 
-### 自己做 SSR：同构实践
+#### 自己做 SSR：同构实践
 
 有个比较老的项目，当时还没有 Next，是自己实现的 SSR 框架。
 
@@ -148,13 +148,13 @@ app.listen(3001, () => {
 
 其余还要处理：异步数据的注水和脱水、多级路由渲染、Node 中间层、CSS 的服务端渲染，以及 SEO（`react-helmet`）。
 
-## SSG
+### SSG
 
 SSG（Static Site Generation，静态站点生成）是 SSR 的一种拓展：构建阶段就把页面渲成纯静态 HTML，运行时不再依赖服务端计算，也不必在客户端跑复杂 JS。静态页可以上 CDN，比 SSR 更省服务器。
 
 适合文档、博客、官网、产品介绍这类偏展示、交互不多的站点。
 
-## ISR
+### ISR
 
 ISR（Incremental Static Regeneration，增量静态再生成）介于 SSR 和 SSG：可以像 SSG 一样先生成静态页，再按需增量更新，不必整站重建。
 
@@ -210,7 +210,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 ```
 
-## Next
+### Next
 
 [Next.js](https://nextjs.org/) 是 Vercel 做的、基于 React 的开源框架，主打 SSR 和 SSG。
 
@@ -253,7 +253,7 @@ export default Home;
 
 Nuxt.js 可以看成 Vue 生态里的 Next.js。
 
-## Qwik
+### Qwik
 
 Qwik 的核心是[跳过水合](https://www.builder.io/blog/hydration-is-pure-overhead)：服务端直接把 JS 逻辑和状态序列化进 HTML，省掉传统水合。Resumable 可以概括成 **按需下载、执行 JS**。
 
@@ -282,7 +282,7 @@ Qwik 的核心是[跳过水合](https://www.builder.io/blog/hydration-is-pure-ov
 
 还有 Islands 这类切法，例如 [Astro](https://docs.astro.build/zh-cn/concepts/islands/)，这里不展开。
 
-## 总结
+### 总结
 
 - **SSG & ISR**：加载最快（静态 HTML），SEO 最优，成本低；内容更新要重建。ISR 能按需增量更新，适合大规模内容站。
 - **SSR**：首屏快，动态内容灵活，SEO 友好；要服务器，成本更高。自己做时，同构、水合、路由和 store 是主要坑。

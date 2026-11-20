@@ -11,15 +11,15 @@ tags:
   - git
 ---
 
-## Git fundamentals
+### Git fundamentals
 
-### What are Git and GitHub?
+#### What are Git and GitHub?
 
 **GitHub** is the world's largest code-hosting platform and hosts many open-source projects.
 
 **Git** is a distributed version-control system and a powerful tool for individual and team development. Beginners can start with the [Liao Xuefeng Git tutorial](https://www.liaoxuefeng.com/wiki/896043488029600) or [Learn Git Branching](https://learngitbranching.js.org/?locale=zh_CN).
 
-### Git's key advantages
+#### Git's key advantages
 
 <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/24-01-06-git/image-20240521225459227.png" alt="Example Git configuration screenshot" />
 
@@ -29,15 +29,15 @@ As a distributed version-control system, Git has these advantages:
 2. **Branches** — create branches for different features and switch or merge them quickly.
 3. **Collaboration** — everyone on a team has a complete local repository and can clearly see each person's updates.
 
-### How version control works
+#### How version control works
 
 Git's implementation is similar to a persistent segment tree: it saves memory effectively by recording file changes as snapshots.
 
 <img src="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/24-01-06-git/image-20240521230522586.png" alt="Git command output screenshot" />
 
-## Common Git operations
+### Common Git operations
 
-### Basic workflow
+#### Basic workflow
 
 **Initialize a project**
 
@@ -70,7 +70,7 @@ git add .               # Add all new files
 git commit -m "Describe the change"
 ```
 
-### Remote collaboration
+#### Remote collaboration
 
 **Pull remote updates**
 
@@ -101,7 +101,7 @@ git push [remote] [branch]
 
 Push local changes to a remote branch so that team members can retrieve them.
 
-### Branch management
+#### Branch management
 
 **Branch operations**
 
@@ -128,9 +128,9 @@ git stash pop          # Apply and remove the latest stash
 git stash clear        # Clear all stashes
 ```
 
-## Git commit conventions
+### Git commit conventions
 
-### Angular team convention
+#### Angular team convention
 
 Commit conventions make it easier to submit complete update information and review it later. The most widely used commit-message convention originated with the Angular team.
 
@@ -146,7 +146,7 @@ Full format:
 type(scope?): subject  # scope is optional and may cover multiple areas
 ```
 
-### Commit types
+#### Commit types
 
 | Type | Description |
 | -------- | -------- |
@@ -164,7 +164,7 @@ type(scope?): subject  # scope is optional and may cover multiple areas
 | release | Release a new version |
 | workflow | Change workflow-related files |
 
-### Examples
+#### Examples
 
 | Commit message | Description |
 | ---------------------------------- | --------------------- |
@@ -185,15 +185,15 @@ type(scope?): subject  # scope is optional and may cover multiple areas
 
 For more examples, see commit histories in mainstream open-source projects.
 
-### Convention-checking tools
+#### Convention-checking tools
 
 Use [commitlint](https://github.com/conventional-changelog/commitlint), together with [husky](https://github.com/typicode/husky), to check whether commit messages meet the convention.
 
 Conventions are not mandatory, but a commit message should briefly explain the main change. This helps both you and others understand the history later.
 
-## Advanced techniques
+### Advanced techniques
 
-### Rewriting history
+#### Rewriting history
 
 **Combine multiple commits**
 
@@ -211,7 +211,7 @@ git reflog
 
 This records all operations and lets you roll back to any revision.
 
-### Managing worktrees
+#### Managing worktrees
 
 **Develop multiple branches at once**
 

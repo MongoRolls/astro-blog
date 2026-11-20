@@ -26,7 +26,7 @@ For everyday coding I still use [Cursor + Claude Code + Codex](/en/blog/26-08-13
 
 Hermes can switch providers by itself, so it does not have to go through CLIProxyAPI. CLIProxyAPI is more useful when a client only accepts an OpenAI or Claude endpoint but your access is a CLI subscription.
 
-## Hermes Agent
+### Hermes Agent
 
 An open-source agent from Nous Research. Repository: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent). Documentation: [hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/). MIT licensed.
 
@@ -43,7 +43,7 @@ Compared with Cursor and Claude Code:
 
 It can search past conversations, and a finished complex task can become a skill. Scheduled tasks can be delivered to WeChat or Telegram.
 
-### Installation
+#### Installation
 
 macOS / Linux / WSL:
 
@@ -65,7 +65,7 @@ hermes doctor
 
 If you do not want a pile of API keys, [Nous Portal](https://portal.nousresearch.com) plus `hermes setup --portal` binds models and some tool gateways to the subscription. I do not use that route: the model is DeepSeek and tools are enabled as needed.
 
-### How I use it
+#### How I use it
 
 ```bash
 hermes              # Terminal chat
@@ -83,7 +83,7 @@ Not ideal when you are still watching a UI and adjusting pixels—keep Cursor fo
 
 It can run local commands, read files, and open a browser. Enable pairing or an allowlist on the gateway. Do not expose it to everyone, and never put secrets in chat history.
 
-## CLIProxyAPI
+### CLIProxyAPI
 
 In [my everyday setup](/en/blog/26-08-13-ai-tools), CC Switch solves switching providers under the same Claude Code CLI. CLIProxyAPI does the reverse: you are already signed in to a CLI subscription and want it as an API for Cursor, Cline, or scripts.
 
@@ -95,7 +95,7 @@ Multiple accounts can rotate. Upstream OpenAI-compatible services such as OpenRo
 
 This is not a reseller. A reseller sells someone else's key; this runs on your machine with the subscription you signed into.
 
-### Installation
+#### Installation
 
 On macOS, Homebrew's service reads `$(brew --prefix)/etc/cliproxyapi.conf` by default. To keep the file in your home directory, create it first and then symlink; a dangling symlink makes the service exit immediately:
 
@@ -126,7 +126,7 @@ Follow the OAuth flow in the official docs; Claude, Codex, Gemini, and Grok each
 
 Usage statistics are no longer built in as of v6.10.0. For a dashboard, use [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper) or [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus).
 
-### How it fits with existing tools
+#### How it fits with existing tools
 
 | Need | Tool |
 | --- | --- |
@@ -136,7 +136,7 @@ Usage statistics are no longer built in as of v6.10.0. For a dashboard, use [CPA
 | Write code in a repository | Cursor / Claude Code; do not treat the proxy as an IDE |
 | Resident agent with a WeChat entry point | Hermes; it can switch models itself and does not need this proxy first |
 
-### Do not treat it as free lunch
+#### Do not treat it as free lunch
 
 Most subscription terms are written around the official client. Turning an OAuth login into a generic API **may violate the terms of service**; you bear bans and rate limits. Account pools, rotation, and exposing the port to the public internet add more risk. Keep it on `127.0.0.1`, add an access key, and do not expose it bare.
 

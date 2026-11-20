@@ -13,11 +13,11 @@ seo:
     alt: 'Frontend performance optimization'
 ---
 
-## References
+### References
 
 - [Google's official guide to performance metrics](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint?hl=zh-cn)
 
-## Context
+### Context
 
 When asked about performance optimization in an interview, it is best to break the answer down by architectural area. Here are some key points:
 
@@ -33,17 +33,17 @@ Depth checks whether you understand the details deeply enough to solve them your
 
 ![Performance optimization diagram](https://www.gahing.top/assets/img/image-3.1e3d4bed.png)
 
-## Performance optimization techniques
+### Performance optimization techniques
 
 Here are some ways to improve performance metrics:
 
-### Compress text
+#### Compress text
 
 > Improve FCP, SI, and LCP
 
 Enable Gzip compression in frontend build configuration such as webpack, and enable it on the backend such as Nginx as well. Source code is mainly compressed using the principles of Gzip, including LZ77 and Huffman coding.
 
-### Prevent layout shifts from images
+#### Prevent layout shifts from images
 
 > Improve CLS (Cumulative Layout Shift)
 
@@ -53,7 +53,7 @@ Common causes of layout shifts and their solutions:
 - **Dynamically loaded content**: reserve fixed placeholder elements for ads and dynamic content.
 - **Font loading**: use `font-display: swap` to avoid layout jumps while fonts load.
 
-### Defer JavaScript
+#### Defer JavaScript
 
 > Improve FCP and LCP
 
@@ -64,21 +64,21 @@ JavaScript has two relevant attributes, `defer` and `async`:
 
 ![async and defer](https://html.spec.whatwg.org/images/asyncdefer.svg)
 
-### Reduce JavaScript execution time
+#### Reduce JavaScript execution time
 
 - Use throttling and debouncing.
 - Use `useCallback` and `useMemo`.
 
-### Reduce asset size
+#### Reduce asset size
 
 - Compress images to WebP.
 
-### Preload the LCP image
+#### Preload the LCP image
 
 - Import on demand.
 - Use preload.
 
-### Lazy-load some resources
+#### Lazy-load some resources
 
 - Lazy-load images.
 - Lazy-load components.

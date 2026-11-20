@@ -22,7 +22,7 @@ Text has no pixels in which to hide data, and copying it does not preserve file 
 
 Google began applying SynthID to Gemini-generated text in 2024. New Claude models also add text watermarks at the model level. These signals are invisible to readers, survive copy and paste, and are unrelated to the zero-width-character tricks often discussed online.
 
-## Language models are already rolling weighted dice
+### Language models are already rolling weighted dice
 
 A language model does not compose an entire sentence before emitting it. At every step it assigns probabilities to possible next tokens and samples from those candidates.
 
@@ -34,7 +34,7 @@ Consider this sentence:
 
 A long article contains hundreds or thousands of these forks. At many of them, several choices preserve the meaning. That freedom is where a watermark can be written.
 
-## A secret key gently nudges the die
+### A secret key gently nudges the die
 
 One classic technique uses a secret key to divide candidate tokens into temporary “green” and “red” groups, then slightly raises the probability of the green group.
 
@@ -44,7 +44,7 @@ Crucially, a token does not belong permanently to one group. The system usually 
 
 Implementations differ. The classic KGW method biases candidate probabilities; Google’s SynthID-Text uses more elaborate sampling and scoring; other designs let a key control the random number generator. They share one principle: **the watermark lives in a statistical pattern of word choices, not in an attached hidden label.**
 
-## Detection recounts tokens instead of judging style
+### Detection recounts tokens instead of judging style
 
 A detector with the same key and rules can replay the grouping decision at every position in a text.
 
@@ -57,7 +57,7 @@ This creates two important limits:
 
 Padolsey’s guide uses an intentionally exaggerated teaching example: moving the green share from an expected 50% to about 55% across 1,500 words can become statistically meaningful. Real production parameters are private, so that number is not a detection threshold for Claude or Gemini.
 
-## Editing dilutes a watermark but may not erase it immediately
+### Editing dilutes a watermark but may not erase it immediately
 
 When a token’s group depends on its recent context, detection relies on stretches of wording that remain unchanged.
 
@@ -67,7 +67,7 @@ Research reports a similar pattern: paraphrasing dilutes statistical watermarks,
 
 There is an important boundary to these claims. Most public evidence comes from papers and open implementations. Anthropic has not published the full algorithm and parameters used in Claude’s production systems, so outside researchers cannot reproduce them exactly.
 
-## What does a detected watermark actually prove?
+### What does a detected watermark actually prove?
 
 Detection results are easy to overstate.
 
@@ -79,7 +79,7 @@ Detection results are easy to overstate.
 
 Text watermarking is best understood as one source signal indicating that content passed through a particular class of generation system. It can improve transparency, but it cannot replace context, evidence of the creative process, or careful human judgment.
 
-## References
+### References
 
 - James Padolsey, [How AI text watermarking works: a visual guide](https://declaude.org/watermarking/)
 - Google DeepMind, [Watermarking AI-generated text and video with SynthID](https://deepmind.google/blog/watermarking-ai-generated-text-and-video-with-synthid/)

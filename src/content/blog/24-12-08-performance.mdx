@@ -10,11 +10,11 @@ seo:
     alt: '前端性能优化'
 ---
 
-## 参考资料
+### 参考资料
 
 - [Google官方性能指标介绍](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint?hl=zh-cn)
 
-## 前情提要
+### 前情提要
 
 在面试中被问到性能优化时，最好从架构层面细分区域进行回答。以下是一些关键点：
 
@@ -31,17 +31,17 @@ seo:
 
 ![性能优化示意图](https://www.gahing.top/assets/img/image-3.1e3d4bed.png)
 
-## 性能优化技巧
+### 性能优化技巧
 
 以下是一些提升性能指标的方法：
 
-### 文本压缩
+#### 文本压缩
 
 > 提高 FCP, SI, LCP
 
 在前端打包配置(如 webpack)中开启 gzip 压缩，同时后端(如 nginx)也应开启 gzip 压缩。主要通过 gzip 原理(LZ77、Huffman 编码)来压缩源码。
 
-### 优化图片偏移
+#### 优化图片偏移
 
 > 提高 CLS(累积布局偏移)
 
@@ -51,7 +51,7 @@ seo:
 - **动态加载的内容**：为广告、动态内容等预留固定的占位元素。
 - **字体加载**：使用 `font-display: swap` 避免字体加载时的布局抖动。
 
-### 延迟加载 JS 脚本
+#### 延迟加载 JS 脚本
 
 > 提高 FCP, LCP
 
@@ -62,21 +62,21 @@ JS 有 `defer` 和 `async` 两种属性：
 
 ![async 和 defer](https://html.spec.whatwg.org/images/asyncdefer.svg)
 
-### 减少 JS 执行时间
+#### 减少 JS 执行时间
 
 - 使用节流和防抖
 - 使用 `useCallback` 和 `useMemo`
 
-### 缩减资源体积
+#### 缩减资源体积
 
 - 将图片格式压缩为 WebP
 
-### 预加载 LCP 图片
+#### 预加载 LCP 图片
 
 - 按需导入
 - 使用 preload
 
-### 延迟加载部分资源
+#### 延迟加载部分资源
 
 - 图片懒加载
 - 组件懒加载

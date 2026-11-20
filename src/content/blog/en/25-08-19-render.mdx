@@ -16,7 +16,7 @@ seo:
   pageType: article
 ---
 
-## CSR
+### CSR
 
 Mainstream frontend frameworks in China, such as Vue and React, generally use CSR (Client-Side Rendering). When a user visits a page, the browser first receives an almost empty HTML file plus the related JavaScript:
 
@@ -47,7 +47,7 @@ In CSR, clicking in-page navigation usually does not request a whole new page. R
 > - First-screen loading is slow because the initial HTML is empty, which can flash a blank page.
 > - SEO is weak; crawlers may not see the real content.
 
-## SSR
+### SSR
 
 Taking Next.js as the usual example, SSR (Server-Side Rendering) pre-renders HTML on the server and returns it to the client.
 
@@ -55,7 +55,7 @@ The first HTML usually has no interaction yet (no click handlers on DOM nodes). 
 
 CSR returns simple HTML, then downloads JavaScript to mutate the DOM. SSR returns complete HTML up front, so the first screen is better. Next and Nuxt are the common choices.
 
-### Why hydration?
+#### Why hydration?
 
 Why not finish the JavaScript logic while rendering on the server? React and Vue components do not really serialize their state. They depend on a runtime, especially closures and event handlers.
 
@@ -96,7 +96,7 @@ Framework internal state (FRAMEWORK_STATE) also has to come back: which componen
 > - Server concurrency and performance need real capacity planning.
 > - TTI may get longer because the page waits for JS download and hydration.
 
-### Rolling your own SSR: isomorphism in practice
+#### Rolling your own SSR: isomorphism in practice
 
 One older project did not have Next.js yet, so it implemented its own SSR framework.
 
@@ -150,13 +150,13 @@ Isomorphism also brings these concrete problems:
 
 You also still have to deal with async data hydration/dehydration, nested-route rendering, a Node middle layer, CSS on the server, and SEO (`react-helmet`).
 
-## SSG
+### SSG
 
 SSG (Static Site Generation) extends SSR: at build time every page becomes static HTML. There is no server computation at runtime and no heavy client JS. The files can sit on a CDN, which is much cheaper than SSR.
 
 Typical for docs, blogs, marketing sites, and product pages with little interaction.
 
-## ISR
+### ISR
 
 ISR (Incremental Static Regeneration) sits between SSR and SSG: generate static pages ahead of time, then refresh some of them on demand without rebuilding the whole site.
 
@@ -212,7 +212,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 ```
 
-## Next
+### Next
 
 [Next.js](https://nextjs.org/) is Vercel's open-source React framework, focused on SSR and SSG.
 
@@ -255,7 +255,7 @@ export default Home;
 
 Nuxt.js is the Vue-ecosystem counterpart of Next.js.
 
-## Qwik
+### Qwik
 
 Qwik's core idea is [skipping hydration](https://www.builder.io/blog/hydration-is-pure-overhead): serialize JavaScript logic and state into HTML on the server. Resumable means **download and run JS on demand**.
 
@@ -284,7 +284,7 @@ The first click downloads the handler; later clicks run the already loaded funct
 
 There are also Islands-style approaches, such as [Astro](https://docs.astro.build/zh-cn/concepts/islands/). That is out of scope here.
 
-## Summary
+### Summary
 
 - **SSG & ISR**: fastest load (static HTML), best SEO, lowest cost; updates need a rebuild. ISR can refresh incrementally and suits large content sites.
 - **SSR**: fast first screen, flexible dynamic content, SEO-friendly; needs a server and costs more. If you roll your own, isomorphism, hydration, routing, and the store are the main pitfalls.

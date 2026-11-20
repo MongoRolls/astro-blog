@@ -16,7 +16,7 @@ seo:
 
 Docker answers “it runs the same on every machine.” CI/CD answers “after a commit, build, test, and deploy happen automatically.” The `docker-build` stage in a GitLab pipeline is where the two meet.
 
-## Docker
+### Docker
 
 Docker is a container technology. It **isolates only an application's runtime, while containers can share the host operating system**. Think of it as a lighter virtual machine that still uses the machine's OS.
 
@@ -26,7 +26,7 @@ For frontend projects it also slots into CI: a pipeline can run *Lint / Test / S
 
 ![Docker concepts](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/25-03-14-docker/image.png)
 
-### Image, container, repository
+#### Image, container, repository
 
 **1. Image**: Like a virtual-machine image, a Docker image is a read-only template for the engine, with a filesystem inside. An application needs an environment; the image provides it. An Ubuntu image is a template with an Ubuntu environment; install Apache on it and it becomes an Apache image.
 
@@ -34,7 +34,7 @@ For frontend projects it also slots into CI: a pipeline can run *Lint / Test / S
 
 **3. Repository**: Where images are stored. A registry holds repositories (usually many of them). A repository holds images, typically one family per repository, distinguished by tags—for example Ubuntu 12.04 and 14.04 in the Ubuntu repository.
 
-### Dockerfile
+#### Dockerfile
 
 ```docker
 # Use node:14-alpine as the base image
@@ -62,7 +62,7 @@ CMD ['','']
 
 [Dockerfile best practices](https://shanyue.tech/op/dockerfile-practice.html#%E5%AE%B9%E5%99%A8%E5%BA%94%E8%AF%A5%E6%98%AF%E7%9F%AD%E6%9A%82%E7%9A%84)
 
-## CI/CD
+### CI/CD
 
 After a developer pushes new code, the system builds and unit-tests it, then decides whether it can merge with what is already there. That is continuous integration.
 
@@ -72,7 +72,7 @@ Continuous deployment automates that last step as well.
 
 Most companies in China use GitLab and put the complex flow in a GitLab workflow. The ideas are the same as GitHub Actions.
 
-### GitHub Actions
+#### GitHub Actions
 
 Create `.github/workflows` and add a `.yml` / `.yaml` file. See [Learn YAML in Y minutes](https://learnxinyminutes.com/docs/yaml/) and the [workflow syntax docs](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions).
 
@@ -119,7 +119,7 @@ jobs:
 
 An `on` event (push, schedule, or manual dispatch) starts the job on a VM. For a personal frontend project, GitHub Actions plus Vercel is usually enough.
 
-### GitLab CI
+#### GitLab CI
 
 GitLab reads `.gitlab-ci.yml`. [GitLab CI documentation](https://docs.gitlab.com/ci/)
 
