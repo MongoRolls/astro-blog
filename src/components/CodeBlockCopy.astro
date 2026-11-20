@@ -8,12 +8,18 @@ const { locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
 ---
 
-<div
-  hidden
-  data-code-copy-label={t.common.codeCopy}
-  data-code-copied-label={t.common.codeCopied}
-  data-code-copy-failed-label={t.common.codeCopyFailed}
-></div>
+<template data-code-copy data-code-copied-label={t.common.codeCopied} data-code-copy-failed-label={t.common.codeCopyFailed}>
+  <button type="button" class="code-copy-button" data-pagefind-ignore="all" aria-label={t.common.codeCopy}>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <g class="copy-icon">
+        <rect x="9" y="9" width="13" height="13" rx="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </g>
+      <path class="copied-icon" d="m5 12 4 4L19 6" />
+      <path class="copy-error-icon" d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  </button>
+</template>
 
 <script>
 let disposeCodeBlockCopy = () => {}
@@ -49,28 +55,18 @@ async function copyText(text: string) {
   fallbackCopy(text)
 }
 
-function createCopyButton() {
-  const labels = document.querySelector<HTMLElement>('[data-code-copy-label]')?.dataset
-  const copyLabel = labels?.codeCopyLabel ?? 'Copy code'
-  const button = document.createElement('button')
-  button.type = 'button'
-  button.className = 'code-copy-button'
-  button.dataset.pagefindIgnore = 'all'
-  button.setAttribute('aria-label', copyLabel)
-  button.setAttribute('title', copyLabel)
-  button.textContent = copyLabel
-  return button
-}
-
 function initCodeBlockCopy() {
   disposeCodeBlockCopy()
 
   const controller = new AbortController()
   const resetTimers = new Set<number>()
-  const labels = document.querySelector<HTMLElement>('[data-code-copy-label]')?.dataset
-  const copyLabel = labels?.codeCopyLabel ?? 'Copy code'
-  const copiedLabel = labels?.codeCopiedLabel ?? 'Copied'
-  const failedLabel = labels?.codeCopyFailedLabel ?? 'Copy failed'
+  const template = document.querySelector<HTMLTemplateElement>('template[data-code-copy]')
+  const original = template?.content.querySelector('button')
+  if (!template || !original)
+    return
+  const copyLabel = original.getAttribute('aria-label')!
+  const copiedLabel = template.dataset.codeCopiedLabel!
+  const failedLabel = template.dataset.codeCopyFailedLabel!
 
   document.querySelectorAll<HTMLElement>('.prose pre').forEach((pre) => {
     if (pre.parentElement?.classList.contains('code-block-wrapper'))
@@ -79,7 +75,7 @@ function initCodeBlockCopy() {
     const wrapper = document.createElement('div')
     wrapper.className = 'code-block-wrapper'
     pre.before(wrapper)
-    wrapper.append(pre, createCopyButton())
+    wrapper.append(original.cloneNode(true), pre)
   })
 
   document.addEventListener('click', async (event) => {
@@ -98,19 +94,16 @@ function initCodeBlockCopy() {
     button.disabled = true
     try {
       await copyText(code.textContent ?? '')
-      button.textContent = copiedLabel
       button.dataset.state = 'success'
       button.setAttribute('aria-label', copiedLabel)
     }
     catch (error) {
       console.warn('代码复制失败:', error)
-      button.textContent = failedLabel
       button.dataset.state = 'error'
       button.setAttribute('aria-label', failedLabel)
     }
 
     const timer = window.setTimeout(() => {
-      button.textContent = copyLabel
       button.disabled = false
       button.removeAttribute('data-state')
       button.setAttribute('aria-label', copyLabel)
@@ -138,15 +131,20 @@ document.addEventListener('astro:before-swap', () => disposeCodeBlockCopy())
 
   :global(.prose .code-block-wrapper > pre) {
     margin-block: 0;
+    /* The top border stays outside the scrollport, so long lines never pass under the button. */
+    border-block-start: 2.5rem solid transparent;
+    padding-block-start: 0.25rem;
   }
 
   :global(.code-copy-button) {
     position: absolute;
-    z-index: 1;
-    top: 0.65rem;
-    right: 0.65rem;
-    min-width: 3.5rem;
-    padding: 0.35rem 0.6rem;
+    inset-block-start: 0.25rem;
+    inset-inline-end: 0.4rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
     border: 1px solid rgb(255 255 255 / 0.18);
     border-radius: 0.375rem;
     background: rgb(39 39 42 / 0.88);
@@ -158,6 +156,13 @@ document.addEventListener('astro:before-swap', () => disposeCodeBlockCopy())
     opacity: 0.78;
     transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
   }
+
+  :global(.code-copy-button .copied-icon),
+  :global(.code-copy-button .copy-error-icon),
+  :global(.code-copy-button[data-state] .copy-icon) { display: none; }
+
+  :global(.code-copy-button[data-state='success'] .copied-icon),
+  :global(.code-copy-button[data-state='error'] .copy-error-icon) { display: inline; }
 
   :global(.code-block-wrapper:hover .code-copy-button),
   :global(.code-copy-button:focus-visible) {
