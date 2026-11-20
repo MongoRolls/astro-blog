@@ -10,10 +10,11 @@ interface Props {
 
 const { headings, locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
-const toc = headings.filter(({ depth }) => depth === 2 || depth === 3)
+const chapterDepth = Math.min(...headings.map(({ depth }) => depth))
+const toc = headings.filter(({ depth }) => depth <= chapterDepth + 1)
 const groups: { heading: typeof toc[number], children: typeof toc }[] = []
 for (const heading of toc) {
-  if (heading.depth === 3 && groups.at(-1)?.heading.depth === 2)
+  if (heading.depth === chapterDepth + 1 && groups.at(-1)?.heading.depth === chapterDepth)
     groups.at(-1)!.children.push(heading)
   else
     groups.push({ heading, children: [] })

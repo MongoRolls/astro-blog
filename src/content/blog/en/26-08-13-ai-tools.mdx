@@ -27,13 +27,13 @@ It is hard to write code without AI these days. I currently use this stack:
 
 For an earlier guide to Cursor, see [Cursor AI User Guide](/en/blog/24-01-17-cursor).
 
-## Cursor
+### Cursor
 
 Cursor is still the most comfortable choice for daily work. It is based on VS Code, and multi-file Agent edits, completion, and chat all live in one window. I use Agent mode most: explain the requirement clearly, let it edit, then review the diff myself. Completion can sometimes take over your train of thought, so enable it when needed. Put project conventions in `.cursor/rules`; it works better than repeating them in chat.
 
 The official Pro plan is not cheap. In China, common options include buying accounts on Xianyu or sharing a plan. I have done this too, mainly to get the IDE running first. Check reviews and transaction history, and do not tie your only work environment to an unknown shared account. Keep it separate from your primary account. You bear the risk of bans and expiration. The official subscription is safer if you can accept the price.
 
-## Claude Code
+### Claude Code
 
 Anthropic's command-line Agent, run as `claude` in a project directory. It is good for handing off a complete task: fix a bug, add tests, or update a page in the existing style, while you go do something else.
 
@@ -45,7 +45,7 @@ Official documentation: [Claude Code](https://docs.anthropic.com/en/docs/claude-
 
 The split with Cursor is simple: use Cursor when you are still in the editor and need to watch the UI; hand a well-bounded asynchronous task to Claude Code. It reads `CLAUDE.md` and `AGENTS.md` in the repository, so conventions are more useful in files than in chat history.
 
-## Codex
+### Codex
 
 I use it as an **app**: download, sign in, and open repositories from the desktop application. Repository: [openai/codex](https://github.com/openai/codex)
 
@@ -53,31 +53,31 @@ The subscription uses **Apple gift cards from the Turkish region**: top up first
 
 I use it as a backup and second perspective alongside Claude Code: run the same task in both, and switch when Claude is unreliable or I want an OpenAI-style model. Because the app subscription goes through Apple, there is no need to configure a CLI provider for Codex.
 
-## Codex Radar
+### Codex Radar
 
 For quota status, model quality, and community sentiment, I check [Codex Radar](https://codexradar.com/). It also has ready-made notes on enabling Max reasoning and connecting DeepSeek to Codex.
 
-## Grok bots
+### Grok bots
 
 I use these to organize news, RSS, and blog content: summarize it, then update the Reader API in the agreed format. This is my own workflow connected to Reader; the sources, summary fields, and API format are agreed on first.
 
-## GPT dots
+### GPT dots
 
 I use these as a personal assistant for coordination across tools and GitHub coding tasks. I spell out the goal, scope, and what needs to be verified before handing things over. Work that spans several tools fits here.
 
-## CC Switch
+### CC Switch
 
 Before CC Switch, changing Claude Code providers meant editing `~/.claude` and environment variables. It quickly became messy with multiple channels. [CC Switch](https://cc-switch.cc/) is a desktop app where providers, MCP, and Skills can be switched with a click. GitHub: [farion1231/cc-switch](https://github.com/farion1231/cc-switch)
 
 I add the official provider, DeepSeek, and GLM, then enable them from the tray. Claude Code can usually switch without restarting. The point is not a smarter model; it is **switching the backend under the same CLI**: use DeepSeek when quotas are tight, GLM when I want a domestic provider, then switch back to the official provider.
 
-## DeepSeek developer platform
+### DeepSeek developer platform
 
 [deepseek.com](https://www.deepseek.com/) is the chat product, while [platform.deepseek.com](https://platform.deepseek.com/) is the API. Use the latter as the backend for tools, scripts, and Claude Code.
 
 The APIs are compatible with OpenAI (`https://api.deepseek.com`) and Anthropic (`https://api.deepseek.com/anthropic`); change `base_url` and the key to connect. Common models include `deepseek-v4-flash` and `deepseek-v4-pro`. It is cheap and directly reachable from China, making it a fallback when official quotas are tight. Store the key in an environment variable. Documentation: [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/)
 
-## How I combine them
+### How I combine them
 
 1. Open the repository and start with **Cursor**.
 2. When the task gets longer and can run asynchronously, hand it to **Claude Code**.

@@ -28,16 +28,16 @@ Delimiter pattern:
 - `|`: supports multiple patterns.
 - `/gim`: global matching, multiline mode, and case-insensitive matching.
 
-## Fundamentals
+### Fundamentals
 
-### How to create one
+#### How to create one
 
 There are two main ways:
 
 - RegExp: `regexp = new RegExp('pattern','flags')`
 - Literal: `/abc/g`
 
-### Flags
+#### Flags
 
 Common flags:
 
@@ -47,9 +47,9 @@ Common flags:
 - _s_: make the dot match newline characters.
 - _m_: enable multiline anchor mode.
 
-## Regular-expression methods
+### Regular-expression methods
 
-### Search
+#### Search
 
 `string.match(regular expression)`
 
@@ -59,7 +59,7 @@ Without `/g`, the result also has properties such as `.index` and `.input`.
 
 Returns `null` when there is no match.
 
-### Replace
+#### Replace
 
 `string.replace(regular expression, replacement)`
 
@@ -82,15 +82,15 @@ _The `replacement` parameter_
 | `$<name>` | Insert the contents of the parentheses with the given `name`; see [capturing groups](https://zh.javascript.info/regexp-groups). |
 | `$$` | Insert the `$` character. |
 
-### Test
+#### Test
 
 `string.test(regular expression)`
 
 Returns `true` if there is at least one match; otherwise returns `false`.
 
-## Character classes and special characters
+### Character classes and special characters
 
-### Basic character classes
+#### Basic character classes
 
 `\d` digit, 0–9
 
@@ -98,7 +98,7 @@ Returns `true` if there is at least one match; otherwise returns `false`.
 
 `\w` word: letters, numbers, and **underscore `_`**
 
-### Inverse character classes
+#### Inverse character classes
 
 `\D` any non-digit character.
 
@@ -122,9 +122,9 @@ alert('Z'.match(/./)); // Z
 alert('A\nB'.match(/A.B/s)); // A\nB (matched!)
 ```
 
-## Anchors and boundaries
+### Anchors and boundaries
 
-### Start and end anchors
+#### Start and end anchors
 
 The caret `^` and dollar sign `$` have special meanings in regular expressions. They are called “anchors.”
 
@@ -132,11 +132,11 @@ The caret `^` matches the beginning of the text, while `$` matches the end.
 
 Together, they can achieve an **exact match**.
 
-### Multiline mode
+#### Multiline mode
 
 Adding the multiline flag lets the expression match the beginning and end of each line.
 
-### Word boundary
+#### Word boundary
 
 `\b`
 
@@ -146,15 +146,15 @@ There are three positions that can serve as word boundaries:
 - Between two characters when one is a word character, `\w`, and the other is not.
 - At the end of a string when the last character is a word character, `\w`.
 
-## Sets and ranges
+### Sets and ranges
 
-### Sets
+#### Sets
 
 Several characters or character classes inside square brackets `[…]` mean “any one of the given characters.”
 
 `[QWER]` matches any of these four characters: `'Q'`, `'W'`, `'E'`, or `'R'`.
 
-### Ranges
+#### Ranges
 
 Square brackets can also contain a **character range**.
 
@@ -162,7 +162,7 @@ For example, `[a-z]` matches a character from `a` to `z`, and `[0-5]` matches a 
 
 `[0-9A-F]` contains two ranges. It matches a character that is either a digit from `0` to `9` or a letter from `A` to `F`.
 
-### Excluding a range
+#### Excluding a range
 
 In addition to ordinary ranges, there is an “exclude” range such as `[^…]`.
 
@@ -172,7 +172,7 @@ Putting `^` at the beginning means “any character except the given characters.
 - `[^0-9]` matches any non-digit character and is equivalent to `\D`.
 - `[^\s]` matches any non-space character and is equivalent to `\S`.
 
-### Escaping rules
+#### Escaping rules
 
 When we want to match a special character literally, we usually escape it, as in `\.`. To match a backslash, use `\\`, and so on.
 
@@ -189,17 +189,17 @@ If a set contains surrogate pairs, the `u` flag is required for them to work cor
 
 For example, let us search for `[𝒳𝒴]` in the string `𝒳`.
 
-## Quantifiers
+### Quantifiers
 
-### Basic quantifiers
+#### Basic quantifiers
 
-#### An exact number
+##### An exact number
 
 ```javascript
 {5}` => `\d{5}` === `\d\d\d\d\d
 ```
 
-#### A range
+##### A range
 
 `{3,5}` **matches 3–5 characters**
 
@@ -207,13 +207,13 @@ For example, let us search for `[𝒳𝒴]` in the string `𝒳`.
 
 `{6,}` **matches at least 6 characters**
 
-### Quantifier shorthand
+#### Quantifier shorthand
 
 - **`+`**: one or more, equivalent to `{1,}`
 - **`*`**: zero or more, equivalent to `{0,}`
 - **`?`**: zero or one, equivalent to `{0,1}`
 
-### Greedy and lazy quantifiers
+#### Greedy and lazy quantifiers
 
 Let us look at an example first:
 
@@ -229,7 +229,7 @@ alert(str.match(regexp)); // "witch" and her "broom"
 
 **In greedy mode (the default), quantifiers repeat as many times as possible.**
 
-#### Lazy quantifiers
+##### Lazy quantifiers
 
 By default, quantifiers are greedy, meaning that they match as many characters as possible. Add `?` after a quantifier to make it lazy, meaning it matches as few characters as possible.
 
@@ -239,7 +239,7 @@ By default, quantifiers are greedy, meaning that they match as many characters a
 - `{n,m}?`: n to m, as few as possible.
 - `{n,}?`: at least n, as few as possible.
 
-#### Comparison
+##### Comparison
 
 Suppose we have the string `"aaaaa"`.
 
@@ -255,14 +255,14 @@ Suppose we have the string `"aaaaa"`.
 
    Result: `["a", "a", "a", "a", "a"]`
 
-## Capturing groups
+### Capturing groups
 
 `(...)` is called a “capturing group.”
 
 - It lets you return part of a match as a separate item in the result array.
 - If a quantifier follows the parentheses, it treats the parentheses as one unit.
 
-### Named groups
+#### Named groups
 
 Put `?<name>` immediately after the opening parenthesis to name the group.
 
@@ -279,7 +279,7 @@ alert(groups.month); // 06
 alert(groups.day); // 18
 ```
 
-### Capturing groups in replacement
+#### Capturing groups in replacement
 
 ```javascript
 let str = 'John Bull';
@@ -290,7 +290,7 @@ alert(str.replace(regexp, '$2, $1')); // Bull, John
 
 For named parentheses, use `$<name>` as the reference.
 
-### Non-capturing groups
+#### Non-capturing groups
 
 This is somewhat abstract; try it a few more times.
 
@@ -299,7 +299,7 @@ Sometimes we need parentheses to apply a quantifier correctly, but we do not wan
 > [!NOTE]
 > Like building with blocks, the more pieces you have, the more complex it becomes.
 
-### Backreferences
+#### Backreferences
 
 Suppose we want to match both `'...'` and `"..."`.
 
@@ -314,6 +314,6 @@ let regexp = /['"](.*?)['"]/g;
 alert(str.match(regexp)); // "She'
 ```
 
-### Debugging
+#### Debugging
 
 `{n}` caused the MDX file to crash because it was parsed as a variable.

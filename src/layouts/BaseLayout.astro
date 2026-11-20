@@ -26,7 +26,7 @@ const targetLocale = alternateLocale(locale)
 const exactAlternateUrl = alternateUrls[targetLocale]
 const languageUrl = exactAlternateUrl
   ?? localizedPath(targetLocale, languageFallbackPath ?? stripLocalePrefix(Astro.url.pathname))
-const hasTableOfContents = headings.some(({ depth }) => depth === 2 || depth === 3)
+const hasTableOfContents = headings.length > 0
 // https://flocto.github.io/
 ---
 

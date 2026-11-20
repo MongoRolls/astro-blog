@@ -22,7 +22,7 @@ The document area of Google Docs, the spreadsheets in Google Sheets and Excel fo
 
 This does not mean Canvas can replace HTML in general. The real question is: when can the gains from taking over the browser's rendering work offset the additional implementation cost?
 
-## What does Canvas provide?
+### What does Canvas provide?
 
 You can think of `<canvas>` as a drawable area inside an HTML document. Developers draw graphics by calling APIs such as `fillRect()` from JavaScript, and can also read and modify pixel data directly.
 
@@ -30,27 +30,27 @@ Ultimately, Canvas delivers a bitmap to the browser. It has no DOM element tree 
 
 This low-level capability is both an advantage and a cost.
 
-## Why consider Canvas?
+### Why consider Canvas?
 
-### Less browser work
+#### Less browser work
 
 Complex pages require HTML parsing, DOM creation, style calculation, layout, and continuous interaction handling. As the number of elements and update frequency increase, this work can become a burden. Canvas has a more direct drawing model and, in suitable scenarios, can reduce intermediate steps and provide more predictable rendering performance.
 
 But a lower-level API does not mean it is faster in every situation. Canvas performance still depends on the drawing area, refresh frequency, resource management, and the device.
 
-### Full control over rendering
+#### Full control over rendering
 
 Infinite whiteboards, huge spreadsheets, timelines, and scheduling tools often need virtual scrolling, viewport clipping, zooming, panning, and dynamic insertion and deletion of elements. DOM can implement these too, but when an application already has to manage the visible region and rendering order itself, directly controlling the entire drawing pipeline may be simpler.
 
-### More consistent behavior across environments
+#### More consistent behavior across environments
 
 Canvas outputs results according to the drawing instructions it receives. Compared with interfaces that depend on responsive layout, CSS gradients, and transitions, it is easier to maintain a consistent visual result across devices. Of course, that also means the browser will no longer handle differences for you automatically.
 
-### An output layer for other rendering systems
+#### An output layer for other rendering systems
 
 Flutter Web and some WebAssembly solutions output their screen buffer to Canvas. Conversely, some tools wrap the drawing capabilities of other platforms in Canvas-like calls. Canvas can therefore serve as a shared output layer for cross-platform visual systems.
 
-## Why most applications should still choose the DOM
+### Why most applications should still choose the DOM
 
 A normal `<input type="text">` already includes crisp high-resolution text, Tab and focus management, text selection, mouse and arrow-key interaction, right-to-left layout, input methods for Asian languages, and screen-reader support.
 
@@ -65,7 +65,7 @@ These capabilities do not appear automatically in Canvas. After choosing Canvas,
 
 Browsers and mature frontend frameworks already provide a standardized, maintainable engineering system for the DOM. For ordinary applications such as forms, content pages, and admin dashboards, the DOM is therefore usually still the better default.
 
-## Which interfaces are better suited to Canvas?
+### Which interfaces are better suited to Canvas?
 
 Three questions can help.
 
@@ -75,39 +75,39 @@ Second, does the application only need to draw the content in the current viewpo
 
 Third, does the application already have a clear internal model? When state, geometry, focus, and interaction rules are managed by the business model and the rendering layer only needs to draw them, Canvas is often more direct than DOM.
 
-## Engineering details worth considering
+### Engineering details worth considering
 
-### Centralize render scheduling
+#### Centralize render scheduling
 
 Set up one main renderer, then split it into sub-renderers by responsibility, such as background, rows, and tasks. When any module needs an update, it sends one render request; `requestAnimationFrame` combines multiple requests in the same frame into one draw.
 
 Hivekit clears the entire Canvas every frame and redraws from scratch. In theory, partial clearing and partial redraws would use fewer resources, but they also add significant state-management complexity. If a full redraw is already smooth enough, there is no need to optimize prematurely.
 
-### Use multiple Canvas layers to isolate update frequencies
+#### Use multiple Canvas layers to isolate update frequencies
 
 Put relatively static main content and frequently changing hover or selection highlights into two same-sized, overlaid Canvases. The interaction layer only draws a small number of borders and hints, so it can refresh frequently without redrawing the entire scene.
 
-### Separate style configuration from drawing logic
+#### Separate style configuration from drawing logic
 
 Canvas has no CSS cascade, but colors, fonts, spacing, line widths, and other visual parameters can still be centralized in a separate configuration. This makes maintenance easier and prevents drawing logic from filling up with magic values.
 
-### Handle device pixel ratio correctly
+#### Handle device pixel ratio correctly
 
 To stay sharp on high-DPI screens, scale the actual pixel dimensions of the Canvas according to `window.devicePixelRatio`, then scale the drawing context so that business code can continue to use CSS pixels as coordinate units.
 
-### Unify domain and screen coordinates
+#### Unify domain and screen coordinates
 
 World coordinates in an infinite canvas and row-column indexes in a spreadsheet are not the same as actual screen pixels. Scale, pan position, and device resolution all affect the final position. Centralizing these conversions in a small number of functions prevents coordinate calculations from being scattered across rendering modules.
 
-### Build a simple hit-testing model
+#### Build a simple hit-testing model
 
 Canvas does not know which “element” the user clicked. One approach is to build a screen-space bounding-box index before drawing, recording each object's bounds, layer, and business identifier. For large data sets, add indexes by horizontal and vertical coordinates, or even use a spatial index such as an R-tree to speed up queries.
 
-### Manage the lifecycle of event listeners
+#### Manage the lifecycle of event listeners
 
 Receive mouse and keyboard events through one global entry point, then dispatch them to specific objects according to hit-test results. At the same time, provide clear registration and deregistration mechanisms to prevent interaction logic from accumulating indefinitely or producing stale callbacks.
 
-## The final judgment
+### The final judgment
 
 Canvas is not a high-performance drop-in replacement for HTML. It is a lower-level rendering tool: developers gain more control, but also take over more work that the browser previously handled.
 

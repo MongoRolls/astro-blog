@@ -9,7 +9,7 @@ translationKey: 26-02-25-typescript
 
 Here are a few commonly used TypeScript type tricks for quick reference.
 
-## Utility types
+### Utility types
 
 `Pick` selects fields, while `Omit` excludes fields:
 
@@ -24,7 +24,7 @@ type UserPreview = Pick<User, 'id' | 'name'>
 type SafeUser = Omit<User, 'password'>
 ```
 
-## `keyof` and mapped types
+### `keyof` and mapped types
 
 `keyof` gets all keys of an object type, while mapped types can modify fields in bulk:
 
@@ -34,7 +34,7 @@ type Optional<T> = {
 }
 ```
 
-## Conditional types and `infer`
+### Conditional types and `infer`
 
 Conditional types can return different results based on the input type. `infer` is used to infer a type inside the condition:
 
@@ -44,7 +44,7 @@ type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 type Result = UnwrapPromise<Promise<string>> // string
 ```
 
-## `as const`
+### `as const`
 
 Use `as const` to preserve literal types and make properties read-only:
 
@@ -53,7 +53,7 @@ const status = ['pending', 'success', 'error'] as const
 type Status = (typeof status)[number]
 ```
 
-## Brand types
+### Brand types
 
 Brand types can distinguish values that have the same underlying type but different business meanings:
 

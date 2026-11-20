@@ -13,7 +13,7 @@ seo:
 
 Docker 解决「在哪台机器上都能跑起来」，CI/CD 解决「提交之后自动构建、测试、部署」。GitLab 流水线里常见的 `docker-build` 阶段，就是把这两块接在一起。
 
-## Docker
+### Docker
 
 Docker 是一种容器技术，**只隔离应用程序的运行时环境，容器之间可以共享同一个操作系统**。可以把它理解成更轻量的虚拟机，用的仍是本机操作系统。
 
@@ -23,7 +23,7 @@ Docker 是一种容器技术，**只隔离应用程序的运行时环境，容�
 
 ![Docker 概念示意](https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com/blog/25-03-14-docker/image.png)
 
-### 镜像、容器、仓库
+#### 镜像、容器、仓库
 
 **1. 镜像（Image）**：类似虚拟机镜像，是面向 Docker 引擎的只读模板，里面带着文件系统。应用要跑，先要有环境，镜像就是提供这个环境的。Ubuntu 镜像是带 Ubuntu 系统环境的模板；在上面装 Apache，就可以称为 Apache 镜像。
 
@@ -31,7 +31,7 @@ Docker 是一种容器技术，**只隔离应用程序的运行时环境，容�
 
 **3. 仓库（Repository）**：集中存放镜像的地方。注意和注册服务器（Registry）的区别：Registry 存放仓库，通常有多个仓库；仓库存放镜像，一般一类镜像一个仓库，用 tag 区分版本，例如 Ubuntu 仓库里的 12.04、14.04。
 
-### Dockerfile
+#### Dockerfile
 
 ```docker
 # 使用 node:14-alpine 基础镜像
@@ -58,7 +58,7 @@ CMD ['','']
 
 [dockerfile 最佳实践](https://shanyue.tech/op/dockerfile-practice.html#%E5%AE%B9%E5%99%A8%E5%BA%94%E8%AF%A5%E6%98%AF%E7%9F%AD%E6%9A%82%E7%9A%84)
 
-## CI/CD
+### CI/CD
 
 开发人员提交新代码后马上构建、（单元）测试，再根据结果判断能不能和已有代码集成，这是持续集成（Continuous Integration）。
 
@@ -68,7 +68,7 @@ CMD ['','']
 
 国内公司多用 GitLab，复杂流程写在 GitLab workflow 里即可，原理和 GitHub Actions 相通。
 
-### GitHub Actions
+#### GitHub Actions
 
 项目里建 `.github/workflows`，再放 `.yml` / `.yaml`。YAML 语法可参考 [Learn YAML in Y minutes](https://learnxinyminutes.com/docs/yaml/)，官方说明见 [Workflow syntax](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)。
 
@@ -115,7 +115,7 @@ jobs:
 
 `on` 里的事件（push、定时、手动触发等）会启动 job：在虚拟机上配环境，再跑指定步骤。个人前端项目用 GitHub Actions + Vercel 就很省心。
 
-### GitLab CI
+#### GitLab CI
 
 GitLab 用 `.gitlab-ci.yml`。[GitLab CI 文档](https://docs.gitlab.com/ci/)
 

@@ -23,7 +23,7 @@ seo:
 
 Hermes 自己就能换 provider，不一定非经 CLIProxyAPI。CLIProxyAPI 更适合「客户端只认 OpenAI / Claude 接口，手里却是 CLI 订阅」。
 
-## Hermes Agent
+### Hermes Agent
 
 Nous Research 的开源 Agent。仓库：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)。文档：[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)。MIT。
 
@@ -40,7 +40,7 @@ Nous Research 的开源 Agent。仓库：[NousResearch/hermes-agent](https://git
 
 它会自己搜过去的会话，复杂任务结束后可以写成 skill。定时任务也能配，做完推到微信或 Telegram。
 
-### 安装
+#### 安装
 
 macOS / Linux / WSL：
 
@@ -62,7 +62,7 @@ hermes doctor
 
 不想攒一堆 key，可以用 [Nous Portal](https://portal.nousresearch.com)，一条 `hermes setup --portal` 把模型和部分工具网关绑到订阅上。自己没走这条，模型用 DeepSeek，工具按需开。
 
-### 自己怎么用
+#### 自己怎么用
 
 ```bash
 hermes              # 终端对话
@@ -80,7 +80,7 @@ hermes gateway      # 消息网关
 
 它能执行本机命令、读文件、开浏览器。网关务必开配对 / 白名单，别对所有人开放。密钥别写进聊天记录。
 
-## CLIProxyAPI
+### CLIProxyAPI
 
 [日常那套](/blog/26-08-13-ai-tools)里，CC Switch 解决的是「同一套 Claude Code 换供应商」。CLIProxyAPI 反过来：订阅已经在 CLI 里登过了，想给 Cursor、Cline、自写脚本当 API 用。
 
@@ -92,7 +92,7 @@ hermes gateway      # 消息网关
 
 和中转站不是一类东西。中转站卖的是别人的 key；这个跑在你机器上，用的是你自己登进去的订阅。
 
-### 安装
+#### 安装
 
 macOS 用 Homebrew，服务默认读 `$(brew --prefix)/etc/cliproxyapi.conf`。想继续用家目录配置，先有文件再软链，悬空软链服务会立刻退：
 
@@ -123,7 +123,7 @@ docker run --rm -p 8317:8317 \
 
 用量统计从 v6.10.0 起不再内置，要看板用 [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper) 或 [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus)。
 
-### 和现有工具怎么叠
+#### 和现有工具怎么叠
 
 | 需求 | 用谁 |
 | --- | --- |
@@ -133,7 +133,7 @@ docker run --rm -p 8317:8317 \
 | 人在仓库里写代码 | Cursor / Claude Code，别把代理当 IDE |
 | 本机常驻、微信入口 | Hermes；它能自己换模型，不必先过这层代理 |
 
-### 别当免费午餐
+#### 别当免费午餐
 
 各家订阅条款通常按「官方客户端」算，拿 OAuth 转成通用 API，**可能违 ToS**，封号、限流自己扛。号池、轮询、对外网开端口，风险再加一档。本机 `127.0.0.1`、加访问密钥，别裸奔到公网。
 

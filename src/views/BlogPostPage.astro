@@ -108,6 +108,12 @@ const { minutesRead } = remarkPluginFrontmatter;
     <div data-pagefind-ignore><MyComment locale={locale} /></div>
 </BaseLayout>
 
+<style>
+  .prose :global(h5), .prose :global(h6) {
+    margin-block: 1em .5em;
+    font-weight: 600;
+  }
+</style>
 
 <script>
   let disposeShareButton = () => {}
