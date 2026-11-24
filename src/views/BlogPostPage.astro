@@ -6,42 +6,73 @@ import Button from '../components/Button.astro'
 import FormattedDate from '../components/FormattedDate.astro'
 import Link from '../components/Link.astro'
 import MyComment from '../components/MyComment.astro'
-import PostPreview from '../components/PostPreview.astro'
-import { getPostCoverSrc } from '../config/image'
-import { defaultLocale, localizedPath } from '../i18n/config'
+import { COVER_HEIGHT, COVER_WIDTH, getPostCoverImage, getPostOgImage } from '../config/image'
+import { defaultLocale } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { slugify } from '../utils/common-utils'
-import { getPostUrl } from '../utils/data-utils'
+import { getPostTagBadges, getPostUrl } from '../utils/data-utils'
 
 type Props = {
   post: CollectionEntry<'blog'>
   translation: CollectionEntry<'blog'> | null
   prevPost: CollectionEntry<'blog'> | null
   nextPost: CollectionEntry<'blog'> | null
+  relatedPosts?: CollectionEntry<'blog'>[]
+  randomPostUrls?: string[]
   locale?: Locale
 }
 
 // const { href } = Astro.url
-const { post, translation, prevPost, nextPost, locale = defaultLocale } = Astro.props
+const {
+  post,
+  translation,
+  prevPost,
+  nextPost,
+  relatedPosts = [],
+  randomPostUrls = [],
+  locale = defaultLocale,
+} = Astro.props
 const t = useTranslations(locale)
+const fallbackRandomUrl = randomPostUrls[0] ?? (prevPost ? getPostUrl(prevPost) : nextPost ? getPostUrl(nextPost) : '')
 const alternateUrls = {
     [locale]: getPostUrl(post),
     ...(translation ? { [translation.data.lang]: getPostUrl(translation) } : {}),
 }
-const { title, publishDate, updatedDate, excerpt, description, image, tags = [], keywords = [], seo, author } = post.data
+const { title, publishDate, updatedDate, excerpt, description, tags = [], keywords = [], seo, author } = post.data
 const summary = seo?.description ?? excerpt ?? description
-const coverImage = seo?.image ?? (image ? { src: image, alt: title } : undefined)
+const coverImage = getPostCoverImage(post.data, t.post.coverAlt(title))
+const ogImage = getPostOgImage(post.data, title)
 const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const { minutesRead } = remarkPluginFrontmatter;
 ---
 
-<BaseLayout locale={locale} alternateUrls={alternateUrls} languageFallbackPath="/blog/" title={seo?.title ?? title} description={summary} image={coverImage} pageType="article" keywords={keywords} author={author} publishDate={publishDate} updatedDate={updatedDate} tags={tags} headings={headings}>
+<BaseLayout locale={locale} alternateUrls={alternateUrls} languageFallbackPath="/blog/" title={seo?.title ?? title} description={summary} image={ogImage} pageType="article" keywords={keywords} author={author} publishDate={publishDate} updatedDate={updatedDate} tags={tags} headings={headings}>
     <div class="relative lg:flex lg:gap-10">
         <!-- 主要内容 -->
         <article data-pagefind-body class="w-full lg:max-w-[674px]">
             <header class="mb-8">
-                <img src={getPostCoverSrc(post.data)} alt={coverImage?.alt ?? t.post.coverAlt(title)} class="w-full h-auto rounded-lg mb-3" width="1200" height="630" loading="eager" fetchpriority="high" decoding="async" />
+                {coverImage && (
+                    <figure class="post-cover">
+                        <img
+                          src={coverImage.src}
+                          alt={coverImage.alt}
+                          class="post-cover-image"
+                          width={COVER_WIDTH}
+                          height={COVER_HEIGHT}
+                          loading="eager"
+                          fetchpriority="high"
+                          decoding="async"
+                        />
+                        {coverImage.credit && (
+                            <figcaption class="post-cover-credit">
+                                {locale === 'zh-CN' ? '封面来源：' : 'Cover credit: '}
+                                {coverImage.credit.url
+                                  ? <a href={coverImage.credit.url} target="_blank" rel="noopener noreferrer">{coverImage.credit.author}</a>
+                                  : coverImage.credit.author}
+                            </figcaption>
+                        )}
+                    </figure>
+                )}
                 <h1 data-pagefind-meta="title" class="text-[1.75rem] leading-snug [overflow-wrap:anywhere] font-serif text-brand font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm leading-relaxed space-y-1">
                     <div class="text-base">{t.post.published}: <FormattedDate date={publishDate} locale={locale} /></div>
@@ -70,9 +101,9 @@ const { minutesRead } = remarkPluginFrontmatter;
                     tags.length > 0 && (
                         <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                             {tags.map((tag: string) => (
-                                <a class="text-main text-lg hover:underline" href={localizedPath(locale, `/tags/${slugify(tag)}/`)}>
+                                <span class="text-main text-lg">
                                     # {tag}
-                                </a>
+                                </span>
                             ))}
                         </div>
                     )
@@ -92,33 +123,398 @@ const { minutesRead } = remarkPluginFrontmatter;
     </div>
 
     {
-        (prevPost || nextPost) && (
-            <div data-pagefind-ignore class="my-16 sm:my-24">
-                <h2 class="mb-10 text-2xl font-serif italic md:mb-12 md:text-3xl">{t.post.readMore}</h2>
+        (relatedPosts.length > 0 || prevPost || nextPost || fallbackRandomUrl) && (
+            <section data-pagefind-ignore class="related-section" aria-labelledby="related-posts-heading">
+                {relatedPosts.length > 0 && (
+                    <>
+                        <h2 id="related-posts-heading" class="related-heading font-serif">{t.post.relatedPosts}</h2>
+                        <ul class="related-list">
+                            {relatedPosts.map((related) => {
+                                const relatedTags = getPostTagBadges(related.data.tags)
+                                return (
+                                    <li class="related-item">
+                                        <span class="related-bullet" aria-hidden="true"></span>
+                                        <div class="related-entry">
+                                            <a class="related-title" href={getPostUrl(related)}>{related.data.title}</a>
+                                            {relatedTags.length > 0 && (
+                                                <span class="related-tags">
+                                                    {relatedTags.map(tag => (
+                                                        <span class:list={['related-tag', `related-tag--tone-${tag.tone}`]}>
+                                                            {tag.name}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </>
+                )}
 
-                <div class="flex flex-col gap-10 sm:gap-12">
-                    {prevPost && <PostPreview post={prevPost} headingLevel="h3" locale={locale} />}
-                    {nextPost && <PostPreview post={nextPost} headingLevel="h3" locale={locale} />}
-                </div>
-            </div>
+                {(prevPost || nextPost || fallbackRandomUrl) && (
+                    <nav class="post-pager" aria-label={locale === 'zh-CN' ? '文章前后导航' : 'Post navigation'}>
+                        <div class="post-pager-neighbors">
+                            {prevPost && (
+                                <a class="post-pager-link post-pager-prev" href={getPostUrl(prevPost)} title={prevPost.data.title}>
+                                    <span class="post-pager-prefix" aria-hidden="true">&laquo; {t.post.prevLabel} |</span>
+                                    <span class="post-pager-title">{prevPost.data.title}</span>
+                                </a>
+                            )}
+                            {nextPost && (
+                                <a class="post-pager-link post-pager-next" href={getPostUrl(nextPost)} title={nextPost.data.title}>
+                                    <span class="post-pager-prefix" aria-hidden="true">{t.post.nextLabel} |</span>
+                                    <span class="post-pager-title">{nextPost.data.title}</span>
+                                    <span class="post-pager-prefix" aria-hidden="true">&raquo;</span>
+                                </a>
+                            )}
+                        </div>
+
+                        {fallbackRandomUrl && (
+                            <a
+                              class="post-pager-random"
+                              href={fallbackRandomUrl}
+                              data-random-post
+                              data-random-urls={JSON.stringify(randomPostUrls)}
+                            >
+                                {t.post.randomPost}
+                            </a>
+                        )}
+                    </nav>
+                )}
+            </section>
         )
     }
 
     <div data-pagefind-ignore><MyComment locale={locale} /></div>
 </BaseLayout>
 
+<style>
+  .post-cover {
+    margin: 0 0 1.25rem;
+  }
+
+  .post-cover-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(var(--color-border-card) / 0.45);
+    background-color: rgb(var(--color-bg-muted) / 0.35);
+  }
+
+  :global(html.dark) .post-cover-image {
+    background-color: rgb(var(--color-bg-card));
+    filter: brightness(0.9);
+  }
+
+  .post-cover-credit {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: rgb(var(--color-text-muted));
+    text-align: right;
+  }
+
+  .post-cover-credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .related-section {
+    margin: 2rem 0 2.75rem;
+  }
+
+  .related-heading {
+    margin: 0 0 0.85rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgb(var(--color-text-main));
+  }
+
+  .related-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0 0 0 0.2rem;
+    list-style: none;
+  }
+
+  .related-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.6rem;
+    align-items: start;
+    padding: 0.3rem 0.5rem;
+    margin-inline: -0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 150ms ease;
+  }
+
+  .related-item:hover {
+    background-color: rgb(var(--color-text-main) / 0.035);
+  }
+
+  :global(html.dark) .related-item:hover {
+    background-color: rgb(180 190 254 / 0.06);
+  }
+
+  .related-bullet {
+    width: 0.32rem;
+    height: 0.32rem;
+    margin-top: 0.72rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--color-brand) / 0.52);
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+
+  :global(html.dark) .related-bullet {
+    background-color: rgb(var(--color-brand) / 0.65);
+  }
+
+  .related-item:is(:hover, :focus-within) .related-bullet {
+    background-color: rgb(var(--color-brand));
+    transform: scale(1.15);
+  }
+
+  .related-entry {
+    min-width: 0;
+    font-size: 0.98rem;
+    line-height: 1.78;
+    overflow-wrap: anywhere;
+  }
+
+  .related-title {
+    color: rgb(var(--color-text-main));
+    font-weight: 500;
+    text-decoration: none;
+    margin-right: 0.3rem;
+    transition: color 150ms ease;
+  }
+
+  .related-title:hover,
+  .related-title:focus-visible {
+    color: rgb(var(--color-brand));
+  }
+
+  .related-title:focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .related-tags {
+    display: inline;
+  }
+
+  .related-tag {
+    display: inline-block;
+    vertical-align: 0.06em;
+    margin-right: 0.28rem;
+    margin-block: 0.06rem;
+    padding: 0.06rem 0.42rem;
+    border-radius: 0.3rem;
+    font-size: 0.74rem;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .related-tag:last-child {
+    margin-right: 0;
+  }
+
+  .related-tag--tone-0 {
+    background-color: rgb(59 130 246 / 0.09);
+    color: rgb(43 84 156);
+  }
+
+  .related-tag--tone-1 {
+    background-color: rgb(16 140 100 / 0.09);
+    color: rgb(30 112 85);
+  }
+
+  .related-tag--tone-2 {
+    background-color: rgb(219 88 124 / 0.09);
+    color: rgb(159 58 88);
+  }
+
+  .related-tag--tone-3 {
+    background-color: rgb(124 92 214 / 0.09);
+    color: rgb(96 71 170);
+  }
+
+  .related-tag--tone-4 {
+    background-color: rgb(107 114 128 / 0.1);
+    color: rgb(75 85 99);
+  }
+
+  :global(html.dark) .related-tag--tone-0 {
+    background-color: rgb(137 180 250 / 0.13);
+    color: rgb(166 202 252);
+  }
+
+  :global(html.dark) .related-tag--tone-1 {
+    background-color: rgb(148 226 213 / 0.12);
+    color: rgb(166 227 161);
+  }
+
+  :global(html.dark) .related-tag--tone-2 {
+    background-color: rgb(243 139 168 / 0.13);
+    color: rgb(245 170 192);
+  }
+
+  :global(html.dark) .related-tag--tone-3 {
+    background-color: rgb(203 166 247 / 0.13);
+    color: rgb(214 186 250);
+  }
+
+  :global(html.dark) .related-tag--tone-4 {
+    background-color: rgb(166 173 200 / 0.13);
+    color: rgb(186 194 222);
+  }
+
+  .post-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-top: 1.4rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgb(var(--color-border-card) / 0.7);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .post-pager-neighbors {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .post-pager-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    min-width: 0;
+    color: rgb(var(--color-brand));
+    text-decoration: none;
+    transition: opacity 150ms ease, color 150ms ease;
+  }
+
+  .post-pager-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  .post-pager-link:focus-visible,
+  .post-pager-random:focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  .post-pager-prefix {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  .post-pager-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .post-pager-random {
+    flex-shrink: 0;
+    color: rgb(var(--color-brand));
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 150ms ease, color 150ms ease;
+  }
+
+  .post-pager-random:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  @media (max-width: 639px) {
+    .related-entry {
+      font-size: 0.95rem;
+      line-height: 1.72;
+    }
+
+    .related-bullet {
+      margin-top: 0.66rem;
+    }
+
+    .post-pager {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.7rem;
+    }
+
+    .post-pager-neighbors {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.55rem;
+      width: 100%;
+    }
+
+    .post-pager-link {
+      max-width: 100%;
+    }
+  }
+</style>
+
 
 <script>
-  let disposeShareButton = () => {}
+  let disposePostFooter = () => {}
 
   document.addEventListener('astro:page-load', () => {
-    disposeShareButton()
+    disposePostFooter()
     const controller = new AbortController()
     let resetTimer: number | undefined
-    const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement
+    const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement | null
     copyUrlButton?.addEventListener('click', async () => {
       await copyUrl(copyUrlButton)
     }, { signal: controller.signal })
+
+    const randomLink = document.querySelector<HTMLAnchorElement>('.post-pager [data-random-post]')
+    if (randomLink) {
+      let pool: string[] = []
+      try {
+        const parsed = JSON.parse(randomLink.dataset.randomUrls ?? '[]')
+        if (Array.isArray(parsed))
+          pool = parsed.filter((item): item is string => typeof item === 'string' && item.length > 0)
+      }
+      catch {
+        pool = []
+      }
+
+      const pickRandomHref = () => {
+        if (pool.length === 0)
+          return
+        const currentPath = window.location.pathname
+        const candidates = pool.filter(url => url !== currentPath)
+        const list = candidates.length > 0 ? candidates : pool
+        const nextUrl = list[Math.floor(Math.random() * list.length)]
+        if (nextUrl)
+          randomLink.href = nextUrl
+      }
+
+      pickRandomHref()
+      randomLink.addEventListener('click', pickRandomHref, { signal: controller.signal })
+    }
 
     async function copyUrl(button: HTMLButtonElement) {
       const url = button.getAttribute('data-url') || ''
@@ -136,12 +532,12 @@ const { minutesRead } = remarkPluginFrontmatter;
       }, 2500)
     }
 
-    disposeShareButton = () => {
+    disposePostFooter = () => {
       controller.abort()
       if (resetTimer)
         window.clearTimeout(resetTimer)
     }
   })
 
-  document.addEventListener('astro:before-swap', () => disposeShareButton())
+  document.addEventListener('astro:before-swap', () => disposePostFooter())
 </script>

@@ -1,0 +1,395 @@
+---
+import type { MediaKind } from '../data/about'
+import type { Locale } from '../i18n/config'
+import { defaultLocale } from '../i18n/config'
+
+interface Props {
+  title: string
+  cover: string
+  coverAlt?: string
+  kind?: MediaKind
+  kindLabel?: string
+  rating?: number
+  status?: string
+  note: string
+  href?: string
+  headingLevel?: 'h3' | 'h4'
+  locale?: Locale
+}
+
+const {
+  title,
+  cover,
+  coverAlt,
+  kind = 'game',
+  kindLabel,
+  rating,
+  status,
+  note,
+  href,
+  headingLevel = 'h3',
+  locale = defaultLocale,
+} = Astro.props
+
+const HeadingTag = headingLevel
+
+const DEFAULT_KIND_LABELS: Record<MediaKind, string> = {
+  game: 'Game',
+  book: 'Book',
+  movie: 'Movie',
+}
+
+const badgeText = kindLabel ?? DEFAULT_KIND_LABELS[kind]
+const clampedRating = typeof rating === 'number'
+  ? Math.max(0, Math.min(5, Math.round(rating * 2) / 2))
+  : undefined
+
+const stars = clampedRating === undefined
+  ? []
+  : Array.from({ length: 5 }, (_, index) => {
+      const value = index + 1
+      if (clampedRating >= value)
+        return 'full' as const
+      if (clampedRating >= value - 0.5)
+        return 'half' as const
+      return 'empty' as const
+    })
+
+const ratingLabel = locale === 'zh-CN' ? '个人评分：' : 'Rating:'
+const ratingAriaLabel = clampedRating === undefined
+  ? undefined
+  : locale === 'zh-CN'
+    ? `个人评分 ${clampedRating} 分（满分 5 分）`
+    : `Personal rating: ${clampedRating} out of 5`
+
+const safeHref = href && /^https?:\/\//.test(href) ? href : undefined
+---
+
+<article class:list={['media-card', `media-card--${kind}`, { 'media-card--interactive': Boolean(safeHref) }]}>
+  <span class="media-card-badge" aria-hidden="true">{badgeText}</span>
+
+  <div class="media-card-cover">
+    <img
+      src={cover}
+      alt={coverAlt || title}
+      width="300"
+      height="450"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+
+  <div class="media-card-body">
+    <HeadingTag class="media-card-title font-serif">
+      {safeHref
+? (
+        <a
+          class="media-card-link"
+          href={safeHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={title}
+        >
+          {title}
+        </a>
+      )
+: (
+        <span title={title}>{title}</span>
+      )}
+    </HeadingTag>
+
+    {(clampedRating !== undefined || status) && (
+      <div class="media-card-meta">
+        {clampedRating !== undefined && (
+          <div class="media-card-rating" role="img" aria-label={ratingAriaLabel}>
+            <span class="media-card-rating-label">{ratingLabel}</span>
+            <span class="media-card-stars" aria-hidden="true">
+              {stars.map(state => (
+                <svg
+                  class:list={['media-card-star', `media-card-star--${state}`]}
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  {state === 'full' && (
+                    <path
+                      fill="currentColor"
+                      d="M12 2.25l2.92 5.92 6.53.95-4.72 4.6 1.11 6.51L12 17.16l-5.84 3.07 1.11-6.51-4.72-4.6 6.53-.95L12 2.25z"
+                    />
+                  )}
+                  {state === 'half' && (
+                    <>
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                        d="M12 2.25l2.92 5.92 6.53.95-4.72 4.6 1.11 6.51L12 17.16l-5.84 3.07 1.11-6.51-4.72-4.6 6.53-.95L12 2.25z"
+                      />
+                      <path
+                        fill="currentColor"
+                        d="M12 2.25L9.08 8.17l-6.53.95 4.72 4.6-1.11 6.51L12 17.16V2.25z"
+                      />
+                    </>
+                  )}
+                  {state === 'empty' && (
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linejoin="round"
+                      d="M12 2.25l2.92 5.92 6.53.95-4.72 4.6 1.11 6.51L12 17.16l-5.84 3.07 1.11-6.51-4.72-4.6 6.53-.95L12 2.25z"
+                    />
+                  )}
+                </svg>
+              ))}
+            </span>
+          </div>
+        )}
+        {status && <span class="media-card-status">{status}</span>}
+      </div>
+    )}
+
+    <p class="media-card-note">{note}</p>
+  </div>
+</article>
+
+<style>
+  .media-card {
+    --media-accent: 64 118 82;
+    --media-badge-bg: rgb(76 126 91);
+    --media-badge-fg: #f8faf9;
+    --media-badge-border: transparent;
+
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0.8rem;
+    padding: 0.78rem;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--color-border-card) / 0.85);
+    background-color: rgb(var(--color-bg-card));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition:
+      transform 220ms cubic-bezier(0.165, 0.84, 0.44, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  .media-card--book {
+    --media-accent: 66 91 197;
+    --media-badge-bg: rgb(66 91 197);
+    --media-badge-fg: #f8fafc;
+  }
+
+  .media-card--movie {
+    --media-accent: 124 92 214;
+    --media-badge-bg: rgb(124 92 214);
+    --media-badge-fg: #faf8ff;
+  }
+
+  :global(html.dark) .media-card {
+    --media-accent: 166 227 161;
+    --media-badge-bg: rgb(166 227 161 / 0.16);
+    --media-badge-fg: rgb(166 227 161);
+    --media-badge-border: rgb(166 227 161 / 0.24);
+    box-shadow: 0 4px 16px rgb(17 17 27 / 0.24);
+  }
+
+  :global(html.dark) .media-card--book {
+    --media-accent: 137 180 250;
+    --media-badge-bg: rgb(137 180 250 / 0.16);
+    --media-badge-fg: rgb(166 202 252);
+    --media-badge-border: rgb(137 180 250 / 0.24);
+  }
+
+  :global(html.dark) .media-card--movie {
+    --media-accent: 203 166 247;
+    --media-badge-bg: rgb(203 166 247 / 0.16);
+    --media-badge-fg: rgb(214 186 250);
+    --media-badge-border: rgb(203 166 247 / 0.24);
+  }
+
+  .media-card--interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--media-accent) / 0.5);
+    box-shadow: var(--card-shadow);
+  }
+
+  .media-card:has(.media-card-link:focus-visible) {
+    border-color: rgb(var(--color-brand));
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  .media-card-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 0.12rem 0.44rem 0.16rem 0.48rem;
+    border-bottom-left-radius: 8px;
+    border-left: 1px solid var(--media-badge-border);
+    border-bottom: 1px solid var(--media-badge-border);
+    background-color: var(--media-badge-bg);
+    color: var(--media-badge-fg);
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  .media-card-cover {
+    flex-shrink: 0;
+    width: 4.95rem;
+    aspect-ratio: 2 / 3;
+    align-self: center;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-border-card) / 0.6);
+    background-color: rgb(var(--color-bg-muted));
+  }
+
+  .media-card-cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    transition: transform 280ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  :global(html.dark) .media-card-cover img {
+    filter: brightness(0.92);
+  }
+
+  .media-card--interactive:hover .media-card-cover img {
+    transform: scale(1.03);
+  }
+
+  .media-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .media-card-title {
+    margin: 0;
+    padding-right: 2.5rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgb(var(--media-accent));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .media-card-link {
+    color: inherit;
+    text-decoration: none;
+    text-underline-offset: 0.18em;
+    transition: color 150ms ease;
+  }
+
+  .media-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .media-card-link:focus-visible {
+    outline: none;
+    text-decoration: underline;
+  }
+
+  .media-card--interactive:hover .media-card-link {
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--media-accent) / 0.55);
+  }
+
+  .media-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.45rem;
+  }
+
+  .media-card-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.08rem;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    color: rgb(var(--color-text-muted));
+  }
+
+  .media-card-rating-label {
+    white-space: nowrap;
+  }
+
+  .media-card-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.06rem;
+    color: #e59a24;
+  }
+
+  :global(html.dark) .media-card-stars {
+    color: #f5c25b;
+  }
+
+  .media-card-star {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .media-card-star--empty {
+    color: rgb(var(--color-text-muted) / 0.48);
+  }
+
+  .media-card-status {
+    display: inline-block;
+    padding: 0.03rem 0.38rem;
+    border-radius: 0.28rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: rgb(var(--color-text-muted));
+    background-color: rgb(var(--color-text-main) / 0.055);
+    white-space: nowrap;
+  }
+
+  :global(html.dark) .media-card-status {
+    background-color: rgb(186 194 222 / 0.1);
+  }
+
+  .media-card-note {
+    margin: 0.08rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.56;
+    color: rgb(var(--color-text-p));
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (hover: none) {
+    .media-card--interactive:hover {
+      transform: none;
+    }
+
+    .media-card--interactive:hover .media-card-cover img {
+      transform: none;
+    }
+  }
+</style>

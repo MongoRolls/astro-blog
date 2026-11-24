@@ -1,23 +1,284 @@
 ---
 import type { Locale } from '../i18n/config'
+import FloatingCard from '../components/FloatingCard.astro'
 import FriendCard from '../components/FriendCard.astro'
-import siteConfig from '../data/site-config'
+import { friendLinks, readingBlogs } from '../data/friends'
 import { defaultLocale } from '../i18n/config'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
+
+const title = locale === 'zh-CN' ? '友链与常读' : 'Friends & Reading'
+const description = locale === 'zh-CN'
+  ? '认识的朋友，以及平时常去串门和订阅的技术博客与独立网站。'
+  : 'Friends I know personally, alongside independent blogs and websites I read regularly.'
 ---
 
 <BaseLayout
   locale={locale}
-  title={locale === 'zh-CN' ? '友链' : 'Friends'}
-  description={locale === 'zh-CN' ? 'MongoRolls 的朋友与推荐链接。' : 'Friends and recommended links from MongoRolls.'}
+  title={title}
+  description={description}
 >
-    <section class="w-full mx-auto md:px-4 md:py-12" aria-labelledby="friends-title">
-        <h1 id="friends-title" class="sr-only">{locale === 'zh-CN' ? '友链' : 'Friends'}</h1>
-        <div class="md:mt-12 mx-auto">
-            <FriendCard friends={siteConfig.friends} locale={locale} />
+  <article data-pagefind-body class="friends-page" aria-labelledby="friends-title">
+    <h1 id="friends-title" class="sr-only" data-pagefind-meta="title">{title}</h1>
+
+    <section class="friends-section" aria-labelledby="friends">
+      <div class="section-head">
+        <div class="section-title-row">
+          <h2 id="friends" class="section-title font-serif">
+            {locale === 'zh-CN' ? '认识的朋友' : 'People I Know'}
+          </h2>
+          <span class="section-count">{friendLinks.length}</span>
         </div>
+        <p class="section-desc">
+          {locale === 'zh-CN' ? '现实与开源社区里结识的伙伴们' : 'Peers from engineering & open source'}
+        </p>
+      </div>
+
+      <div class="card-grid">
+        {friendLinks.map(friend => (
+          <FriendCard
+            name={friend.name[locale]}
+            subtitle={`${friend.role[locale]} · ${friend.handle}`}
+            description={friend.bio[locale]}
+            href={friend.href}
+            tags={friend.tags[locale]}
+            tone={friend.tone}
+            avatar={friend.avatar}
+            badgeLabel={friend.linkKind === 'github' ? 'GitHub' : 'Blog'}
+            locale={locale}
+          />
+        ))}
+
+        <a class="invite-card" href="#site-info" data-pagefind-ignore>
+          <div class="invite-main">
+            <div class="invite-head">
+              <span class="invite-plus" aria-hidden="true">+</span>
+              <div class="min-w-0">
+                <h3 class="invite-title font-serif">
+                  {locale === 'zh-CN' ? '虚位以待' : 'Say Hello'}
+                </h3>
+                <p class="invite-sub">
+                  {locale === 'zh-CN' ? '欢迎独立博客互换友链' : 'Open to fellow indie bloggers'}
+                </p>
+              </div>
+            </div>
+            <p class="invite-desc">
+              {locale === 'zh-CN'
+                ? '如果你也在认真写博客，欢迎带走下面的本站信息，随时联系互换链接。'
+                : 'If you keep a personal blog too, grab my site info below and reach out anytime.'}
+            </p>
+          </div>
+          <div class="invite-footer">
+            <span class="invite-tag">{locale === 'zh-CN' ? '双向互链' : 'Link exchange'}</span>
+            <span class="invite-action">{locale === 'zh-CN' ? '本站信息 ↓' : 'Site info ↓'}</span>
+          </div>
+        </a>
+      </div>
     </section>
+
+    <hr class="section-divider" />
+
+    <section class="friends-section" aria-labelledby="reading">
+      <div class="section-head">
+        <div class="section-title-row">
+          <h2 id="reading" class="section-title font-serif">
+            {locale === 'zh-CN' ? '在看的博客' : 'Blogs I Read'}
+          </h2>
+          <span class="section-count">{readingBlogs.length}</span>
+        </div>
+        <p class="section-desc">
+          {locale === 'zh-CN' ? '单向收藏，平时常去翻阅的独立博客与技术周刊' : 'One-way blogroll of independent sites and tech weeklies I follow'}
+        </p>
+      </div>
+
+      <div class="card-grid">
+        {readingBlogs.map(blog => (
+          <FriendCard
+            name={blog.name[locale]}
+            subtitle={blog.domain}
+            description={blog.note[locale]}
+            href={blog.href}
+            tags={blog.tags[locale]}
+            tone={blog.tone}
+            monogram={blog.monogram}
+            rssHref={blog.rss}
+            badgeLabel={!blog.rss ? 'Site' : undefined}
+            locale={locale}
+          />
+        ))}
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <section class="friends-section" aria-labelledby="site-info" data-pagefind-ignore>
+      <div class="section-head">
+        <div class="section-title-row">
+          <h2 id="site-info" class="section-title font-serif">
+            {locale === 'zh-CN' ? '本站信息' : 'Site Info'}
+          </h2>
+        </div>
+        <p class="section-desc">
+          {locale === 'zh-CN'
+            ? '需要交换友链或加入 RSS 订阅时，可以直接复制下方信息'
+            : 'Copy my site details below if you would like to exchange links or add my feed'}
+        </p>
+      </div>
+
+      <FloatingCard locale={locale} />
+    </section>
+  </article>
 </BaseLayout>
+
+<style>
+  .friends-page {
+    width: 100%;
+  }
+
+  .friends-section {
+    scroll-margin-top: 6rem;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.95rem;
+  }
+
+  .invite-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 1.05rem 1.15rem;
+    border-radius: 12px;
+    border: 1px dashed rgb(var(--color-border-card));
+    background-color: rgb(var(--color-bg-muted) / 0.32);
+    text-decoration: none;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 220ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .invite-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--color-brand) / 0.55);
+    background-color: rgb(var(--color-bg-muted) / 0.55);
+  }
+
+  .invite-card:focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  .invite-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .invite-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .invite-plus {
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 10px;
+    border: 1px dashed rgb(var(--color-border-card));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: rgb(var(--color-text-muted));
+    transition: color 180ms ease, border-color 180ms ease;
+  }
+
+  .invite-card:hover .invite-plus {
+    color: rgb(var(--color-brand));
+    border-color: rgb(var(--color-brand) / 0.55);
+  }
+
+  .invite-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgb(var(--color-text-main));
+  }
+
+  .invite-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    color: rgb(var(--color-text-muted));
+  }
+
+  .invite-desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.68;
+    color: rgb(var(--color-text-muted));
+  }
+
+  .invite-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed rgb(var(--color-border-card) / 0.65);
+  }
+
+  .invite-tag {
+    display: inline-block;
+    padding: 0.08rem 0.42rem;
+    border-radius: 0.3rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    font-weight: 500;
+    color: rgb(var(--color-text-muted));
+    background-color: rgb(var(--color-text-main) / 0.055);
+  }
+
+  :global(html.dark) .invite-tag {
+    background-color: rgb(186 194 222 / 0.1);
+  }
+
+  .invite-action {
+    font-size: 0.75rem;
+    color: rgb(var(--color-text-muted));
+    transition: color 150ms ease;
+  }
+
+  .invite-card:hover .invite-action {
+    color: rgb(var(--color-brand));
+  }
+
+  .section-divider {
+    margin: 2.5rem 0;
+    border: 0;
+    border-top: 1px dashed rgb(var(--color-border-card) / 0.8);
+  }
+
+  @media (max-width: 639px) {
+    .card-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.85rem;
+    }
+
+    .section-divider {
+      margin: 2rem 0;
+    }
+  }
+
+  @media (hover: none) {
+    .invite-card:hover {
+      transform: none;
+    }
+  }
+</style>

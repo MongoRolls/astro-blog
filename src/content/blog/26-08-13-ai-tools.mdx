@@ -1,76 +1,130 @@
 ---
 title: 日常 AI 工具
-excerpt: 目前日常开发里常用的几套 AI 工具：Cursor、Claude Code、Codex App、CC Switch 和 DeepSeek
+excerpt: 从 Cursor、Claude Code、Codex 到 Google Antigravity（Gemini 4 Neon 等）与 Typeless，记录当下日常开发在用的 AI 工具组合，以及这段时间用下来的一些真实心得。
 publishDate: '2026-08-13'
+updatedDate: '2026-11-25'
 author: MongoRolls
 tags:
-  - tools
-  - ai
-  - tech
+  - AI
+  - 工具
+seo:
+  image:
+    src: '26-08-13-ai-tools/cover.webp'
+    alt: '扁平插画：代码编辑器、命令行终端、语音波形、切换开关与星芒模块相连的 AI 工具流'
+  description: 日常开发在用的 AI 工具栈与分工：Cursor、Google Antigravity 与 Gemini 4 Neon、Claude Code、Codex、Typeless、CC Switch 与 DeepSeek，附近期使用心得。
+  pageType: article
 ---
 
-写代码基本离不开 AI。自己现在是这几套叠着用：
+这半年写代码越来越像在「开工具组合」，而不是守着某一个编辑器死磕。最初只是拿 Cursor 补全和改几行文件，后来慢慢加上了 Claude Code、Codex，最近又把 **Google Antigravity**（和谷歌这波 Gemini 4 系列模型）以及语音输入工具 **Typeless** 接进了日常流。
+
+先划清边界：AI 工具换代太快，这篇不是什么「年度终极排行」，只是截至 **2026 年 11 月** 我自己每天真的会打开的一套工作流快照，顺便记一下这段时间用下来几个比较深的体感。
 
 | 场景 | 工具 | 怎么用 |
 | --- | --- | --- |
-| IDE | Cursor | 日常写、改文件、看页面 |
-| CLI | Claude Code | 边界清楚、可以异步的长任务 |
-| App | Codex | 桌面 App；旧号土耳其礼品卡约 70 多一个月 |
-| 情报 | [Codex 雷达](https://codexradar.com/) | 看额度、智商、降智、社区体感 |
-| 切换 | CC Switch | 给 Claude Code 换供应商 |
+| IDE | Cursor | 盯着页面、改 UI、小步快跑时还是最顺手 |
+| Agent 平台 | [Antigravity](https://antigravity.google) | 谷歌反重力桌面端 / IDE / CLI，主力跑 Gemini 4 Neon，适合规划与多步任务 |
+| CLI | Claude Code | 边界清楚、可以异步丢着跑的长任务 |
+| App | Codex | 桌面 App；旧号土耳其礼品卡约 70 多一个月，做第二视角与重活兜底 |
+| 语音输入 | [Typeless](https://www.typeless.com) | 说话直接转成整理好的文本，给 Agent 交代需求、写草稿省打字 |
+| 情报 | [Codex 雷达](https://codexradar.com/) | 看额度、模型智商、降智和社区体感 |
+| 切换 | CC Switch | 给 Claude Code 热切换供应商、MCP 和 Skills |
 | API | DeepSeek | 便宜、国内直连，给 CLI / 脚本兜底 |
 
-更早的 Cursor 用法见 [Cursor AI 使用指南](/blog/24-01-17-cursor)。
+更早的 Cursor 基础用法见 [Cursor 使用指南](/blog/24-01-17-cursor)；IDE 之外的本机常驻入口与订阅转 API 见 [Hermes 与 CLIProxyAPI](/blog/26-08-17-hermes)。
 
 ## Cursor
 
-日常还是 Cursor 最舒服。基于 VS Code，Agent 改多文件、补全、对话都在一个窗口里。用得最多的是 Agent：需求说清楚，让它改，自己审 diff。补全有时会抢思路，需要再开。项目约定写进 `.cursor/rules`，比每次口头强调有效。
+日常改页面、调样式、边看浏览器边微调，Cursor 依然顺手。它基于 VS Code，多文件 Agent 修改、行内补全和对话都在一个窗口里，上手几乎没有切换成本。
 
-官方 Pro 不便宜。国内常见是闲鱼买号、拼车。自己也走过，图的是先把 IDE 用起来。要注意评价和成交，别把唯一工作环境绑在来路不明的共享号上；账号别和主力混用。封号、失效都得自己兜。能接受官方订阅还是更稳。
+自己用得最多的还是 Agent 模式：把需求边界说清，让它改，自己审 diff。行内补全有时候反而会抢思路，写复杂逻辑时按需开关就好。项目里的代码规范和目录约定尽量写进 `.cursor/rules` 或仓库根目录的 `AGENTS.md`，比每次在聊天框里重复强调管用得多。
+
+官方 Pro 订阅不算便宜。国内常见做法是闲鱼买号或拼车，我自己早期也走过，图的是先把工具用起来。但真要用在日常开发里，得看清评价和成交，别把唯一的工作环境绑在来路不明的共享号上，更不要和主力账号混用——封号、掉线、额度被挤占都得自己兜底。预算允许的话，官方渠道省心很多。
+
+## Google Antigravity 与 Gemini 4 系列
+
+最近用得越来越多的一块，是谷歌推出的 [Antigravity](https://antigravity.google)（圈里常直接叫「反重力」）。
+
+和传统「编辑器里塞一个聊天侧边栏」不太一样，Antigravity 更像一整套围绕 Agent 组织起来的开发平台：有独立的桌面应用、IDE 和命令行工具 `agy`，原生支持 `AGENTS.md`、`.agents/skills/`、MCP、定时任务、子代理协作和内置浏览器验证。像写完前端改动顺手让它开页面检查、或者把固定流程沉淀成仓库里的本地 skill，用起来会比单纯聊天省事不少。
+
+真正让我把 Antigravity 留在日常桌面里的，其实是谷歌最近这波 **Gemini 4** 系列模型——它们不再按旧的 Pro / Flash 线硬分高下，而是用化学元素按「推理深度、速度和成本」划出了很清楚的分工：
+
+| 模型 | 定位 | 适合干什么 |
+| --- | --- | --- |
+| **Gemini 4 Neon** | 中坚主力（甜点位） | 日常主力：仓库级改码、多步 Agent 循环、方案推演与长文整理 |
+| **Gemini 4 Carbon** | 重型旗舰 | 真正难啃的硬骨头：复杂架构权衡、深水区排错、长程推理 |
+| **Gemini 4 Hydrogen** | 轻量高速执行 | 常规改动、写脚本、跑验证、低延迟交互和子任务执行 |
+
+这几个里我自己最常用的是 **Gemini 4 Neon**。它是从旗舰 Carbon 演化出来的，推理深度和代码质量已经非常接近顶配，但跑完整条任务更干脆，废话少、输出更克制，而且 1M 统一上下文读大仓库很稳。还有一个很实用的体感是**中途纠偏顺手**：任务跑到一半发现方向偏了，直接打断补一句约束，Neon 能很快顺着新要求接着改，不太会出现「嘴上答应改了，手还在按旧思路硬跑」的拧巴感。
+
+Antigravity 里还可以用 **Orchestrator** 思路把模型拆开配：让 **Neon** 负责前期拆解、读仓库和定方案，把常规改文件、跑命令这类脏活累活交给更快的 **Hydrogen**，遇到卡点再切回高思考档位。这样既保住了规划质量，又不至于改个小样式也烧旗舰额度。
+
+当然也没必要神化任何一家模型。Gemini 4 系列现在很能打，但额度、网络环境和不同任务上的口味差异依然存在，把它当成和 Claude Code、Codex 并列的常用主力之一，按任务切着来，比押宝单一家稳得多。
 
 ## Claude Code
 
-Anthropic 的命令行 Agent，项目目录里跑 `claude`。适合丢一件完整的事：修 bug、补测试、按现有风格改一页。人可以先去干别的。
+Anthropic 的命令行 Agent，在项目目录里直接跑 `claude`。它最适合接那种「边界清楚、不需要人一直盯着像素」的完整任务：修一个能复现的 bug、补一组自动化测试、或者按既有规范重构一整个模块。交代清楚之后，人就可以切去做别的事。
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
 
-官方说明：[Claude Code](https://docs.anthropic.com/en/docs/claude-code)。
+官方文档见 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)。
 
-和 Cursor 的分工：人还在编辑器里、要盯 UI，用 Cursor；任务边界清楚、可以异步，丢 Claude Code。它会读仓库里的 `CLAUDE.md` / `AGENTS.md`，约定写在文件里比写在聊天记录里有用。
+它和 Cursor、Antigravity 的分工其实很简单：手还在编辑器里盯界面细节，用 Cursor；想在独立应用里跑多步规划、调技能或用 Gemini 4 Neon，开 Antigravity；终端里随手丢一个边界明确、可异步跑完的任务，交给 Claude Code。它同样会读仓库里的 `CLAUDE.md` 和 `AGENTS.md`，约定落在文件里，换哪家 Agent 都能直接复用。
 
 ## Codex
 
-自己当 **App** 用，下载登录开仓库都在应用里。仓库：[openai/codex](https://github.com/openai/codex)
+我主要把它当 **桌面 App** 用，登录、开仓库、并行跑任务都在应用里完成。仓库见 [openai/codex](https://github.com/openai/codex)。
 
-订阅走 **土耳其区 Apple 礼品卡**，充值后再买。自己这档大概 **70 多人民币一个月**，差不多官方一半。**新开账户已经没这个价**，是旧号续上的，别按这个数去开新号。礼品卡走靠谱渠道，区和 Apple ID 别跟主力国区混。
+订阅走的是 **土耳其区 Apple 礼品卡**，充值后再续费，自己这档大概 **70 多人民币一个月**，差不多官方原价的一半。需要提前说明的是，**新开账号已经拿不到这个价格了**，只是旧号一路续下来的老价，别按这个数去算新号成本。礼品卡挑靠谱渠道，外区 Apple ID 也别和主力国区混在一起。
 
-用法是 Claude Code 的备胎和第二视角：同一件事两边各跑一遍；Claude 不稳或更想用 OpenAI 口味时切过去。App 走苹果订阅，不用再给 Codex 配 CLI 供应商。
+我现在基本成了半个「Codex 驾驶员」：很多边界清晰的重活、跨文件改动，或者 Claude 这边状态不稳、想换一套 OpenAI 口味思路时，就会丢给 Codex 跑一遍。同一个棘手问题，拿 Codex 和 Claude Code 或 Gemini 4 Neon 交叉看一遍，往往比盯着单个模型反复追问更快定位问题。
+
+## Typeless
+
+[Typeless](https://www.typeless.com) 是最近让我觉得「早该装上」的一个工具——表面上看它是 AI 语音输入法，实际上它解决的是**跟 AI 沟通时的输入摩擦**。
+
+以前不是没试过系统自带语音听写，但老式听写是「逐字照抄」：说话时带的「嗯、那个、不对前面删掉重来」全给你留着，最后改错别字和顺语序的时间，比自己敲键盘还长。Typeless 的思路不同，它在后台用大模型把口语实时整理成通顺文字：自动去掉口癖和重复，话说到一半自己改口也能顺手修正，需要分点时还能自动排好结构。在 macOS 上按住快捷键（默认 `Fn`）直接开口，松手就把整理好的句子落到当前光标处，Cursor、Antigravity、Codex、浏览器、文档都能直接用。
+
+它真正好用的场景，反而不是写多正式的公文，而是**给 Agent 交代复杂需求**和**打博客初稿**：
+- 改一个功能时，把背景、边界条件、不要动的旧逻辑一口气说出来，往往三四十秒就能给出两三百字上下文——要是靠敲键盘，人一懒就容易只打一句「帮我优化一下这里」，结果模型猜错方向，来回返工更费时间。
+- 写长文想不起怎么起头时，先口述一版粗糙想法，再回头删改，比盯着空白编辑器憋第一句话轻松太多。
+
+缺点也要说在前面：第一，办公室人多或者环境吵的时候不太方便开口；第二，中英混排时，冷门技术词、缩写或同音词偶尔还是会识别歪（比如把「应用」听成「英语」这种小乌龙），发给 Agent 之前最好扫一眼代码标识符和关键专有名词；第三，它的付费版并不算便宜，先用免费额度试一周，确认自己真的养成了说话输入的习惯再决定要不要订阅。
 
 ## Codex 雷达
 
-额度够不够、模型有没有降智、社区体感怎么样，自己看 [Codex 雷达](https://codexradar.com/)。Max 推理怎么开、DeepSeek 怎么接到 Codex，那边也有现成说明。
+额度还剩多少、最近某家模型有没有「降智」、社区整体体感怎么样，我平时会去 [Codex 雷达](https://codexradar.com/) 瞄一眼。上面也有开高推理档位、把 DeepSeek 接到 Codex 这类现成教程，省得自己到处翻帖子。
 
 ## CC Switch
 
-Claude Code 换供应商以前要改 `~/.claude` 和环境变量，渠道一多就乱。[CC Switch](https://cc-switch.cc/) 是桌面应用，供应商、MCP、Skills 点一下切。GitHub：[farion1231/cc-switch](https://github.com/farion1231/cc-switch)
+以前给 Claude Code 换供应商要手动改 `~/.claude` 配置和环境变量，渠道一多很容易改乱。[CC Switch](https://cc-switch.cc/) 把供应商、MCP 和 Skills 做成了桌面托盘切换。仓库见 [farion1231/cc-switch](https://github.com/farion1231/cc-switch)。
 
-自己加官方、DeepSeek、GLM，托盘启用。Claude Code 多数能热切换。解决的不是模型更聪明，是**同一套 CLI 换后端**：额度紧了切 DeepSeek，要国产切 GLM，再切回官方。
+我里面常备官方渠道、DeepSeek 和 GLM，托盘里点一下就能热切。它解决的不是「让模型突然变聪明」，而是**同一套 CLI 随时换后端**：官方额度吃紧切 DeepSeek，想测国产模型切 GLM，要干重活再切回官方。
 
 ## DeepSeek 开发者平台
 
-[deepseek.com](https://www.deepseek.com/) 是聊天，[platform.deepseek.com](https://platform.deepseek.com/) 是 API。给工具、脚本、Claude Code 当后端用后者。
+[deepseek.com](https://www.deepseek.com/) 是日常网页对话，[platform.deepseek.com](https://platform.deepseek.com/) 才是给开发工具接的 API。
 
-接口兼容 OpenAI（`https://api.deepseek.com`）和 Anthropic（`https://api.deepseek.com/anthropic`），改 `base_url` 和 key 就能接。常用 `deepseek-v4-flash` / `deepseek-v4-pro`。国内直连、便宜，官方额度紧时当兜底。Key 存环境变量，文档：[DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/)
+它同时兼容 OpenAI（`https://api.deepseek.com`）和 Anthropic（`https://api.deepseek.com/anthropic`）两套协议，改一下 `base_url` 和密钥就能挂进脚本或 CLI。平时常用 `deepseek-v4-flash` / `deepseek-v4-pro`，便宜、国内直连，拿来做自动化脚本和官方额度见底时的兜底很合适。密钥统一放环境变量里，别写进仓库。文档见 [DeepSeek 文档](https://api-docs.deepseek.com/zh-cn/)。
 
-## 怎么叠
+## 这套工具现在怎么叠
 
-1. 打开仓库先开 **Cursor**
-2. 任务变长、可以异步，丢 **Claude Code**
-3. 换渠道用 **CC Switch**，DeepSeek 当便宜兜底
-4. 换思路或 Claude 不好用，开 **Codex App**；额度/降智看 [Codex 雷达](https://codexradar.com/)
-5. 本机常驻、微信当入口，用 [Hermes](/blog/26-08-17-hermes/#hermes-agent)
-6. CLI 订阅要给别的客户端当 API 用，用 [CLIProxyAPI](/blog/26-08-17-hermes/#cliproxyapi)
+1. 盯界面、小步改代码，先开 **Cursor**。
+2. 需要多步规划、用本地 skills、或者想跑 **Gemini 4 Neon / Carbon / Hydrogen**，开 **Antigravity**。
+3. 边界清晰、可异步跑完的仓库任务，丢 **Claude Code** 或 **Codex App**；状态和额度看 [Codex 雷达](https://codexradar.com/)。
+4. 需求背景长、懒得敲一大段字时，直接用 **Typeless** 语音说出来，再扫一眼专有名词。
+5. 切换 CLI 供应商用 **CC Switch**，**DeepSeek** 做便宜兜底。
+6. 本机常驻、微信当入口用 [Hermes](/blog/26-08-17-hermes/#hermes-agent)；CLI 订阅要转成标准 API 给别的客户端用，再开 [CLIProxyAPI](/blog/26-08-17-hermes/#cliproxyapi)。
 
-工具会换。比较稳的是：约定写进规则文件，自己审 diff，不要把「能跑」当成「对」。
+## 最近的一些心得
+
+工具列表隔几个月就会洗牌，下面这几点反而比具体装了哪个软件更值得留下来。
+
+- **重心从「写代码」挪到了「拆问题」和「审代码」**：这半年最大的体感，是自己越来越像个「驾驶员」——从前骑自行车，每踩一脚都要自己出力；现在像开车，手脚动作轻了，但路况预判和方向掌控反倒更值钱。生成代码的边际成本已经掉到很低，真正贵的是**识别什么不该做、看懂 diff 里藏着的隐患，以及在模型一本正经胡说时立刻踩刹车**。基本功不牢，模型越快，制造「能跑但全是雷的代码」的速度也就越快。
+- **瓶颈不再是敲键盘，而是把约束说清楚**：很多人抱怨 AI 写出来的东西「不对味」，拆开看十有八九是上下文没给够。把反复要讲的项目规矩写进 `AGENTS.md`、`.cursor/rules` 和 `.agents/skills/`，再配像 Typeless 这样低摩擦的输入方式把当下任务的边界说透，收益远高于到处背什么「万能神级 Prompt」。
+- **放弃「寻找唯一最强模型」，按任务分层用**：每隔一两个月榜单都会换一轮第一。比起频繁焦虑要不要整体迁移，更稳的办法是把任务分层——常规改码与交互走中坚主力（比如 Gemini 4 Neon 或日常 IDE），难啃的架构决策才动用旗舰（如 Carbon 或高推理档位），批处理和脚本走高性价比 API（如 DeepSeek 或 Hydrogen）。把约定留在仓库文件里，而不是绑死在某一家客户端的聊天记录里，谁降智了就能随时平滑切走。
+- **前端边界在化开，软技能和业务理解越来越显眼**：现在靠着这一堆 Agent，一个人顺手写前端、补脚本、改后端接口、跑端到端测试已经变成常态，纯按「切页面 / 写 CRUD」划分的岗位边界确实越来越模糊。代码产出被拉平之后，能把需求背后的业务目标问明白、把复杂问题拆成清楚的阶段、顺畅地跟人对齐预期，反而成了更难被替代的部分。
+- **警惕「折腾工具带来的虚假忙碌感」**：这点也是提醒我自己。装新客户端、配代理、调 MCP、逛排行榜都很容易给人一种「我今天学了很多先进生产力」的错觉，但回头一看，正事一行没推。一个很简单的检验标准：**这个工具到底缩短了我从想法到可用 diff 的距离，还是只是让我换了个更花哨的姿势整理书桌？**
+
+工具一定会继续换，明年回头看这篇，上面一半名字大概又会被新东西顶掉。但有几件笨事应该短期内都不会过时：把约定写进仓库文件，给足上下文再让 AI 动手，永远自己审 diff，别把「能跑」当成「对」。

@@ -1,4 +1,5 @@
 import type { Locale } from '../i18n/config'
+import { getDefaultOgImageSrc } from '../config/image'
 import { localizedPath } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
 
@@ -132,14 +133,14 @@ export function getSiteConfig(locale: Locale): SiteConfig {
     language: metadata.language,
     locale: metadata.locale,
     keywords: [...metadata.keywords],
-    image: siteConfig.image
-      ? { ...siteConfig.image, alt: metadata.imageAlt }
-      : undefined,
+    image: {
+      src: getDefaultOgImageSrc(),
+      alt: metadata.imageAlt,
+    },
     headerNavLinks: [
       { text: t.nav.post, href: localizedPath(locale, '/post/') },
       { text: t.nav.blog, href: localizedPath(locale, '/blog/') },
-      { text: t.nav.projects, href: localizedPath(locale, '/projects/') },
-      { text: t.nav.tags, href: localizedPath(locale, '/tags/') },
+      { text: t.nav.friends, href: localizedPath(locale, '/friends/') },
       { text: t.nav.about, href: localizedPath(locale, '/about/') },
     ],
     socialLinks: siteConfig.socialLinks?.map(link => link.text === 'RSS'

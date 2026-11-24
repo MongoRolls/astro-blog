@@ -3,271 +3,676 @@ import type { Locale } from '../i18n/config'
 import { defaultLocale } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
 
+interface Heading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface TocGroup {
+  heading: Heading
+  children: Heading[]
+}
+
 interface Props {
-  headings: { depth: number, slug: string, text: string }[]
+  headings: Heading[]
   locale?: Locale
+}
+
+function buildTocGroups(headings: Heading[]): TocGroup[] {
+  const tocHeadings = headings.filter(({ depth }) => depth === 2 || depth === 3)
+  const groups: TocGroup[] = []
+
+  for (const heading of tocHeadings) {
+    const lastGroup = groups.at(-1)
+    if (heading.depth === 3 && lastGroup?.heading.depth === 2)
+      lastGroup.children.push(heading)
+    else
+      groups.push({ heading, children: [] })
+  }
+
+  return groups
 }
 
 const { headings, locale = defaultLocale } = Astro.props
 const t = useTranslations(locale)
-const toc = headings.filter(({ depth }) => depth === 2 || depth === 3)
-const groups: { heading: typeof toc[number], children: typeof toc }[] = []
-for (const heading of toc) {
-  if (heading.depth === 3 && groups.at(-1)?.heading.depth === 2)
-    groups.at(-1)!.children.push(heading)
-  else
-    groups.push({ heading, children: [] })
-}
+const groups = buildTocGroups(headings)
+const headingTitle = locale === 'en' ? 'On this page' : t.common.content
+const togglePrefix = locale === 'en' ? 'Toggle subsections: ' : '展开或收起子章节：'
+const progressLabel = locale === 'en' ? 'Reading progress' : '阅读进度'
 ---
 
-<nav data-pagefind-ignore class="toc" aria-label={t.common.content}>
-  <div class="toc-panel">
-    <div class="toc-scroll">
-      <div class="toc-outline">
-        <span class="toc-indicator" aria-hidden="true"></span>
-        <ul class="toc-list">
-          {groups.map(({ heading, children }, index) => (
-            <li class="toc-section">
-              <div class="toc-row">
-                <a class="toc-link toc-chapter" href={`#${heading.slug}`} data-heading-id={heading.slug}>{heading.text}</a>
-                {children.length > 0 && (
-                  <button class="toc-toggle" type="button" aria-label={`${locale === 'en' ? 'Toggle subsections:' : '展开或收起子章节：'}${heading.text}`} aria-expanded="true" aria-controls={`toc-children-${index}`}>
-                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="m5 6 3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                  </button>
-                )}
-              </div>
-              {children.length > 0 && (
-                <div class="toc-branch" id={`toc-children-${index}`}>
-                  <ul class="toc-children">
-                    {children.map(child => (
-                      <li><a class="toc-link" href={`#${child.slug}`} data-heading-id={child.slug}>{child.text}</a></li>
-                    ))}
-                  </ul>
+{groups.length > 0 && (
+  <nav data-pagefind-ignore class="toc" aria-label={t.common.content}>
+    <div class="toc-panel">
+      <div class="toc-header">
+        <span class="toc-title">{headingTitle}</span>
+      </div>
+
+      <div class="toc-scroll">
+        <div class="toc-outline">
+          <span class="toc-indicator" aria-hidden="true"></span>
+          <ul class="toc-list">
+            {groups.map(({ heading, children }, index) => (
+              <li class="toc-section">
+                <div class="toc-row">
+                  <a
+                    class="toc-link toc-chapter"
+                    href={`#${heading.slug}`}
+                    data-heading-id={heading.slug}
+                  >
+                    {heading.text}
+                  </a>
+                  {children.length > 0 && (
+                    <button
+                      class="toc-toggle"
+                      type="button"
+                      aria-label={`${togglePrefix}${heading.text}`}
+                      aria-expanded="true"
+                      aria-controls={`toc-children-${index}`}
+                    >
+                      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                        <path
+                          d="m5 6 3 3 3-3"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
+
+                {children.length > 0 && (
+                  <div class="toc-branch" id={`toc-children-${index}`}>
+                    <ul class="toc-children">
+                      {children.map(child => (
+                        <li>
+                          <a
+                            class="toc-link toc-sublink"
+                            href={`#${child.slug}`}
+                            data-heading-id={child.slug}
+                          >
+                            {child.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div class="toc-footer">
+        <div class="toc-status">
+          <span
+            class="toc-progress"
+            role="progressbar"
+            aria-label={progressLabel}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+              <circle class="toc-ring-track" cx="10" cy="10" r="7" />
+              <circle class="toc-ring" cx="10" cy="10" r="7" pathLength="100" />
+            </svg>
+            <span class="toc-percent">0%</span>
+          </span>
+
+          <button class="toc-top" type="button">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+              <path
+                d="M8 12V4m-4 4 4-4 4 4"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>{t.common.backToTop}</span>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="toc-footer">
-      <svg class="toc-divider" viewBox="0 0 160 12" fill="none" aria-hidden="true"><path d="M1 5C18 10 28 10 42 6S65 2 81 5s24 5 40 1 24-3 38-1" /></svg>
-      <div class="toc-status">
-        <span class="toc-progress" role="progressbar" aria-label={locale === 'en' ? 'Reading progress' : '阅读进度'} aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle class="toc-ring-track" cx="10" cy="10" r="7" /><circle class="toc-ring" cx="10" cy="10" r="7" pathLength="100" /></svg>
-          <span class="toc-percent">0%</span>
-        </span>
-        <button class="toc-top" type="button">
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M8 12V4m-4 4 4-4 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
-          {t.common.backToTop}
-        </button>
-      </div>
-    </div>
-  </div>
-</nav>
+  </nav>
+)}
 
 <style>
   .toc {
-    --toc-ink: #425bc5;
+    --toc-accent: rgb(var(--color-brand));
     height: 100%;
     min-width: 0;
     padding-left: 1.5rem;
   }
 
-  :global(html.dark) .toc { --toc-ink: rgb(var(--color-primary)); }
-  .toc-panel { position: sticky; top: 6rem; display: flex; flex-direction: column; max-height: calc(100dvh - 8rem); }
-  .toc-scroll { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(var(--color-border-card)) transparent; padding: 4px; }
-  .toc-outline { position: relative; }
-  .toc-list, .toc-children { list-style: none; padding: 0; margin: 0; }
-  .toc-row { display: flex; align-items: flex-start; }
+  .toc-panel {
+    position: sticky;
+    top: 6rem;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 8rem);
+  }
+
+  .toc-header {
+    flex-shrink: 0;
+    padding: 0 0.25rem 0.65rem;
+  }
+
+  .toc-title {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgb(var(--color-text-muted));
+  }
+
+  .toc-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-border-card)) transparent;
+    padding: 0.125rem 0.25rem 0.25rem 0;
+  }
+
+  .toc-outline {
+    position: relative;
+    border-left: 1px solid rgb(var(--color-border-card) / 0.55);
+  }
+
+  .toc-list,
+  .toc-children {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-row {
+    display: flex;
+    align-items: flex-start;
+  }
+
   .toc-link {
     display: block;
     min-width: 0;
-    padding: 3px 4px 3px 15px;
+    padding: 0.22rem 0.35rem 0.22rem 0.85rem;
+    border-radius: 0.375rem;
     color: rgb(var(--color-text-muted));
     font-size: 0.8125rem;
-    line-height: 1.65;
+    line-height: 1.55;
     text-decoration: none;
     overflow-wrap: anywhere;
+    transition: color 180ms ease, background-color 180ms ease;
+  }
+
+  .toc-chapter {
+    flex: 1;
+  }
+
+  .toc-sublink {
+    padding-left: 1.5rem;
+    font-size: 0.75rem;
+  }
+
+  .toc-link:hover {
+    color: rgb(var(--color-text-main));
+    background-color: rgb(var(--color-bg-muted) / 0.55);
+  }
+
+  .toc-section[data-current] > .toc-row .toc-chapter {
+    color: var(--toc-accent);
+    font-weight: 500;
+  }
+
+  .toc-link[aria-current='location'] {
+    color: var(--toc-accent);
+    font-weight: 600;
+  }
+
+  .toc-branch {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition: grid-template-rows 220ms ease, opacity 180ms ease;
+  }
+
+  .toc-children {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .toc-branch[data-collapsed] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+
+  .toc-toggle {
+    display: none;
+    flex: 0 0 1.5rem;
+    min-height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 0;
+    border-radius: 0.25rem;
+    color: rgb(var(--color-text-muted));
+    cursor: pointer;
     transition: color 180ms ease;
   }
 
-  .toc-chapter { flex: 1; }
-  .toc-link:hover { color: rgb(var(--color-text-main)); }
-  .toc-section[data-current] > .toc-row .toc-chapter { color: var(--toc-ink); font-weight: 500; }
-  .toc-link[aria-current="location"] { color: var(--toc-ink); font-weight: 600; }
-  .toc-children .toc-link { padding-left: 26px; font-size: 0.75rem; }
-  .toc-branch { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 240ms ease, opacity 180ms ease; }
-  .toc-children { min-height: 0; overflow: hidden; }
-  .toc-branch[data-collapsed] { grid-template-rows: 0fr; opacity: 0; }
+  .toc[data-ready] .toc-toggle {
+    display: flex;
+  }
 
-  .toc-toggle { display: none; flex: 0 0 24px; min-height: 28px; align-items: center; justify-content: center; background: none; border: 0; color: rgb(var(--color-text-muted)); cursor: pointer; }
-  .toc[data-ready] .toc-toggle { display: flex; }
-  .toc-toggle:hover { color: var(--toc-ink); }
-  .toc-toggle svg { transition: transform 200ms ease; }
-  .toc-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
-  .toc-link:focus-visible, .toc-toggle:focus-visible, .toc-top:focus-visible { outline: 2px solid var(--toc-ink); outline-offset: -1px; border-radius: 3px; }
+  .toc-toggle:hover {
+    color: var(--toc-accent);
+  }
+
+  .toc-toggle svg {
+    transition: transform 200ms ease;
+  }
+
+  .toc-toggle[aria-expanded='false'] svg {
+    transform: rotate(-90deg);
+  }
+
+  .toc-link:focus-visible,
+  .toc-toggle:focus-visible,
+  .toc-top:focus-visible {
+    outline: 2px solid var(--toc-accent);
+    outline-offset: -1px;
+    border-radius: 0.25rem;
+  }
 
   .toc-indicator {
     display: none;
     position: absolute;
-    left: 0;
+    left: -1.5px;
     top: 0;
     width: 2px;
-    border-radius: 2px;
-    background: linear-gradient(to bottom, var(--toc-ink) 80%, transparent);
-    box-shadow: 0 0 6px color-mix(in srgb, var(--toc-ink) 25%, transparent);
+    height: 0;
+    border-radius: 9999px;
+    background-color: var(--toc-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--toc-accent) 30%, transparent);
     pointer-events: none;
-    transition: top 280ms cubic-bezier(0.4, 0, 0.2, 1), height 240ms ease;
+    transform: translateY(0);
+    transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1), height 200ms ease, opacity 180ms ease;
   }
 
-  .toc[data-ready] .toc-indicator { display: block; }
-  .toc-footer { display: none; flex-shrink: 0; padding: 10px 4px 0; }
-  .toc[data-ready] .toc-footer { display: block; }
-  .toc-divider { width: 140px; max-width: 85%; height: 12px; color: rgb(var(--color-border-card)); }
-  .toc-divider path { stroke: currentColor; stroke-width: 1; }
-  .toc-status { display: flex; flex-wrap: wrap; align-items: center; column-gap: 16px; margin-top: 5px; }
-  .toc-progress { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; color: rgb(var(--color-text-main)); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
-  .toc-progress circle { fill: none; stroke-width: 1.8; }
-  .toc-ring-track { stroke: rgb(var(--color-border-card)); }
-  .toc-ring { stroke: var(--toc-ink); stroke-dasharray: 100; stroke-dashoffset: var(--remaining, 100); transform: rotate(-90deg); transform-origin: center; stroke-linecap: round; }
-  .toc-top { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; border: 0; padding: 0; background: none; font-size: 0.6875rem; color: rgb(var(--color-text-muted)); cursor: pointer; }
-  .toc-top:hover { color: var(--toc-ink); }
-  @media (pointer: coarse) { .toc-toggle, .toc-top { min-height: 44px; } }
+  .toc[data-ready] .toc-indicator {
+    display: block;
+  }
+
+  .toc-footer {
+    display: none;
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgb(var(--color-border-card) / 0.6);
+  }
+
+  .toc[data-ready] .toc-footer {
+    display: block;
+  }
+
+  .toc-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .toc-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2rem;
+    color: rgb(var(--color-text-main));
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .toc-progress circle {
+    fill: none;
+    stroke-width: 1.9;
+  }
+
+  .toc-ring-track {
+    stroke: rgb(var(--color-border-card) / 0.8);
+  }
+
+  .toc-ring {
+    stroke: var(--toc-accent);
+    stroke-dasharray: 100;
+    stroke-dashoffset: var(--remaining, 100);
+    transform: rotate(-90deg);
+    transform-origin: center;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 120ms linear;
+  }
+
+  .toc-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2rem;
+    border: 0;
+    padding: 0 0.25rem;
+    border-radius: 0.25rem;
+    background: none;
+    font-size: 0.75rem;
+    color: rgb(var(--color-text-muted));
+    cursor: pointer;
+    transition: color 180ms ease, opacity 180ms ease;
+  }
+
+  .toc-top:hover {
+    color: var(--toc-accent);
+  }
+
+  @media (pointer: coarse) {
+    .toc-toggle,
+    .toc-top {
+      min-height: 44px;
+    }
+  }
+
   @media (min-width: 1024px) {
-    :global(body:has(.toc[data-ready]) .reading-progress), :global(body:has(.toc[data-ready]) .back-to-top) { display: none; }
+    :global(body:has(.toc[data-ready]) .back-to-top) {
+      display: none;
+    }
   }
 </style>
 
 <script>
+interface TocEntry {
+  link: HTMLAnchorElement
+  heading: HTMLElement
+  sectionIndex: number
+  top: number
+}
+
+interface TocSectionRef {
+  element: HTMLElement
+  chapter: TocEntry
+  branch: HTMLElement | null
+  toggle: HTMLButtonElement | null
+}
+
+interface ScrollMetrics {
+  offset: number
+  startY: number
+  endY: number
+}
+
 let disposeTableOfContents = () => {}
 
-document.addEventListener('astro:page-load', () => {
+function collectTocRefs(nav: HTMLElement) {
+  const sectionElements = Array.from(nav.querySelectorAll<HTMLElement>('.toc-section'))
+  const sections: TocSectionRef[] = []
+  const entries: TocEntry[] = []
+
+  for (const element of sectionElements) {
+    const chapterLink = element.querySelector<HTMLAnchorElement>('.toc-chapter[data-heading-id]')
+    const chapterHeading = chapterLink?.dataset.headingId
+      ? document.getElementById(chapterLink.dataset.headingId)
+      : null
+
+    if (!chapterLink || !chapterHeading)
+      continue
+
+    const sectionIndex = sections.length
+    const chapter: TocEntry = {
+      link: chapterLink,
+      heading: chapterHeading,
+      sectionIndex,
+      top: 0,
+    }
+    entries.push(chapter)
+
+    const branch = element.querySelector<HTMLElement>('.toc-branch')
+    const toggle = element.querySelector<HTMLButtonElement>('.toc-toggle')
+    const childLinks = branch
+      ? Array.from(branch.querySelectorAll<HTMLAnchorElement>('[data-heading-id]'))
+      : []
+
+    for (const childLink of childLinks) {
+      const childHeading = childLink.dataset.headingId
+        ? document.getElementById(childLink.dataset.headingId)
+        : null
+      if (childHeading) {
+        entries.push({
+          link: childLink,
+          heading: childHeading,
+          sectionIndex,
+          top: 0,
+        })
+      }
+    }
+
+    sections.push({ element, chapter, branch, toggle })
+  }
+
+  return { sections, entries }
+}
+
+function measureLayout(entries: TocEntry[], content: HTMLElement): ScrollMetrics {
+  const offset = Number.parseFloat(getComputedStyle(entries[0].heading).scrollMarginTop) || 96
+  for (const entry of entries)
+    entry.top = entry.heading.getBoundingClientRect().top + window.scrollY
+
+  const contentRect = content.getBoundingClientRect()
+  const contentTop = contentRect.top + window.scrollY
+  const contentBottom = contentRect.bottom + window.scrollY
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+
+  const startY = Math.max(0, Math.min(contentTop, entries[0].top) - offset)
+  const contentEndY = contentBottom - window.innerHeight * 0.75
+  const rawEndY = Math.min(contentEndY, maxScroll)
+  const endY = rawEndY > startY ? rawEndY : Math.max(startY + 1, maxScroll)
+
+  return { offset, startY, endY }
+}
+
+function computeReadingProgress(scrollY: number, metrics: ScrollMetrics) {
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+  if (maxScroll <= 0 || scrollY >= maxScroll - 2)
+    return 100
+  if (scrollY <= metrics.startY)
+    return 0
+  const ratio = (scrollY - metrics.startY) / Math.max(metrics.endY - metrics.startY, 1)
+  return Math.min(100, Math.max(0, Math.round(ratio * 100)))
+}
+
+function resolveActiveEntry(entries: TocEntry[], scrollY: number, offset: number) {
+  const atPageBottom = window.innerHeight + scrollY >= document.documentElement.scrollHeight - 4
+  if (atPageBottom)
+    return entries.at(-1)!
+
+  const probe = scrollY + offset + 8
+  let active = entries[0]
+  for (const entry of entries) {
+    if (entry.top > probe)
+      break
+    active = entry
+  }
+  return active
+}
+
+function syncBranches(
+  sections: TocSectionRef[],
+  activeChapterIndex: number,
+  overrides: Map<number, boolean>,
+) {
+  sections.forEach(({ element, branch, toggle }, index) => {
+    element.toggleAttribute('data-current', index === activeChapterIndex)
+    if (!branch || !toggle)
+      return
+
+    // 保留键盘焦点所在子目录的展开状态，避免焦点丢失
+    const expanded = branch.contains(document.activeElement)
+      || (overrides.get(index) ?? index === activeChapterIndex)
+    branch.toggleAttribute('data-collapsed', !expanded)
+    branch.inert = !expanded
+    branch.setAttribute('aria-hidden', String(!expanded))
+    toggle.setAttribute('aria-expanded', String(expanded))
+  })
+}
+
+function syncIndicator(indicator: HTMLElement, outline: HTMLElement, targetLink: HTMLAnchorElement) {
+  const outlineRect = outline.getBoundingClientRect()
+  const linkRect = targetLink.getBoundingClientRect()
+  const top = Math.max(0, linkRect.top - outlineRect.top + 4)
+  const height = Math.max(16, linkRect.height - 8)
+  indicator.style.transform = `translateY(${top}px)`
+  indicator.style.height = `${height}px`
+}
+
+function keepLinkVisible(scroller: HTMLElement, nav: HTMLElement, targetLink: HTMLAnchorElement) {
+  if (nav.contains(document.activeElement))
+    return
+  const rect = targetLink.getBoundingClientRect()
+  const viewport = scroller.getBoundingClientRect()
+  if (rect.top < viewport.top || rect.bottom > viewport.bottom)
+    scroller.scrollTop += rect.top - viewport.top - scroller.clientHeight / 2
+}
+
+function mountTableOfContents() {
   disposeTableOfContents()
+
   const nav = document.querySelector<HTMLElement>('.toc')
   if (!nav)
     return
-  const scroller = nav.querySelector<HTMLElement>('.toc-scroll')!
-  const outline = nav.querySelector<HTMLElement>('.toc-outline')!
-  const indicator = nav.querySelector<HTMLElement>('.toc-indicator')!
-  const progress = nav.querySelector<HTMLElement>('.toc-progress')!
-  const percentLabel = nav.querySelector<HTMLElement>('.toc-percent')!
-  const sections = Array.from(nav.querySelectorAll<HTMLElement>('.toc-section'))
-  const entries = Array.from(nav.querySelectorAll<HTMLAnchorElement>('[data-heading-id]'))
-    .flatMap((link) => {
-      const heading = document.getElementById(link.dataset.headingId!)
-      return heading ? [{ link, heading, top: 0 }] : []
-    })
-  if (!entries.length)
+
+  const scroller = nav.querySelector<HTMLElement>('.toc-scroll')
+  const outline = nav.querySelector<HTMLElement>('.toc-outline')
+  const indicator = nav.querySelector<HTMLElement>('.toc-indicator')
+  const progress = nav.querySelector<HTMLElement>('.toc-progress')
+  const percentLabel = nav.querySelector<HTMLElement>('.toc-percent')
+  const topButton = nav.querySelector<HTMLButtonElement>('.toc-top')
+  if (!scroller || !outline || !indicator || !progress || !percentLabel || !topButton)
     return
-  const content = entries[0].heading.closest<HTMLElement>('.prose') ?? entries[0].heading.closest('article')!
-  const chapters = sections.map(section => entries.find(entry => entry.link === section.querySelector('.toc-chapter'))!)
+
+  const { sections, entries } = collectTocRefs(nav)
+  if (!entries.length || !sections.length)
+    return
+
+  const content = entries[0].heading.closest<HTMLElement>('.prose')
+    ?? entries[0].heading.closest<HTMLElement>('article')
+  if (!content)
+    return
+
   const controller = new AbortController()
   const overrides = new Map<number, boolean>()
   let frame = 0
   let dirty = true
   let outlineChanged = true
-  let end = 0
-  let offset = 96
-  let activeChapter = -1
+  let metrics: ScrollMetrics = { offset: 96, startY: 0, endY: 1 }
+  let activeChapterIndex = -1
   let activeLink: HTMLAnchorElement | undefined
 
   const update = () => {
     frame = 0
     if (!nav.getClientRects().length)
       return
+
     if (dirty) {
-      offset = Number.parseFloat(getComputedStyle(entries[0].heading).scrollMarginTop) || 96
-      entries.forEach(entry => entry.top = entry.heading.getBoundingClientRect().top + window.scrollY)
-      end = Math.max(content.getBoundingClientRect().bottom + window.scrollY, entries.at(-1)!.top + 1)
+      metrics = measureLayout(entries, content)
       dirty = false
     }
-    const start = entries[0].top
-    const position = Math.min(Math.max(window.scrollY + offset + 2, start), end)
-    const percent = Math.round((position - start) / Math.max(end - start, 1) * 100)
+
+    const scrollY = window.scrollY
+    const percent = computeReadingProgress(scrollY, metrics)
     percentLabel.textContent = `${percent}%`
     progress.setAttribute('aria-valuenow', String(percent))
     progress.style.setProperty('--remaining', String(100 - percent))
-    let current = entries[0]
-    for (const entry of entries) {
-      if (entry.top > position)
-        break
-      current = entry
-    }
-    const chapterIndex = chapters.reduce((index, chapter, next) => chapter.top <= position ? next : index, 0)
-    if (chapterIndex !== activeChapter) {
-      activeChapter = chapterIndex
+
+    const currentEntry = resolveActiveEntry(entries, scrollY, metrics.offset)
+    const chapterIndex = currentEntry.sectionIndex
+    if (chapterIndex !== activeChapterIndex) {
+      activeChapterIndex = chapterIndex
       overrides.delete(chapterIndex)
     }
-    sections.forEach((section, index) => {
-      section.toggleAttribute('data-current', index === chapterIndex)
-      const branch = section.querySelector<HTMLElement>('.toc-branch')
-      const toggle = section.querySelector<HTMLButtonElement>('.toc-toggle')
-      if (!branch || !toggle)
-        return
-      // Never collapse the branch containing the reader's keyboard focus.
-      const expanded = branch.contains(document.activeElement) || (overrides.get(index) ?? index === chapterIndex)
-      branch.toggleAttribute('data-collapsed', !expanded)
-      branch.inert = !expanded
-      branch.setAttribute('aria-hidden', String(!expanded))
-      toggle.setAttribute('aria-expanded', String(expanded))
-    })
-    const branch = current.link.closest<HTMLElement>('.toc-branch')
-    const visibleLink = branch?.inert ? chapters[chapterIndex].link : current.link
+
+    syncBranches(sections, chapterIndex, overrides)
+
+    const activeSection = sections[chapterIndex]
+    const visibleLink = currentEntry.link.closest<HTMLElement>('.toc-branch')?.inert
+      ? activeSection.chapter.link
+      : currentEntry.link
+
     const activeChanged = activeLink !== visibleLink
     if (activeChanged) {
       activeLink?.removeAttribute('aria-current')
       activeLink = visibleLink
       activeLink.setAttribute('aria-current', 'location')
     }
-    if (activeChanged || outlineChanged) {
-      const rect = visibleLink.getBoundingClientRect()
-      const viewport = scroller.getBoundingClientRect()
-      if (!nav.contains(document.activeElement) && (rect.top < viewport.top || rect.bottom > viewport.bottom))
-        scroller.scrollTop += rect.top - viewport.top - scroller.clientHeight / 2
-    }
+
+    if (activeChanged || outlineChanged)
+      keepLinkVisible(scroller, nav, visibleLink)
+
     outlineChanged = false
-    const section = sections[chapterIndex]
-    indicator.style.top = `${section.offsetTop}px`
-    indicator.style.height = `${section.getBoundingClientRect().height}px`
+    syncIndicator(indicator, outline, visibleLink)
   }
+
   const schedule = () => {
     if (!frame)
       frame = requestAnimationFrame(update)
   }
+
   const remeasure = () => {
     dirty = true
     schedule()
   }
-  sections.forEach((section, index) => {
-    section.querySelector('.toc-toggle')?.addEventListener('click', (event) => {
-      const toggle = event.currentTarget as HTMLButtonElement
+
+  sections.forEach(({ toggle }, index) => {
+    toggle?.addEventListener('click', () => {
       overrides.set(index, toggle.getAttribute('aria-expanded') !== 'true')
+      outlineChanged = true
       schedule()
     }, { signal: controller.signal })
   })
+
   nav.addEventListener('focusout', schedule, { signal: controller.signal })
-  nav.querySelector('.toc-top')!.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+  topButton.addEventListener('click', () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' })
   }, { signal: controller.signal })
+
   window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal })
   window.addEventListener('resize', remeasure, { signal: controller.signal })
+
   const contentObserver = new ResizeObserver(remeasure)
   contentObserver.observe(content)
+
   const outlineObserver = new ResizeObserver(() => {
     outlineChanged = true
     schedule()
   })
   outlineObserver.observe(outline)
+
+  document.fonts?.ready.then(() => {
+    if (!controller.signal.aborted)
+      remeasure()
+  })
+
   nav.dataset.ready = ''
   update()
+
   disposeTableOfContents = () => {
     controller.abort()
     contentObserver.disconnect()
     outlineObserver.disconnect()
     cancelAnimationFrame(frame)
+    frame = 0
   }
-})
+}
 
+document.addEventListener('astro:page-load', mountTableOfContents)
 document.addEventListener('astro:before-swap', () => disposeTableOfContents())
 </script>

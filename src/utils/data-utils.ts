@@ -1,9 +1,72 @@
-import type { GetStaticPathsOptions } from 'astro'
 import type { CollectionEntry } from 'astro:content'
 import type { Locale } from '../i18n/config'
 import { getCollection } from 'astro:content'
 import { alternateLocale, defaultLocale, localizedPath } from '../i18n/config'
 import { slugify } from './common-utils'
+
+const TAG_TONE_COUNT = 5
+
+export interface PostTagBadge {
+  name: string
+  id: string
+  tone: number
+}
+
+function getTagTone(tagId: string) {
+  let hash = 0
+  for (const char of tagId) {
+    hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 2147483647
+  }
+  return hash % TAG_TONE_COUNT
+}
+
+export function getPostTagBadges(rawTags?: string[]): PostTagBadge[] {
+  const seen = new Set<string>()
+  const tags: PostTagBadge[] = []
+
+  for (const rawTag of rawTags ?? []) {
+    if (!rawTag)
+      continue
+    const id = slugify(rawTag)
+    if (!id || seen.has(id))
+      continue
+    seen.add(id)
+    tags.push({ name: rawTag, id, tone: getTagTone(id) })
+  }
+
+  return tags
+}
+
+export function getRelatedPosts(
+  currentPost: CollectionEntry<'blog'>,
+  allPosts: CollectionEntry<'blog'>[],
+  limit = 5,
+): CollectionEntry<'blog'>[] {
+  const currentTagIds = new Set(getPostTagBadges(currentPost.data.tags).map(tag => tag.id))
+  const candidates = allPosts.filter(candidate => candidate.id !== currentPost.id)
+
+  const scored = candidates.map((candidate) => {
+    const candidateTags = getPostTagBadges(candidate.data.tags)
+    let overlap = 0
+    for (const tag of candidateTags) {
+      if (currentTagIds.has(tag.id))
+        overlap += 1
+    }
+    return { post: candidate, overlap }
+  })
+
+  const matched = scored
+    .filter(item => item.overlap > 0)
+    .toSorted((a, b) => b.overlap - a.overlap || sortItemsByDateDesc(a.post, b.post))
+    .map(item => item.post)
+
+  if (matched.length >= limit)
+    return matched.slice(0, limit)
+
+  const matchedIds = new Set(matched.map(item => item.id))
+  const fallback = candidates.filter(candidate => !matchedIds.has(candidate.id))
+  return [...matched, ...fallback].slice(0, limit)
+}
 
 export function sortItemsByDateDesc(itemA: CollectionEntry<'blog'>, itemB: CollectionEntry<'blog'>) {
   return new Date(itemB.data.publishDate).getTime() - new Date(itemA.data.publishDate).getTime()
@@ -50,33 +113,6 @@ export function getPageUrl(page: CollectionEntry<'pages'>) {
   return localizedPath(page.data.lang, `/${getPageSlug(page)}/`)
 }
 
-export function getAllTags(posts: CollectionEntry<'blog'>[]) {
-  const tagsById = new Map<string, { name: string, id: string, value: number }>()
-
-  for (const post of posts) {
-    const seen = new Set<string>()
-    for (const tag of post.data.tags ?? []) {
-      if (!tag)
-        continue
-      const id = slugify(tag)
-      if (!id || seen.has(id))
-        continue
-      seen.add(id)
-      const existing = tagsById.get(id)
-      if (existing)
-        existing.value += 1
-      else
-        tagsById.set(id, { name: tag, id, value: 1 })
-    }
-  }
-
-  return [...tagsById.values()]
-}
-
-export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagId: string) {
-  return posts.filter(post => (post.data.tags ?? []).some(tag => slugify(tag) === tagId))
-}
-
 export async function getBlogPostStaticPaths(locale: Locale) {
   const now = new Date()
   const [posts, translatedPosts] = await Promise.all([
@@ -93,35 +129,10 @@ export async function getBlogPostStaticPaths(locale: Locale) {
       translation: translations.get(getPostTranslationKey(post)) ?? null,
       prevPost: index + 1 !== postCount ? posts[index + 1] : null,
       nextPost: index !== 0 ? posts[index - 1] : null,
+      relatedPosts: getRelatedPosts(post, posts, 5),
+      randomPostUrls: posts.filter(item => item.id !== post.id).map(getPostUrl),
     },
   }))
-}
-
-export async function getBlogArchiveStaticPaths(
-  locale: Locale,
-  paginate: GetStaticPathsOptions['paginate'],
-  pageSize: number,
-) {
-  const posts = await getPublishedBlogPosts(locale)
-  return paginate(posts, { pageSize })
-}
-
-export async function getTagPageStaticPaths(
-  locale: Locale,
-  paginate: GetStaticPathsOptions['paginate'],
-  pageSize: number,
-) {
-  const posts = await getPublishedBlogPosts(locale)
-  const tags = getAllTags(posts)
-
-  return tags.flatMap((tag) => {
-    const filteredPosts = getPostsByTag(posts, tag.id)
-    return paginate(filteredPosts, {
-      params: { id: tag.id },
-      props: { tagName: tag.name },
-      pageSize,
-    })
-  })
 }
 
 export async function getContentPageStaticPaths(locale: Locale) {

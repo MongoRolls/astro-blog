@@ -98,18 +98,18 @@ const navLinks = getSiteConfig(locale).headerNavLinks || [];
             width: 100%;
             padding: 0;
         }
-        .menu .nav-link {
+        .menu :global(.nav-link) {
             display: block;
             width: 100%;
             padding: 0.55rem 0.75rem;
-            border-radius: 0.5rem;
-            transition: color 0.15s ease, background-color 0.15s ease;
+            border-radius: 0.375rem;
+            background: transparent;
+            transition: color 0.15s ease;
         }
-        .menu .nav-link:hover,
-        .menu .nav-link:focus-visible {
-            color: rgb(var(--color-primary));
-            background: rgb(var(--color-text-main) / 0.07);
-            outline: none;
+        .menu :global(.nav-link:hover),
+        .menu :global(.nav-link:focus-visible) {
+            color: rgb(var(--color-brand));
+            background: transparent;
         }
         .menu.is-visible {
             @apply visible opacity-100;
@@ -201,20 +201,22 @@ const navLinks = getSiteConfig(locale).headerNavLinks || [];
 
     .menu :global(.nav-link) {
         display: block;
-        padding: 0.625rem 0.65rem;
-        border-radius: 999px;
+        padding: 0.375rem 0.65rem;
+        border-radius: 0.25rem;
         font-size: 1rem;
         white-space: nowrap;
-        transition: background-color 150ms ease;
+        background: transparent;
+        transition: color 150ms ease;
     }
 
     .menu :global(.nav-link:hover),
     .menu :global(.nav-link[aria-current="page"]) {
-        background: var(--link-bg-hover);
+        color: rgb(var(--color-brand));
+        background: transparent;
     }
 
     .menu :global(a:focus-visible) {
-        outline: 2px solid currentColor;
+        outline: 2px solid rgb(var(--color-brand));
         outline-offset: 2px;
     }
 

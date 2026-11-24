@@ -10,7 +10,6 @@
     --color-primary: 14, 165, 233; /* sky-500 */
     --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
     --color-brand: 66 91 197;
-    --color-accent-secondary: 232 121 249;
     --color-secondary: 236, 72, 153; /* pink-500 */
 
     /* 文本颜色 */
@@ -52,7 +51,6 @@
     --color-primary-dark: 180 190 254;
     --color-primary-glow: 180 190 254;
     --color-brand: 180 190 254;
-    --color-accent-secondary: 203 166 247;
     --color-secondary: 203, 166, 247;
     --color-border-main: 108 112 134;
     --color-border-card: 69 71 90;
@@ -87,6 +85,53 @@
   /* 侧边栏样式 */
   aside {
     @apply bg-gray-50 dark:bg-gray-800 p-3 rounded-lg;
+  }
+
+  /* 页面统一的二级栏目头部 */
+  .section-head {
+    margin-bottom: 1.25rem;
+  }
+
+  .section-head--divided {
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px dashed rgb(var(--color-border-card) / 0.8);
+  }
+
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: rgb(var(--color-text-main));
+  }
+
+  .section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.45rem;
+    height: 1.35rem;
+    padding-inline: 0.4rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--color-bg-muted));
+    color: rgb(var(--color-text-muted));
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .section-desc {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgb(var(--color-text-muted));
   }
 }
 
@@ -169,35 +214,33 @@ main :where(h2[id], h3[id]) {
 }
 
 .post-link[class] {
-  color: rgb(var(--color-text-main) / 0.8);
+  color: rgb(var(--color-text-main) / 0.85);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 .post-link-text {
   text-decoration: underline;
-  text-decoration-color: rgb(var(--color-text-main) / 0.4);
+  text-decoration-color: rgb(var(--color-text-main) / 0.28);
   text-decoration-style: dotted;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 0.3em;
-  padding-bottom: 2px;
-  background-image: linear-gradient(90deg, #60a5fa, #e879f9);
-  background-repeat: no-repeat;
-  background-position: right bottom;
-  background-size: 0 2px;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  transition: background-size 0.3s ease, text-decoration-color 0.2s ease;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.28em;
+  transition: text-decoration-color 0.15s ease;
 }
 
 .post-link[class]:is(:hover, :focus-visible) {
-  color: rgb(var(--color-text-main) / 1);
+  color: rgb(var(--color-text-main));
 }
 
 .post-link[class]:is(:hover, :focus-visible) .post-link-text {
-  text-decoration-color: transparent;
-  background-size: 100% 2px;
-  background-position: left bottom;
+  text-decoration-style: solid;
+  text-decoration-color: rgb(var(--color-text-main) / 0.65);
+}
+
+.post-link[class]:focus-visible {
+  outline: 2px solid rgb(var(--color-brand));
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 @supports (text-autospace: normal) {  
@@ -219,7 +262,6 @@ main :where(h2[id], h3[id]) {
 .text-brand { color: rgb(var(--color-brand)); }
 .text-muted { color: rgb(var(--color-text-muted)); }
 html.dark ::selection { background: rgb(180 190 254 / 0.25); color: rgb(var(--color-text-main)); }
-html.dark .post-link-text { background-image: linear-gradient(90deg, rgb(var(--color-primary)), rgb(var(--color-accent-secondary))); }
 html.dark .prose { --tw-prose-invert-bullets: rgb(var(--color-text-muted)); --tw-prose-invert-hr: rgb(var(--color-border-card)); }
 html.dark .prose a { color: rgb(var(--color-primary)); text-decoration-color: rgb(var(--color-primary) / 0.4); }
 html.dark .prose summary { color: rgb(var(--color-brand)); }

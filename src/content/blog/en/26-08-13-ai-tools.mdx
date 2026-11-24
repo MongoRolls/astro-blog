@@ -1,79 +1,134 @@
 ---
 title: Everyday AI tools
-excerpt: "The AI tools I currently use for daily development: Cursor, Claude Code, Codex App, CC Switch, and DeepSeek."
+excerpt: "My current daily AI stack—Cursor, Google Antigravity with Gemini 4 Neon, Claude Code, Codex, Typeless, CC Switch, and DeepSeek—plus a few lessons from using them."
 publishDate: '2026-08-13'
+updatedDate: '2026-11-25'
 author: MongoRolls
 lang: en
 route: 26-08-13-ai-tools
 translationKey: 26-08-13-ai-tools
 tags:
-  - tools
-  - ai
-  - tech
+  - AI
+  - Tools
+seo:
+  image:
+    src: '26-08-13-ai-tools/cover.webp'
+    alt: 'Minimalist flat illustration of a code editor linked to terminal, voice waveform, toggle switch, and sparkle tool modules'
+  description: "How I split daily development across Cursor, Google Antigravity (Gemini 4 Neon), Claude Code, Codex, Typeless, CC Switch, and DeepSeek, plus recent takeaways."
+  pageType: article
 ---
 
-It is hard to write code without AI these days. I currently use this stack:
+Writing code over the past six months has felt less like living inside a single editor and more like driving a small kit of tools. What started with Cursor for autocomplete and multi-file edits gradually expanded to Claude Code and Codex, and more recently **Google Antigravity** (with Google’s Gemini 4 models) plus the voice-dictation app **Typeless**.
+
+One caveat upfront: AI tooling turns over every few weeks. This is not a permanent tier list—just a snapshot of the setup I actually open every day as of **November 2026**, along with a few patterns that have held up across tool switches.
 
 | Scenario | Tool | How I use it |
 | --- | --- | --- |
-| IDE | Cursor | Write and edit files, and inspect pages daily |
-| CLI | Claude Code | Long, well-bounded tasks that can run asynchronously |
-| App | Codex | Desktop app; an old account with a Turkish gift card costs a little over ¥70 per month |
+| IDE | Cursor | Still the most comfortable when watching UI changes and editing interactively |
+| Agent platform | [Antigravity](https://antigravity.google) | Desktop app, IDE, and CLI; runs Gemini 4 Neon for planning and multi-step work |
+| CLI | Claude Code | Well-bounded tasks that can run asynchronously in the terminal |
+| App | Codex | Desktop app; old Turkish gift-card renewal (~¥70/mo), used as a heavy-duty second view |
+| Voice input | [Typeless](https://www.typeless.com) | Turns spoken thoughts into clean text for agent prompts and rough drafts |
 | Intelligence | [Codex Radar](https://codexradar.com/) | Track quotas, model quality, degradation, and community sentiment |
-| Switching | CC Switch | Change providers for Claude Code |
+| Switching | CC Switch | Hot-swap Claude Code providers, MCP servers, and Skills |
 | API | DeepSeek | Cheap, directly reachable from China, and a fallback for CLIs and scripts |
 
-For an earlier guide to Cursor, see [Cursor AI User Guide](/en/blog/24-01-17-cursor).
+For an earlier Cursor walkthrough, see [Cursor Guide](/en/blog/24-01-17-cursor). For resident local agents and exposing CLI subscriptions as local APIs outside the IDE, see [Hermes & CLIProxyAPI](/en/blog/26-08-17-hermes).
 
 ## Cursor
 
-Cursor is still the most comfortable choice for daily work. It is based on VS Code, and multi-file Agent edits, completion, and chat all live in one window. I use Agent mode most: explain the requirement clearly, let it edit, then review the diff myself. Completion can sometimes take over your train of thought, so enable it when needed. Put project conventions in `.cursor/rules`; it works better than repeating them in chat.
+When I am adjusting layout details, checking live pages, and iterating in small steps, Cursor is still the most natural place to work. Built on VS Code, it keeps multi-file Agent edits, inline completion, and chat inside one window with almost zero friction.
 
-The official Pro plan is not cheap. In China, common options include buying accounts on Xianyu or sharing a plan. I have done this too, mainly to get the IDE running first. Check reviews and transaction history, and do not tie your only work environment to an unknown shared account. Keep it separate from your primary account. You bear the risk of bans and expiration. The official subscription is safer if you can accept the price.
+I spend most of my time in Agent mode: spell out the boundaries, let it make the edits, and inspect the diff myself. Inline autocomplete can occasionally hijack your train of thought during tricky logic, so I toggle it as needed. Putting coding conventions into `.cursor/rules` or a root `AGENTS.md` works far better than repeating them in chat.
+
+The official Pro plan is not cheap. In China, people often buy accounts on Xianyu or share a subscription—I took that route early on just to get moving. If you rely on it for real work, check seller history carefully, never bind your only environment to a random shared login, and keep it separate from your main account. Bans, lockouts, and contested quotas are yours to absorb; if the budget allows, paying officially saves headaches.
+
+## Google Antigravity and the Gemini 4 lineup
+
+A newer staple on my desktop is Google’s [Antigravity](https://antigravity.google).
+
+Rather than feeling like a traditional editor with a chat sidebar bolted on, Antigravity is organized around agents from the ground up. It comes as a desktop app, an IDE, and a CLI (`agy`), with native support for `AGENTS.md`, `.agents/skills/`, MCP servers, scheduled tasks, subagents, and built-in browser verification. Letting an agent inspect a rendered page right after changing frontend code—or packaging a recurring workflow as a repo-local skill—removes a lot of glue work.
+
+What really kept Antigravity in my daily rotation is Google’s recent **Gemini 4** lineup. Instead of a simple "better vs. worse" ladder, the element-named tiers separate cleanly by reasoning depth, latency, and cost:
+
+| Model | Role | Where it fits best |
+| --- | --- | --- |
+| **Gemini 4 Neon** | Mid-tier workhorse | Daily driver: repo-level edits, multi-step agent loops, technical writing |
+| **Gemini 4 Carbon** | Heavyweight flagship | Hardest architectural tradeoffs, deep debugging, long-horizon reasoning |
+| **Gemini 4 Hydrogen** | Fast lightweight executor | Routine edits, scripts, test runs, low-latency interactive work |
+
+Out of the three, I reach for **Gemini 4 Neon** the most. Adapted from Carbon, it delivers near-flagship reasoning and code quality while finishing tasks faster with leaner output, backed by a 1M-token context window that handles large repositories comfortably. The detail I appreciate most in practice is **steerability**: if an agent starts drifting mid-task, interrupting it with a correction actually sticks, instead of getting a polite apology followed by the exact same mistake.
+
+Antigravity also supports an **Orchestrator** pattern—letting **Neon** handle upfront planning and architecture while delegating routine edits and test runs to **Hydrogen**, only pulling the heavier tier back in when something gets stuck. That keeps quota usage sane without dumbing down the plan.
+
+Still, there is no reason to treat any vendor as permanent. Quotas, network conditions, and model tastes shift constantly; keeping Gemini 4 alongside Claude Code and Codex is much safer than betting everything on one provider.
 
 ## Claude Code
 
-Anthropic's command-line Agent, run as `claude` in a project directory. It is good for handing off a complete task: fix a bug, add tests, or update a page in the existing style, while you go do something else.
+Anthropic’s terminal agent, launched via `claude` inside a repository. It shines when a task is self-contained and does not need your eyes glued to pixels: tracking down a reproducible bug, adding test coverage, or refactoring a module to match existing patterns while you work on something else.
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
 
-Official documentation: [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Official docs: [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-The split with Cursor is simple: use Cursor when you are still in the editor and need to watch the UI; hand a well-bounded asynchronous task to Claude Code. It reads `CLAUDE.md` and `AGENTS.md` in the repository, so conventions are more useful in files than in chat history.
+The split across the three main environments stays simple: use Cursor when watching UI details in the editor, Antigravity when orchestrating multi-step plans, skills, or Gemini 4 Neon, and Claude Code for clean asynchronous terminal tasks. Because it also reads `CLAUDE.md` and `AGENTS.md`, conventions written into repo files travel across all of them.
 
 ## Codex
 
-I use it as an **app**: download, sign in, and open repositories from the desktop application. Repository: [openai/codex](https://github.com/openai/codex)
+I mostly use Codex as a **desktop app**—sign-in, repository switching, and parallel runs all live there. Repository: [openai/codex](https://github.com/openai/codex).
 
-The subscription uses **Apple gift cards from the Turkish region**: top up first, then subscribe. My tier costs a little over **¥70 per month**, roughly half the official price. **New accounts no longer get this price**; it is a renewal on an old account, so do not use it as the expected price for a new account. Use a reliable gift-card channel and do not mix the region or Apple ID with your main Chinese-region account.
+My subscription renews via **Turkish-region Apple gift cards**, coming out to a little over **¥70 per month**—roughly half the standard price. Worth stating clearly: **new accounts can no longer get this tier**; it only survives as an existing renewal, so do not budget a fresh account around that number. Use a trustworthy gift-card source and keep the foreign Apple ID separate from your primary Chinese-region account.
 
-I use it as a backup and second perspective alongside Claude Code: run the same task in both, and switch when Claude is unreliable or I want an OpenAI-style model. Because the app subscription goes through Apple, there is no need to configure a CLI provider for Codex.
+At this point I spend a fair chunk of my week as a "Codex driver" for multi-file changes or as a second opinion whenever Claude feels off. Running a stubborn problem past both Codex and Claude Code (or Gemini 4 Neon) usually surfaces the real cause faster than arguing with a single model for ten turns.
+
+## Typeless
+
+[Typeless](https://www.typeless.com) is the tool I wish I had added earlier. On paper it is an AI voice-dictation app; in practice it removes the **input bottleneck of talking to agents**.
+
+Classic built-in dictation transcribes literally—leaving in every "um", false start, and mid-sentence correction—so cleaning up the mess takes longer than typing. Typeless runs speech through an LLM in real time: it strips filler words, reconciles self-corrections on the fly, and formats lists or paragraphs cleanly. On macOS, holding a shortcut (`Fn` by default) drops polished text straight into whatever cursor is active, whether that is Cursor, Antigravity, Codex, or a browser tab.
+
+Its biggest payoff is not formal emails; it is **briefing agents on nuanced tasks** and **getting past blank-page friction**:
+
+- When asking an agent to change existing code, speaking out the context, constraints, and what *not* to touch takes thirty seconds and gives a few hundred words of signal. When typing, laziness pushes you toward "please optimize this," which invites guesswork and rework.
+- For blog drafts, talking through a rough outline first makes editing far easier than staring at an empty cursor.
+
+The tradeoffs are real, too. Talking out loud does not work well in a noisy open office; mixed Chinese-English technical terms or homophones still slip occasionally (so glance over code identifiers and key names before hitting enter); and the Pro tier is not cheap—use the free allowance for a week first to see if voice actually sticks in your routine.
 
 ## Codex Radar
 
-For quota status, model quality, and community sentiment, I check [Codex Radar](https://codexradar.com/). It also has ready-made notes on enabling Max reasoning and connecting DeepSeek to Codex.
+For quota windows, model regressions, and community pulse checks, I glance at [Codex Radar](https://codexradar.com/). It also keeps practical walkthroughs for higher reasoning tiers and wiring DeepSeek into Codex.
 
 ## CC Switch
 
-Before CC Switch, changing Claude Code providers meant editing `~/.claude` and environment variables. It quickly became messy with multiple channels. [CC Switch](https://cc-switch.cc/) is a desktop app where providers, MCP, and Skills can be switched with a click. GitHub: [farion1231/cc-switch](https://github.com/farion1231/cc-switch)
+Before CC Switch, switching Claude Code providers meant manually juggling `~/.claude` files and environment variables. [CC Switch](https://cc-switch.cc/) moves providers, MCP configs, and Skills into a tray menu. Repository: [farion1231/cc-switch](https://github.com/farion1231/cc-switch).
 
-I add the official provider, DeepSeek, and GLM, then enable them from the tray. Claude Code can usually switch without restarting. The point is not a smarter model; it is **switching the backend under the same CLI**: use DeepSeek when quotas are tight, GLM when I want a domestic provider, then switch back to the official provider.
+I keep the official channel, DeepSeek, and GLM configured and toggle them from the tray. It does not make any model smarter; it just lets **one CLI swap backends cleanly** when quotas tighten or when I want a cheaper run.
 
 ## DeepSeek developer platform
 
-[deepseek.com](https://www.deepseek.com/) is the chat product, while [platform.deepseek.com](https://platform.deepseek.com/) is the API. Use the latter as the backend for tools, scripts, and Claude Code.
+[deepseek.com](https://www.deepseek.com/) is for web chat; [platform.deepseek.com](https://platform.deepseek.com/) is the API backend for tools and scripts.
 
-The APIs are compatible with OpenAI (`https://api.deepseek.com`) and Anthropic (`https://api.deepseek.com/anthropic`); change `base_url` and the key to connect. Common models include `deepseek-v4-flash` and `deepseek-v4-pro`. It is cheap and directly reachable from China, making it a fallback when official quotas are tight. Store the key in an environment variable. Documentation: [DeepSeek API Docs](https://api-docs.deepseek.com/zh-cn/)
+It exposes both OpenAI-compatible (`https://api.deepseek.com`) and Anthropic-compatible (`https://api.deepseek.com/anthropic`) endpoints, so pointing a CLI or script at it only takes a `base_url` and key. I mostly use `deepseek-v4-flash` and `deepseek-v4-pro`—inexpensive, directly reachable from China, and reliable as a fallback when flagship quotas run low. Keep keys in environment variables, never in the repo. Docs: [DeepSeek Docs](https://api-docs.deepseek.com/zh-cn/).
 
-## How I combine them
+## How they fit together
 
-1. Open the repository and start with **Cursor**.
-2. When the task gets longer and can run asynchronously, hand it to **Claude Code**.
-3. Use **CC Switch** to change channels, with DeepSeek as the inexpensive fallback.
-4. For a different perspective or when Claude is not working well, open the **Codex App**; check [Codex Radar](https://codexradar.com/) for quota and model-quality reports.
-5. For a resident local agent with WeChat as an entry point, use [Hermes](/en/blog/26-08-17-hermes/#hermes-agent).
-6. To expose a CLI subscription as an API for other clients, use [CLIProxyAPI](/en/blog/26-08-17-hermes/#cliproxyapi).
+1. Open **Cursor** when watching the UI and making tight interactive edits.
+2. Open **Antigravity** for multi-step planning, repo-local skills, or running **Gemini 4 Neon / Carbon / Hydrogen**.
+3. Hand well-bounded, asynchronous repo tasks to **Claude Code** or the **Codex App**; check [Codex Radar](https://codexradar.com/) for quota and quality notes.
+4. Use **Typeless** whenever a task needs rich spoken context rather than a terse typed prompt, then skim key identifiers.
+5. Swap CLI backends with **CC Switch**, keeping **DeepSeek** as an inexpensive fallback.
+6. Use [Hermes](/en/blog/26-08-17-hermes/#hermes-agent) for a resident local agent with chat entry points, and [CLIProxyAPI](/en/blog/26-08-17-hermes/#cliproxyapi) only when an existing CLI subscription must act as a standard API.
 
-Tools will change. The stable habits are to put conventions in rule files, review your own diffs, and never confuse “it runs” with “it is correct.”
+## Recent takeaways
+
+The tool list will reshuffle again in a few months, so the habits underneath matter more than the brand names.
+
+- **The job has shifted from typing code to framing problems and reviewing diffs.** It feels like moving from a bicycle to a car: pedaling takes less effort, but reading the road and keeping control matter far more. Generating code is cheap now; noticing what should *not* be built, spotting subtle bugs in a diff, and braking when a model sounds confident but wrong are where fundamentals pay off. Without solid basics, faster agents just help ship plausible-looking landmines faster.
+- **The bottleneck is rarely keyboard speed—it is stating constraints clearly.** Most "dumb AI output" traces back to under-specified context. Putting durable project rules into `AGENTS.md`, `.cursor/rules`, and `.agents/skills/`, then pairing them with low-friction input like Typeless to explain edge cases, beats memorizing clever prompt templates every time.
+- **Stop chasing one "best" model; tier work by difficulty.** Leaderboard crowns rotate every couple of months. Matching task weight to model tier—a fast workhorse like Gemini 4 Neon for daily repo work, heavyweight Carbon or high-reasoning tiers for real architectural calls, and cheap APIs like DeepSeek or Hydrogen for scripts—holds up much better. When conventions live in repo files instead of one app’s chat history, switching providers is painless.
+- **The frontend boundary is dissolving, which puts business judgment and communication in front.** With agents handling boilerplate across frontend, scripts, backend endpoints, and tests, pure "slice UI / write CRUD" lines are fading fast. When implementation speed evens out, understanding why a feature exists, breaking fuzzy requests into concrete milestones, and aligning cleanly with teammates carry much more weight.
+- **Watch out for productive-feeling tool tinkering.** This one is mostly a reminder to myself. Trying new clients, tuning MCP servers, and reading benchmarks feels like upgrading productivity, even when zero actual work shipped. The sanity check is simple: did this tool shorten the path from idea to a verified diff, or did I just rearrange my desk?
+
+Half the names on this page will probably be replaced a year from now. The boring habits should last longer: write conventions into the repo, supply real context before letting an agent run, review every diff yourself, and never confuse "it runs" with "it is right."

@@ -73,7 +73,7 @@ export default defineConfig({
         const routePathname = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
         if (routePathname === '/')
           return { ...item, changefreq: 'weekly', priority: 1 }
-        if (routePathname === '/blog' || routePathname === '/post' || routePathname === '/tags' || routePathname === '/about')
+        if (routePathname === '/blog' || routePathname === '/post' || routePathname === '/about')
           return { ...item, changefreq: 'weekly', priority: 0.8 }
         if (routePathname.startsWith('/blog/'))
           return { ...item, changefreq: 'monthly', priority: 0.7 }

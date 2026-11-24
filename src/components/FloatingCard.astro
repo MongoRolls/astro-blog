@@ -3,333 +3,263 @@ import type { Locale } from '../i18n/config'
 import { defaultLocale } from '../i18n/config'
 
 interface Props {
-    title?: string
-    description?: string
-    website?: string
-    avatar?: string
-    locale?: Locale
+  title?: string
+  description?: string
+  website?: string
+  avatar?: string
+  rss?: string
+  locale?: Locale
 }
 
 const {
-    title = 'MongoRolls',
-    description = 'MongoRolls',
-    website = 'https://mongorolls.cn',
-    avatar = 'https://mongorolls.cn/logo.png',
-    locale = defaultLocale,
-} = Astro.props;
+  title = 'MongoRolls',
+  description = 'MongoRolls 的前端技术博客，记录工程实践与个人思考。',
+  website = 'https://mongorolls.cn',
+  avatar = 'https://mongorolls.cn/logo.png',
+  rss = 'https://mongorolls.cn/rss.xml',
+  locale = defaultLocale,
+} = Astro.props
+
+const yamlEntries = [
+  { key: 'title', value: title },
+  { key: 'description', value: description },
+  { key: 'website', value: website },
+  { key: 'avatar', value: avatar },
+  { key: 'rss', value: rss },
+]
+
+const copyLabel = locale === 'zh-CN' ? '复制 YAML' : 'Copy YAML'
+const copiedLabel = locale === 'zh-CN' ? '已复制' : 'Copied'
+const failedLabel = locale === 'zh-CN' ? '复制失败' : 'Copy failed'
 ---
 
-<div class="yaml-card">
-    <div class="yaml-card-header">
-        <h3 class="font-serif">{locale === 'zh-CN' ? '本站信息' : 'Site information'}</h3>
-        <h3 class="yaml-key">yaml</h3>
+<div class="site-info-card">
+  <div class="site-info-header">
+    <div class="site-info-heading">
+      <span class="site-info-title font-serif">{locale === 'zh-CN' ? '本站卡片信息' : 'Site card details'}</span>
+      <span class="site-info-lang">yaml</span>
     </div>
-    <div class="yaml-card-content">
-        <button class="copy-button" type="button" title="Copy to clipboard" aria-label={locale === 'zh-CN' ? '复制本站信息' : 'Copy site information'}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-        </button>
-        <div class="yaml-item">
-            <span class="yaml-key">title:</span>
-            <span class="yaml-value">'{title}'</span>
-        </div>
-        <div class="yaml-item">
-            <span class="yaml-key">description:</span>
-            <span class="yaml-value">'{description}'</span>
-        </div>
-        <div class="yaml-item">
-            <span class="yaml-key">website:</span>
-            <span class="yaml-value">'{website}'</span>
-        </div>
-        <div class="yaml-item">
-            <span class="yaml-key">avatar:</span>
-            <span class="yaml-value">'{avatar}'</span>
-        </div>
-    </div>
-    <div class="yaml-card-status"></div>
+
+    <button
+      class="site-copy-button"
+      type="button"
+      aria-label={locale === 'zh-CN' ? '复制本站信息' : 'Copy site information'}
+      data-label-default={copyLabel}
+      data-label-success={copiedLabel}
+      data-label-failed={failedLabel}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <span class="site-copy-label">{copyLabel}</span>
+    </button>
+  </div>
+
+  <div class="site-info-body">
+    {yamlEntries.map(entry => (
+      <div class="yaml-item">
+        <span class="yaml-key">{entry.key}:</span>
+        <span class="yaml-value">'{entry.value}'</span>
+      </div>
+    ))}
+  </div>
+
+  <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
 </div>
 
-<style lang="scss">
-    .yaml-card {
-        width: 380px;
-        position: absolute;
-        top: 70%;
-        left: 5%;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        font-family: 'Fira Code', 'Courier New', monospace;
-        overflow: hidden;
-        cursor: move;
-        user-select: none;
-        z-index: 100;
-        border: 1px solid #eaeaea;
-        font-size: 14px;
-        transition: box-shadow 0.3s ease, transform 0.1s ease;
-        will-change: transform, left, top;
+<style>
+  .site-info-card {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--color-border-card) / 0.85);
+    background-color: rgb(var(--color-bg-card));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.035);
+    overflow: hidden;
+  }
 
-        &:hover,
-        &:focus-within {
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  :global(html.dark) .site-info-card {
+    box-shadow: 0 4px 16px rgb(17 17 27 / 0.22);
+  }
 
-            .copy-button {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  .site-info-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    background-color: rgb(var(--color-bg-muted) / 0.65);
+    border-bottom: 1px solid rgb(var(--color-border-card) / 0.65);
+  }
 
-        &.dragging {
-            cursor: grabbing;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-            transition: box-shadow 0.2s ease, transform 0s;
-        }
+  .site-info-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+  }
+
+  .site-info-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: rgb(var(--color-text-main));
+  }
+
+  .site-info-lang {
+    padding: 0.06rem 0.4rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--color-text-main) / 0.07);
+    color: rgb(var(--color-text-muted));
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+  }
+
+  .site-copy-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.68rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--color-border-card));
+    background-color: rgb(var(--color-bg-card));
+    color: rgb(var(--color-text-p));
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .site-copy-button:hover {
+    color: rgb(var(--color-brand));
+    border-color: rgb(var(--color-brand) / 0.5);
+    background-color: rgb(var(--color-brand) / 0.06);
+  }
+
+  .site-copy-button:focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  .site-copy-button[data-state='success'] {
+    color: rgb(22 128 60);
+    border-color: rgb(22 128 60 / 0.4);
+  }
+
+  :global(html.dark) .site-copy-button[data-state='success'] {
+    color: rgb(166 227 161);
+    border-color: rgb(166 227 161 / 0.4);
+  }
+
+  .site-copy-button[data-state='error'] {
+    color: rgb(220 38 38);
+    border-color: rgb(220 38 38 / 0.4);
+  }
+
+  :global(html.dark) .site-copy-button[data-state='error'] {
+    color: rgb(243 139 168);
+    border-color: rgb(243 139 168 / 0.4);
+  }
+
+  .site-info-body {
+    padding: 0.9rem 1rem;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+
+  .yaml-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .yaml-key {
+    flex-shrink: 0;
+    color: rgb(var(--color-brand));
+    font-weight: 500;
+  }
+
+  .yaml-value {
+    min-width: 0;
+    color: rgb(var(--color-text-p));
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  @media (max-width: 639px) {
+    .site-info-body {
+      font-size: 0.76rem;
     }
+  }
 
-    .yaml-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 14px;
-        background-color: #f7f7f7;
-        border-bottom: 1px solid #eaeaea;
-
-        h3 {
-            margin: 0;
-            font-size: 14px;
-            color: #333;
-            font-weight: 600;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+  @media (max-width: 767px) {
+    .site-copy-button {
+      min-height: 2.5rem;
+      padding-inline: 0.85rem;
     }
-
-    .copy-button {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 4px;
-        cursor: pointer;
-        color: #666;
-        background-color: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        transition: all 0.25s ease;
-        opacity: 0;
-        transform: translateY(-4px);
-        z-index: 10;
-
-        &:hover {
-            background-color: #fff;
-            color: #333;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-            transform: translateY(0) scale(1.05);
-        }
-
-        &:active {
-            transform: translateY(0) scale(0.95);
-        }
-
-        &:focus-visible {
-            opacity: 1;
-            transform: none;
-            outline: 2px solid rgb(var(--color-primary));
-            outline-offset: 2px;
-        }
-    }
-
-    .yaml-card-content {
-        padding: 14px;
-        position: relative;
-    }
-
-    .yaml-item {
-        padding: 3px 0;
-        line-height: 1.5;
-        display: flex;
-        font-size: 13px;
-        word-break: break-all;
-    }
-
-    .yaml-key {
-        color: #905;
-        font-weight: 600;
-        margin-right: 6px;
-        flex-shrink: 0;
-    }
-
-    .yaml-value {
-        color: rgb(4, 119, 6);
-        overflow-wrap: break-word;
-    }
-
-    .yaml-card-status {
-        height: 3px;
-        width: 0;
-        background-color: #4CAF50;
-        transition: width 0.3s ease-out;
-    }
-
-    @media (max-width: 767px) {
-        .yaml-card {
-            position: static;
-            width: 100%;
-            max-width: 380px;
-            min-width: 0;
-            margin-top: 1rem;
-            cursor: auto;
-            user-select: text;
-        }
-
-        .yaml-card-content {
-            padding-top: 52px;
-        }
-
-        .yaml-value {
-            min-width: 0;
-            overflow-wrap: anywhere;
-        }
-
-        .copy-button {
-            width: 44px;
-            height: 44px;
-            top: 4px;
-            opacity: 1;
-            transform: none;
-        }
-    }
-
-    // Dark mode support
-    :global(.dark) .yaml-card {
-        background-color: #1a1b26;
-        border-color: #2a2b36;
-    }
-
-    :global(.dark) .yaml-card-header {
-        background-color: #16161e;
-        border-bottom-color: #2a2b36;
-
-        h3 {
-            color: #c0caf5;
-        }
-    }
-
-    :global(.dark) .copy-button {
-        background-color: rgba(30, 30, 46, 0.9);
-        color: #a9b1d6;
-
-        &:hover {
-            background-color: rgba(36, 36, 54, 1);
-            color: #c0caf5;
-        }
-    }
-
-    :global(.dark) .yaml-key {
-        color: #f7768e;
-    }
-
-    :global(.dark) .yaml-value {
-        color: #9ece6a;
-    }
+  }
 </style>
 
 <script>
-let disposeFloatingCards = () => {}
+  let disposeSiteInfoCards = () => {}
 
-function initializeCards() {
-  disposeFloatingCards()
-  const controller = new AbortController()
-  const timers: number[] = []
+  function initSiteInfoCards() {
+    disposeSiteInfoCards()
+    const controller = new AbortController()
+    const timers: number[] = []
 
-  document.querySelectorAll<HTMLElement>('.yaml-card').forEach((card) => {
-    const copyButton = card.querySelector<HTMLButtonElement>('.copy-button')
-    const statusBar = card.querySelector<HTMLElement>('.yaml-card-status')
-    let isDragging = false
-    let offsetX = 0
-    let offsetY = 0
+    document.querySelectorAll<HTMLElement>('.site-info-card').forEach((card) => {
+      const button = card.querySelector<HTMLButtonElement>('.site-copy-button')
+      const label = card.querySelector<HTMLElement>('.site-copy-label')
+      const status = card.querySelector<HTMLElement>('[data-copy-status]')
 
-    function setPosition(left: number, top: number) {
-      const maxLeft = Math.max(0, window.innerWidth - card.offsetWidth)
-      const maxTop = Math.max(0, window.innerHeight - card.offsetHeight)
-      card.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`
-      card.style.top = `${Math.max(0, Math.min(top, maxTop))}px`
-    }
+      button?.addEventListener('click', async () => {
+        const yamlText = Array.from(card.querySelectorAll<HTMLElement>('.yaml-item'))
+          .map((item) => {
+            const key = item.querySelector('.yaml-key')?.textContent?.trim() ?? ''
+            const value = item.querySelector('.yaml-value')?.textContent?.trim() ?? ''
+            return `${key} ${value}`.trim()
+          })
+          .join('\n')
 
-    copyButton?.addEventListener('click', async (event) => {
-      event.stopPropagation()
-      const content = Array.from(card.querySelectorAll<HTMLElement>('.yaml-item'))
-        .map(item => item.textContent?.trim() ?? '')
-        .join('\n')
+        const defaultText = button.dataset.labelDefault ?? 'Copy YAML'
+        const successText = button.dataset.labelSuccess ?? 'Copied'
+        const failedText = button.dataset.labelFailed ?? 'Copy failed'
 
-      try {
-        await navigator.clipboard.writeText(content)
-        copyButton.style.color = '#4CAF50'
-        if (statusBar)
-          statusBar.style.width = '100%'
-      }
-      catch (error) {
-        console.error('复制失败:', error)
-        if (statusBar) {
-          statusBar.style.backgroundColor = '#f44336'
-          statusBar.style.width = '100%'
+        try {
+          await navigator.clipboard.writeText(yamlText)
+          button.dataset.state = 'success'
+          if (label)
+            label.textContent = successText
+          if (status)
+            status.textContent = successText
         }
-      }
-
-      timers.push(window.setTimeout(() => {
-        copyButton.style.color = ''
-        if (statusBar) {
-          statusBar.style.width = '0'
-          statusBar.style.backgroundColor = '#4CAF50'
+        catch {
+          button.dataset.state = 'error'
+          if (label)
+            label.textContent = failedText
+          if (status)
+            status.textContent = failedText
         }
-      }, 1500))
-    }, { signal: controller.signal })
 
-    card.addEventListener('pointerdown', (event) => {
-      if (window.matchMedia('(max-width: 767px)').matches || event.button !== 0 || (event.target as Element).closest('.copy-button'))
-        return
-      const rect = card.getBoundingClientRect()
-      offsetX = event.clientX - rect.left
-      offsetY = event.clientY - rect.top
-      isDragging = true
-      card.setPointerCapture(event.pointerId)
-      card.classList.add('dragging')
-      card.style.transition = 'none'
-      document.body.style.userSelect = 'none'
-    }, { signal: controller.signal })
+        timers.push(window.setTimeout(() => {
+          delete button.dataset.state
+          if (label)
+            label.textContent = defaultText
+          if (status)
+            status.textContent = ''
+        }, 2000))
+      }, { signal: controller.signal })
+    })
 
-    card.addEventListener('pointermove', (event) => {
-      if (isDragging)
-        setPosition(event.clientX - offsetX, event.clientY - offsetY)
-    }, { signal: controller.signal })
-
-    const stopDragging = () => {
-      if (!isDragging)
-        return
-      isDragging = false
-      card.classList.remove('dragging')
-      card.style.transition = ''
-      document.body.style.userSelect = ''
+    disposeSiteInfoCards = () => {
+      controller.abort()
+      timers.forEach(timer => window.clearTimeout(timer))
     }
-
-    card.addEventListener('pointerup', stopDragging, { signal: controller.signal })
-    card.addEventListener('pointercancel', stopDragging, { signal: controller.signal })
-    window.addEventListener('resize', () => {
-      const rect = card.getBoundingClientRect()
-      setPosition(rect.left, rect.top)
-    }, { signal: controller.signal })
-  })
-
-  disposeFloatingCards = () => {
-    controller.abort()
-    timers.forEach(timer => window.clearTimeout(timer))
-    document.body.style.userSelect = ''
   }
-}
 
-document.addEventListener('astro:page-load', initializeCards)
-document.addEventListener('astro:before-swap', () => disposeFloatingCards())
+  document.addEventListener('astro:page-load', initSiteInfoCards)
+  document.addEventListener('astro:before-swap', () => disposeSiteInfoCards())
 </script>

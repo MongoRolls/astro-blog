@@ -1,10 +1,9 @@
 ---
 import type { Locale } from '../i18n/config'
 import heroCover from '../assets/blog-cover.webp'
-import ArticleCarousel from '../components/ArticleCarousel.astro'
 import Button from '../components/Button.astro'
 import FormattedDate from '../components/FormattedDate.astro'
-import PostPreview from '../components/PostPreview.astro'
+import TechStack from '../components/TechStack.astro'
 import { getHeroImageSrc } from '../config/image'
 import { getSiteConfig } from '../data/site-config'
 import { defaultLocale, localizedPath } from '../i18n/config'
@@ -15,8 +14,8 @@ type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
 const siteConfig = getSiteConfig(locale)
 const posts = await getPublishedBlogPosts(locale)
-const featuredPosts = posts.filter(({ data }) => data.isFeatured)
-const carouselPosts = posts.slice(0, 4)
+const randomPostUrls = posts.map(getPostUrl)
+const fallbackRandomUrl = randomPostUrls[0]
 
 const heroData = {
     title: locale === 'zh-CN' ? '你好，欢迎来到我的博客' : 'Hi there, welcome to my blog',
@@ -68,22 +67,29 @@ const heroData = {
                     {heroData.actions.map(action => (
                         <Button href={action.href} class="w-full md:w-auto">{action.text}</Button>
                     ))}
+                    {fallbackRandomUrl && (
+                        <Button
+                          href={fallbackRandomUrl}
+                          class="w-full md:w-auto"
+                          data-random-post
+                          data-random-urls={JSON.stringify(randomPostUrls)}
+                        >
+                            {locale === 'zh-CN' ? '🎲 随便看看' : '🎲 Surprise me'}
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>
     </section>
 
-    {carouselPosts.length > 0 && (
-        <>
-            <hr class="my-8 border-dashed border-main" />
-            <ArticleCarousel posts={carouselPosts} locale={locale} />
-            <hr class="my-8 border-dashed border-main" />
-        </>
-    )}
+    <section class="w-full mb-8">
+        <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-4">{locale === 'zh-CN' ? '技术栈' : 'Tech stack'}</h2>
+        <TechStack />
+    </section>
 
+    <hr class="my-8 border-dashed border-main" />
 
-
-    <section class="w-full mb-8 ">
+    <section class="w-full mb-12 sm:mb-16">
         <h2 class="text-xl leading-tight font-serif font-medium sm:text-2xl mb-3">{locale === 'zh-CN' ? '文章' : 'Posts'}</h2>
         <ul class="post-list flex flex-col">
             {posts.slice(0, 8).map((post) => {
@@ -100,25 +106,7 @@ const heroData = {
         <div class="mt-8">
             <a class="read-more-link font-serif" href={localizedPath(locale, '/post/')}>{locale === 'zh-CN' ? '阅读更多' : 'Read more'} →</a>
         </div>
-        <hr class="my-8 border-dashed border-main" />
     </section>
-
-    {
-        featuredPosts?.length > 0 && (
-            <div class="mb-16 sm:mb-24 mt-12">
-                <h2 class="mb-12 text-xl italic font-bold font-serif sm:mb-16 sm:text-2xl">{locale === 'zh-CN' ? '精选文章' : 'Featured posts'}</h2>
-                <div class="flex flex-col gap-10 sm:gap-12">
-                    {featuredPosts.map(post => (
-                        <PostPreview post={post} headingLevel="h3" locale={locale} />
-                    ))}
-                </div>
-
-                <div class="mt-12 sm:mt-16">
-                    <Button href={localizedPath(locale, '/blog/')}>{locale === 'zh-CN' ? '查看全部文章' : 'View all posts'}</Button>
-                </div>
-            </div>
-        )
-    }
 </BaseLayout>
 
 <style lang="scss">
@@ -328,3 +316,47 @@ const heroData = {
 
 
 </style>
+
+<script>
+  let disposeHomeActions = () => {}
+
+  document.addEventListener('astro:page-load', () => {
+    disposeHomeActions()
+    const controller = new AbortController()
+    const randomLink = document.querySelector<HTMLAnchorElement>('.hero-actions [data-random-post]')
+
+    if (randomLink) {
+      let pool: string[] = []
+      try {
+        const parsed = JSON.parse(randomLink.dataset.randomUrls ?? '[]')
+        if (Array.isArray(parsed))
+          pool = parsed.filter((item): item is string => typeof item === 'string' && item.length > 0)
+      }
+      catch {
+        pool = []
+      }
+
+      const pickRandomHref = (avoidCurrent = false) => {
+        if (pool.length === 0)
+          return
+        const currentPath = new URL(randomLink.href, window.location.origin).pathname
+        const candidates = avoidCurrent && pool.length > 1
+          ? pool.filter(url => url !== currentPath)
+          : pool
+        const list = candidates.length > 0 ? candidates : pool
+        const nextUrl = list[Math.floor(Math.random() * list.length)]
+        if (nextUrl)
+          randomLink.href = nextUrl
+      }
+
+      pickRandomHref()
+      randomLink.addEventListener('click', () => pickRandomHref(true), { signal: controller.signal })
+    }
+
+    disposeHomeActions = () => {
+      controller.abort()
+    }
+  })
+
+  document.addEventListener('astro:before-swap', () => disposeHomeActions())
+</script>

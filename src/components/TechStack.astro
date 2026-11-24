@@ -15,13 +15,12 @@ const techStacks = [
 const allTechStacks = [...techStacks, ...techStacks];
 ---
 
-<div class="w-full dark:border-slate-900 border dark:bg-slate-800 bg-slate-50 p-4 rounded-xl">
-  <!-- <p class="text-sm font-medium text-gray-600 dark:text-gray-400">技术栈</p> -->
-  <div class="mt-4 overflow-hidden relative">
-    <div id="tech-stack" class="flex gap-4 animate-scroll opacity-0">
+<div class="tech-stack-panel w-full p-4 rounded-xl">
+  <div class="tech-stack-viewport overflow-hidden relative">
+    <div id="tech-stack" class="tech-stack-track flex gap-4 animate-scroll">
       {
         allTechStacks.map((tech, index) => (
-          <div class={`flex justify-center items-center flex-shrink-0 w-20 h-20 p-4 rounded-lg ${tech.bg}`} aria-hidden={index >= techStacks.length ? 'true' : undefined}>
+          <div class={`tech-stack-item flex justify-center items-center flex-shrink-0 w-20 h-20 p-4 rounded-lg ${tech.bg}`} aria-hidden={index >= techStacks.length ? 'true' : undefined}>
             <img
               src={tech.icon}
               alt={tech.name}
@@ -37,10 +36,32 @@ const allTechStacks = [...techStacks, ...techStacks];
 </div>
 
 <style>
+  .tech-stack-panel {
+    background-color: rgb(var(--color-bg-muted) / 0.35);
+    border: 1px solid rgb(var(--color-border-card) / 0.8);
+    transition: background-color 300ms ease, border-color 300ms ease;
+  }
+
+  :global(html.dark) .tech-stack-panel {
+    background-color: rgb(var(--color-bg-card));
+    border-color: rgb(var(--color-border-card) / 0.85);
+  }
+
+  .tech-stack-viewport {
+    mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
+  }
+
+  :global(html.dark) .tech-stack-item {
+    filter: brightness(0.92);
+  }
+
+  .tech-stack-track {
+    width: max-content;
+  }
+
   .animate-scroll {
     animation: scroll 20s linear infinite;
-    animation-delay: 0.5s;
-    transition: opacity 0.3s ease-in-out;
     will-change: transform;
   }
 
@@ -50,26 +71,31 @@ const allTechStacks = [...techStacks, ...techStacks];
 
   @keyframes scroll {
     0% {
-      opacity: 1;
       transform: translateX(0);
     }
     100% {
-      opacity: 1;
-      /* n个item的宽度 + （n+1）个gap的宽度 */
-      transform: translateX(-860px);
+      transform: translateX(calc(-50% - 0.5rem));
     }
   }
 
   /* 鼠标悬停时暂停动画 */
-  .animate-scroll:hover {
+  .tech-stack-panel:hover .animate-scroll {
     animation-play-state: paused;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .tech-stack-viewport {
+      mask-image: none;
+      -webkit-mask-image: none;
+      overflow-x: auto;
+    }
+
     .animate-scroll {
       animation: none;
-      opacity: 1;
-      overflow-x: auto;
+    }
+
+    .tech-stack-item[aria-hidden='true'] {
+      display: none;
     }
   }
 </style>

@@ -40,8 +40,8 @@ export async function createLlmsResponse(locale: Locale, site?: URL) {
   })
 
   const labels = locale === 'en'
-    ? { entry: 'Main links', home: 'Home', archive: 'Blog archive', tags: 'Tags', about: 'About the author', published: 'Published posts' }
-    : { entry: '主要入口', home: '首页', archive: '文章归档', tags: '标签', about: '关于作者', published: '已发布文章' }
+    ? { entry: 'Main links', home: 'Home', archive: 'Blog archive', friends: 'Friends & Reading', about: 'About the author', published: 'Published posts' }
+    : { entry: '主要入口', home: '首页', archive: '文章归档', friends: '友链与常读', about: '关于作者', published: '已发布文章' }
 
   const content = [
     `# ${siteConfig.title}`,
@@ -56,7 +56,7 @@ export async function createLlmsResponse(locale: Locale, site?: URL) {
     '',
     `- [${labels.home}](${absoluteUrl(localizedPath(locale, '/'))})`,
     `- [${labels.archive}](${absoluteUrl(localizedPath(locale, '/blog/'))})`,
-    `- [${labels.tags}](${absoluteUrl(localizedPath(locale, '/tags/'))})`,
+    `- [${labels.friends}](${absoluteUrl(localizedPath(locale, '/friends/'))})`,
     `- [${labels.about}](${absoluteUrl(localizedPath(locale, '/about/'))})`,
     `- [RSS](${absoluteUrl(localizedPath(locale, '/rss.xml'))})`,
     `- [Sitemap](${absoluteUrl('/sitemap-index.xml')})`,

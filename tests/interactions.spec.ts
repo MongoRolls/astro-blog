@@ -120,3 +120,126 @@ test('typing demo rebinds after navigation and supports keyboard and reduced mot
   await page.emulateMedia({ reducedMotion: 'reduce' })
   expect(await typing.evaluate(element => getComputedStyle(element).animationName)).toBe('none')
 })
+
+test('blog and post index pages render all posts without pagination and avoid overflow', async ({ page }) => {
+  for (const { blogPath, postPath, paginationLabel, blogHeading, postHeading } of [
+    { blogPath: '/blog/', postPath: '/post/', paginationLabel: '分页导航', blogHeading: '图文阅读', postHeading: '全部归档' },
+    { blogPath: '/en/blog/', postPath: '/en/post/', paginationLabel: 'Pagination', blogHeading: 'Reading Feed', postHeading: 'Archive' },
+  ]) {
+    await page.goto(blogPath)
+    await expect(page.locator('nav .nav-link[href*="/projects/"], nav .nav-link[href*="/tags/"]')).toHaveCount(0)
+    await expect(page.locator(`nav[aria-label="${paginationLabel}"]`)).toHaveCount(0)
+    await expect(page.locator('main h1.sr-only')).toHaveCount(1)
+    await expect(page.getByRole('heading', { level: 2, name: blogHeading })).toBeVisible()
+    const blogPostsCount = await page.locator('main article.post-feed-item').count()
+    expect(blogPostsCount).toBeGreaterThan(6)
+    await expect(page.locator('.section-head .section-count')).toHaveText(String(blogPostsCount))
+
+    await page.goto(postPath)
+    await expect(page.locator(`nav[aria-label="${paginationLabel}"]`)).toHaveCount(0)
+    await expect(page.locator('main h1.sr-only')).toHaveCount(1)
+    await expect(page.getByRole('heading', { level: 2, name: postHeading })).toBeVisible()
+    await expect(page.locator('.section-head .section-count')).toHaveText(String(blogPostsCount))
+    const items = page.locator('.archive-item')
+    await expect(items).toHaveCount(blogPostsCount)
+    await expect(page.locator('span.archive-tag').first()).toBeVisible()
+    await expect(page.locator('a.archive-tag')).toHaveCount(0)
+    await expect(page.locator('.archive-date time').first()).toHaveText(/^\d{4}-\d{2}-\d{2}$/)
+
+    for (const viewport of [{ width: 1280, height: 800 }, { width: 375, height: 812 }]) {
+      await page.setViewportSize(viewport)
+      const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+      expect(hasHorizontalOverflow).toBe(false)
+    }
+  }
+
+  for (const removedPath of ['/blog/2/', '/projects/', '/en/projects/', '/tags/', '/en/tags/']) {
+    const response = await page.goto(removedPath)
+    expect(response?.status()).toBe(404)
+  }
+})
+
+test('friends and reading page displays both message card sections without overflow', async ({ page }) => {
+  for (const { path, friendsHeading, readingHeading } of [
+    { path: '/friends/', friendsHeading: '认识的朋友', readingHeading: '在看的博客' },
+    { path: '/en/friends/', friendsHeading: 'People I Know', readingHeading: 'Blogs I Read' },
+  ]) {
+    await page.goto(path)
+    await expect(page.locator('nav.toc')).toHaveCount(0)
+    await expect(page.locator('main h1.sr-only')).toHaveCount(1)
+    await expect(page.locator('.friends-header, .friends-anchors')).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 2, name: friendsHeading })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: readingHeading })).toBeVisible()
+    await expect(page.locator('section[aria-labelledby="friends"] .info-card')).toHaveCount(3)
+    await expect(page.locator('section[aria-labelledby="reading"] .info-card')).toHaveCount(4)
+    await expect(page.locator('.info-card-rss').first()).toHaveAttribute('href', /^https:\/\//)
+    await expect(page.locator('.site-info-card .site-copy-button')).toBeVisible()
+
+    for (const viewport of [{ width: 1280, height: 800 }, { width: 375, height: 812 }]) {
+      await page.setViewportSize(viewport)
+      const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+      expect(hasHorizontalOverflow).toBe(false)
+    }
+  }
+
+  for (const nonArticlePath of ['/', '/about/', '/en/about/', '/post/', '/blog/']) {
+    await page.goto(nonArticlePath)
+    await expect(page.locator('nav.toc')).toHaveCount(0)
+  }
+
+  await page.setViewportSize({ width: 1280, height: 800 })
+  const firstHeadingTops: number[] = []
+  for (const [routePath, selector] of [
+    ['/', 'main h1'],
+    ['/post/', 'main h2.section-title'],
+    ['/blog/', 'main h2.section-title'],
+    ['/friends/', 'main h2.section-title'],
+    ['/about/', 'main h2#about-me'],
+  ] as const) {
+    await page.goto(routePath)
+    const top = await page.locator(selector).first().evaluate(el => Math.round(el.getBoundingClientRect().top))
+    firstHeadingTops.push(top)
+  }
+  expect(new Set(firstHeadingTops).size).toBe(1)
+
+  await page.goto('/blog/26-08-21-ai-text-watermarking/')
+  await expect(page.locator('nav.toc')).toHaveCount(1)
+  await expect(page.locator('.related-section .related-item')).toHaveCount(5)
+  await expect(page.locator('.related-section a.card')).toHaveCount(0)
+  await expect(page.locator('.post-pager-prev')).toBeVisible()
+  await expect(page.locator('[data-random-post]')).toHaveAttribute('href', /^\/blog\/.+\/$/)
+})
+
+test('about page displays now updates, book and game media cards, and heading anchors without overflow', async ({ page }) => {
+  for (const { path, expectedBooks, expectedGames } of [
+    { path: '/about/', expectedBooks: ['思考，快与慢', '纳瓦尔宝典'], expectedGames: ['影之刃零', '深空当铺'] },
+    { path: '/en/about/', expectedBooks: ['Thinking, Fast and Slow', 'The Almanack of Naval Ravikant'], expectedGames: ['Phantom Blade Zero', 'Probably Stolen'] },
+  ]) {
+    await page.goto(path)
+    await expect(page.locator('nav.toc')).toHaveCount(0)
+    await expect(page.locator('.about-now-item')).toHaveCount(4)
+
+    const nowHeading = page.locator('h2#about-me-now')
+    const nowAnchor = nowHeading.locator('.heading-anchor')
+    await expect(nowAnchor).toHaveAttribute('href', '#about-me-now')
+    await nowHeading.hover()
+    await expect(nowAnchor).toHaveCSS('opacity', '1')
+
+    const bookCards = page.locator('section[aria-labelledby="about-me-books"] .media-card')
+    await expect(bookCards).toHaveCount(2)
+    await expect(bookCards.locator('.media-card-badge')).toHaveText(['Book', 'Book'])
+    await expect(bookCards.locator('.media-card-title')).toHaveText(expectedBooks)
+
+    const gameCards = page.locator('section[aria-labelledby="about-me-games"] .media-card')
+    await expect(gameCards).toHaveCount(2)
+    await expect(gameCards.locator('.media-card-badge')).toHaveText(['Game', 'Game'])
+    await expect(gameCards.locator('.media-card-title')).toHaveText(expectedGames)
+    await expect(gameCards.locator('.media-card-link').first()).toHaveAttribute('href', /^https:\/\/store\.steampowered\.com\/app\//)
+
+    for (const viewport of [{ width: 1280, height: 800 }, { width: 375, height: 812 }]) {
+      await page.setViewportSize(viewport)
+      const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+      expect(hasHorizontalOverflow).toBe(false)
+    }
+  }
+})

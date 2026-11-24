@@ -1,25 +1,414 @@
 ---
-import type { Friend } from '../data/site-config'
+import type { CardTone } from '../data/friends'
 import type { Locale } from '../i18n/config'
 import { defaultLocale } from '../i18n/config'
-import FloatingCard from './FloatingCard.astro'
 
 interface Props {
-    friends: Friend[]
-    locale?: Locale
+  name: string
+  subtitle: string
+  description: string
+  href: string
+  tags?: readonly string[]
+  tone?: CardTone
+  avatar?: string
+  monogram?: string
+  badgeLabel?: string
+  rssHref?: string
+  locale?: Locale
 }
 
-const { friends, locale = defaultLocale } = Astro.props;
+const {
+  name,
+  subtitle,
+  description,
+  href,
+  tags = [],
+  tone = 'blue',
+  avatar,
+  monogram,
+  badgeLabel,
+  rssHref,
+  locale = defaultLocale,
+} = Astro.props
 
+const fallbackMonogram = monogram || name.slice(0, 1)
+const rssAriaLabel = locale === 'zh-CN' ? `订阅 ${name} 的 RSS` : `Subscribe to ${name} RSS feed`
 ---
 
-<h2 class="text-2xl font-bold">Friends</h2>
-<div class="flex flex-col items-center gap-4">
-    {friends.map(friend => (
-        <div class="bg-white rounded-lg p-4 shadow-md">
-            <img src={friend.avatar} alt={friend.name} class="w-8 h-8 rounded-full" />
-            <h3 class="text-lg font-bold">{friend.name}</h3>
+<article class:list={['info-card', `info-card--${tone}`]}>
+  <div class="info-card-main">
+    <div class="info-card-header">
+      {avatar
+? (
+        <span class="info-card-avatar">
+          <img
+            src={avatar}
+            alt={name}
+            width="44"
+            height="44"
+            loading="lazy"
+            decoding="async"
+          />
+        </span>
+      )
+: (
+        <span class:list={['info-card-monogram', `info-card-monogram--${tone}`]} aria-hidden="true">
+          {fallbackMonogram}
+        </span>
+      )}
+
+      <div class="info-card-identity">
+        <div class="info-card-title-row">
+          <h3 class="info-card-name font-serif">
+            <a
+              class="info-card-link"
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {name}
+            </a>
+          </h3>
+          <svg
+            class="info-card-arrow"
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M7 17 17 7"></path>
+            <path d="M7 7h10v10"></path>
+          </svg>
         </div>
-    ))}
-    <FloatingCard locale={locale} />
-</div>
+        <p class="info-card-subtitle">{subtitle}</p>
+      </div>
+    </div>
+
+    <p class="info-card-message">{description}</p>
+  </div>
+
+  {(tags.length > 0 || badgeLabel || rssHref) && (
+    <div class="info-card-footer">
+      <div class="info-card-tags">
+        {tags.map(tag => (
+          <span class="info-card-tag">{tag}</span>
+        ))}
+      </div>
+
+      {rssHref
+? (
+        <a
+          class="info-card-rss"
+          href={rssHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={rssAriaLabel}
+        >
+          RSS
+        </a>
+      )
+: badgeLabel && (
+        <span class="info-card-badge">{badgeLabel}</span>
+      )}
+    </div>
+  )}
+</article>
+
+<style>
+  .info-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 1.05rem 1.15rem;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--color-border-card) / 0.85);
+    background-color: rgb(var(--color-bg-card));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.035);
+    transition:
+      transform 220ms cubic-bezier(0.165, 0.84, 0.44, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  :global(html.dark) .info-card {
+    box-shadow: 0 4px 16px rgb(17 17 27 / 0.22);
+  }
+
+  .info-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--color-brand) / 0.45);
+    box-shadow: var(--card-shadow);
+  }
+
+  .info-card:has(.info-card-link:focus-visible) {
+    border-color: rgb(var(--color-brand));
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  .info-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .info-card-avatar,
+  .info-card-monogram {
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 10px;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .info-card-avatar {
+    border: 1px solid rgb(var(--color-border-card) / 0.75);
+    background-color: rgb(var(--color-bg-muted));
+  }
+
+  .info-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  .info-card-monogram {
+    font-family: 'Newsreader', 'Source Han Serif SC', 'Noto Serif SC', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    border: 1px solid transparent;
+  }
+
+  .info-card-monogram--blue {
+    background-color: rgb(59 130 246 / 0.1);
+    border-color: rgb(59 130 246 / 0.18);
+    color: rgb(43 84 156);
+  }
+
+  .info-card-monogram--sage {
+    background-color: rgb(16 140 100 / 0.1);
+    border-color: rgb(16 140 100 / 0.18);
+    color: rgb(30 112 85);
+  }
+
+  .info-card-monogram--rose {
+    background-color: rgb(219 88 124 / 0.1);
+    border-color: rgb(219 88 124 / 0.18);
+    color: rgb(159 58 88);
+  }
+
+  .info-card-monogram--lavender {
+    background-color: rgb(124 92 214 / 0.1);
+    border-color: rgb(124 92 214 / 0.18);
+    color: rgb(96 71 170);
+  }
+
+  .info-card-monogram--slate {
+    background-color: rgb(107 114 128 / 0.11);
+    border-color: rgb(107 114 128 / 0.2);
+    color: rgb(75 85 99);
+  }
+
+  :global(html.dark) .info-card-monogram--blue {
+    background-color: rgb(137 180 250 / 0.14);
+    border-color: rgb(137 180 250 / 0.24);
+    color: rgb(166 202 252);
+  }
+
+  :global(html.dark) .info-card-monogram--sage {
+    background-color: rgb(148 226 213 / 0.13);
+    border-color: rgb(148 226 213 / 0.22);
+    color: rgb(166 227 161);
+  }
+
+  :global(html.dark) .info-card-monogram--rose {
+    background-color: rgb(243 139 168 / 0.14);
+    border-color: rgb(243 139 168 / 0.24);
+    color: rgb(245 170 192);
+  }
+
+  :global(html.dark) .info-card-monogram--lavender {
+    background-color: rgb(203 166 247 / 0.14);
+    border-color: rgb(203 166 247 / 0.24);
+    color: rgb(214 186 250);
+  }
+
+  :global(html.dark) .info-card-monogram--slate {
+    background-color: rgb(166 173 200 / 0.14);
+    border-color: rgb(166 173 200 / 0.24);
+    color: rgb(186 194 222);
+  }
+
+  .info-card-identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .info-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .info-card-name {
+    margin: 0;
+    min-width: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgb(var(--color-text-main));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .info-card-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .info-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .info-card-link:focus-visible {
+    outline: none;
+    color: rgb(var(--color-brand));
+  }
+
+  .info-card:hover .info-card-link {
+    color: rgb(var(--color-brand));
+  }
+
+  .info-card-arrow {
+    flex-shrink: 0;
+    color: rgb(var(--color-text-muted) / 0.7);
+    transition: transform 180ms ease, color 180ms ease;
+  }
+
+  .info-card:is(:hover, :focus-within) .info-card-arrow {
+    color: rgb(var(--color-brand));
+    transform: translate(2px, -2px);
+  }
+
+  .info-card-subtitle {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: rgb(var(--color-text-muted));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .info-card-message {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.68;
+    color: rgb(var(--color-text-p));
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .info-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed rgb(var(--color-border-card) / 0.65);
+  }
+
+  .info-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.32rem;
+    min-width: 0;
+  }
+
+  .info-card-tag {
+    display: inline-block;
+    padding: 0.08rem 0.42rem;
+    border-radius: 0.3rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    font-weight: 500;
+    color: rgb(var(--color-text-muted));
+    background-color: rgb(var(--color-text-main) / 0.055);
+  }
+
+  :global(html.dark) .info-card-tag {
+    background-color: rgb(186 194 222 / 0.1);
+  }
+
+  .info-card-badge,
+  .info-card-rss {
+    flex-shrink: 0;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  .info-card-badge {
+    color: rgb(var(--color-text-muted) / 0.85);
+  }
+
+  .info-card-rss {
+    position: relative;
+    z-index: 2;
+    padding: 0.12rem 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--color-border-card) / 0.9);
+    color: rgb(var(--color-text-muted));
+    background-color: rgb(var(--color-bg-main));
+    text-decoration: none;
+    transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .info-card-rss:hover {
+    color: rgb(var(--color-brand));
+    border-color: rgb(var(--color-brand) / 0.55);
+    background-color: rgb(var(--color-brand) / 0.06);
+  }
+
+  .info-card-rss:focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+    color: rgb(var(--color-brand));
+  }
+
+  @media (hover: none) {
+    .info-card:hover {
+      transform: none;
+    }
+  }
+</style>

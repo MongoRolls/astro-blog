@@ -5,6 +5,11 @@ import { defineCollection } from 'astro:content'
 
 const localeSchema = z.enum(['zh-CN', 'en'])
 
+const seoImageCreditSchema = z.object({
+  author: z.string(),
+  url: z.string().url().optional(),
+})
+
 const seoSchema = z.object({
   title: z.string().min(5).max(120).optional(),
   description: z.string().min(5).max(160).optional(),
@@ -12,6 +17,7 @@ const seoSchema = z.object({
     .object({
       src: z.string(),
       alt: z.string().optional(),
+      credit: seoImageCreditSchema.optional(),
     })
     .optional(),
   pageType: z.enum(['website', 'article']).default('website'),

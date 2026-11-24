@@ -8,18 +8,18 @@ const requiredFiles = [
   'index.html',
   'about/index.html',
   'blog/index.html',
+  'friends/index.html',
   'post/index.html',
   'rss.xml',
   'sitemap-index.xml',
   'pagefind/pagefind.js',
   '404.html',
-  'tags/index.html',
   'en/index.html',
   'en/about/index.html',
   'en/blog/index.html',
+  'en/friends/index.html',
   'en/blog/26-08-21-ai-text-watermarking/index.html',
   'en/post/index.html',
-  'en/tags/index.html',
   'en/style/index.html',
   'en/rss.xml',
   'en/llms.txt',
@@ -84,9 +84,27 @@ if (missingReferences.size > 0) {
   throw new Error(`发现失效的站内链接或资源：\n${[...missingReferences].join('\n')}`)
 }
 
-const [chineseHome, englishHome, chinesePost, englishPost, chineseSearch, englishSearch, englishRss] = await Promise.all([
+const [
+  chineseHome,
+  englishHome,
+  chineseBlog,
+  chinesePostList,
+  chineseAbout,
+  chineseFriends,
+  englishFriends,
+  chinesePost,
+  englishPost,
+  chineseSearch,
+  englishSearch,
+  englishRss,
+] = await Promise.all([
   readFile(path.join(distDirectory, 'index.html'), 'utf8'),
   readFile(path.join(distDirectory, 'en/index.html'), 'utf8'),
+  readFile(path.join(distDirectory, 'blog/index.html'), 'utf8'),
+  readFile(path.join(distDirectory, 'post/index.html'), 'utf8'),
+  readFile(path.join(distDirectory, 'about/index.html'), 'utf8'),
+  readFile(path.join(distDirectory, 'friends/index.html'), 'utf8'),
+  readFile(path.join(distDirectory, 'en/friends/index.html'), 'utf8'),
   readFile(path.join(distDirectory, 'blog/26-08-21-ai-text-watermarking/index.html'), 'utf8'),
   readFile(path.join(distDirectory, 'en/blog/26-08-21-ai-text-watermarking/index.html'), 'utf8'),
   readFile(path.join(distDirectory, 'search-index.json'), 'utf8').then(JSON.parse),
@@ -100,6 +118,19 @@ assert.match(chineseHome, /hreflang="en" href="https:\/\/mongorolls\.cn\/en\/"/)
 assert.match(englishHome, /hreflang="zh-CN" href="https:\/\/mongorolls\.cn\/"/)
 assert.match(chinesePost, /hreflang="en" href="https:\/\/mongorolls\.cn\/en\/blog\/26-08-21-ai-text-watermarking\/"/)
 assert.match(englishPost, /hreflang="zh-CN" href="https:\/\/mongorolls\.cn\/blog\/26-08-21-ai-text-watermarking\/"/)
+assert.match(chinesePost, /class="toc"/)
+assert.match(englishPost, /class="toc"/)
+for (const [label, html] of [
+  ['index.html', chineseHome],
+  ['en/index.html', englishHome],
+  ['blog/index.html', chineseBlog],
+  ['post/index.html', chinesePostList],
+  ['about/index.html', chineseAbout],
+  ['friends/index.html', chineseFriends],
+  ['en/friends/index.html', englishFriends],
+]) {
+  assert.doesNotMatch(html, /class="toc"/, `非文章页面 ${label} 不应渲染文章目录`)
+}
 assert.ok(chineseSearch.every(item => !item.url.startsWith('/en/')), '中文搜索索引混入英文 URL')
 assert.ok(englishSearch.length > 0 && englishSearch.every(item => item.url.startsWith('/en/')), '英文搜索索引缺失或混入中文 URL')
 assert.match(englishRss, /<language>en<\/language>/)

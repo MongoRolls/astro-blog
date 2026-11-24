@@ -33,6 +33,9 @@ UI 变更复用现有基础组件和主题变量，保留键盘操作、焦点�
 - 图片源由 `ASTRO_IMAGE_SOURCE=local|oss` 控制，默认开发用本地、生产用 OSS；实现以 `src/config/env.ts` 为准。
 - 封面、Hero 和 OSS 拼接复用 `src/config/image.ts`，新调用点不复制 CDN 域名或旧 `/img/` 路径。
 - Bucket 为 `mongorolls-images`（`oss-cn-shenzhen`），本站独占前缀 `blog/`。文章图片放 `blog/{content-id}/`；公共分类为 `cover-images/`、`friends/`、`tech/`、`site/`，均在 `blog/` 下。旧 `/img/` 对象保留兼容，不删除。
+- 文章封面统一放在 `blog/{content-id}/cover.webp`（替换破缓存用 `cover-v2.webp`），规格为 `1200×630` WebP、sRGB、剥离 EXIF、体积 `≤ 150 KB`；中英文双语文章共用同一 OSS key，各自填写对应语言的 `seo.image.alt`。
+- 封面通过 `seo.image` 配置（支持相对 OSS key 如 `26-08-21-ai-text-watermarking/cover.webp` 或完整 URL；开发模式优先读取已暂存的本地 `public/blog/` 副本，生产模式一律走 `ossAsset()`）。未配置封面的文章在列表与详情页不渲染占位图，OG/Twitter Card 统一回退 `cover-images/og-default.webp`。
+- 本地处理与巡检使用 `pnpm cover:prepare <原图> <content-id>`（基于 `sharp` 裁切压缩到 `public/blog/{content-id}/cover.webp`）与 `pnpm cover:audit`。
 - 文章配图以 OSS 为真相源；MDX 使用 `ossAsset()` 或完整 OSS URL，不使用 `../../../public/blog/...`。`public/blog/` 仅作不入库的粘贴暂存，确认上传成功并改好引用后删除对应本地副本。
 - 站点级本地文件仍放 `public/cover-images/`、`public/friends/`、`public/tech/`、`public/logo.png`，以站点根路径引用。
 - AccessKey 仅写已忽略的根目录 `.env`，不写 `.env.example` 或提交。使用仅 OpenAPI 的 RAM 用户并授权 OSS，不用主账号密钥。

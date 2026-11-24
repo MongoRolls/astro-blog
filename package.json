@@ -22,6 +22,8 @@
     "verify": "pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
     "oss:sync": "node scripts/oss-sync.mjs",
     "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run",
+    "cover:prepare": "node scripts/prepare-cover.mjs",
+    "cover:audit": "node scripts/audit-covers.mjs",
     "test:browser": "playwright test"
   },
   "dependencies": {
