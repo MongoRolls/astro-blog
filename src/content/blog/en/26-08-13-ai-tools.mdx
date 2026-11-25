@@ -1,6 +1,6 @@
 ---
-title: Everyday AI tools
-excerpt: "My current daily AI stack—Cursor, Google Antigravity with Gemini 4 Neon, Claude Code, Codex, Typeless, CC Switch, and DeepSeek—plus a few lessons from using them."
+title: "Daily AI Tool Stack and Workflow Division"
+excerpt: "My current daily AI stack across coding and research—Cursor, Google Antigravity (Gemini 4), Claude Code, Codex, Typeless, Grok Bot, CC Switch, and DeepSeek—plus practical takeaways."
 publishDate: '2026-08-13'
 updatedDate: '2026-11-25'
 author: MongoRolls
@@ -12,13 +12,13 @@ tags:
   - Tools
 seo:
   image:
-    src: '26-08-13-ai-tools/cover.webp'
-    alt: 'Minimalist flat illustration of a code editor linked to terminal, voice waveform, toggle switch, and sparkle tool modules'
-  description: "How I split daily development across Cursor, Google Antigravity (Gemini 4 Neon), Claude Code, Codex, Typeless, CC Switch, and DeepSeek, plus recent takeaways."
+    src: '26-08-13-ai-tools/cover-v2.webp'
+    alt: 'Model-kit box art depicts a workstation with mechanical arms, monitors and a keyboard'
+  description: "How I split daily coding and research across Cursor, Antigravity (Gemini 4), Claude Code, Codex, Typeless, Grok Bot, CC Switch, and DeepSeek."
   pageType: article
 ---
 
-Writing code over the past six months has felt less like living inside a single editor and more like driving a small kit of tools. What started with Cursor for autocomplete and multi-file edits gradually expanded to Claude Code and Codex, and more recently **Google Antigravity** (with Google’s Gemini 4 models) plus the voice-dictation app **Typeless**.
+Writing code over the past six months has felt less like living inside a single editor and more like driving a small kit of tools. What started with Cursor for autocomplete and multi-file edits gradually expanded to Claude Code and Codex, and more recently **Google Antigravity** (with Google’s Gemini 4 models), the voice-dictation app **Typeless**, and **Grok Bot** for research and news gathering.
 
 One caveat upfront: AI tooling turns over every few weeks. This is not a permanent tier list—just a snapshot of the setup I actually open every day as of **November 2026**, along with a few patterns that have held up across tool switches.
 
@@ -29,6 +29,7 @@ One caveat upfront: AI tooling turns over every few weeks. This is not a permane
 | CLI | Claude Code | Well-bounded tasks that can run asynchronously in the terminal |
 | App | Codex | Desktop app; old Turkish gift-card renewal (~¥70/mo), used as a heavy-duty second view |
 | Voice input | [Typeless](https://www.typeless.com) | Turns spoken thoughts into clean text for agent prompts and rough drafts |
+| Research / News | Grok Bot | Look up reference material, query blog info, and scrape news updates |
 | Intelligence | [Codex Radar](https://codexradar.com/) | Track quotas, model quality, degradation, and community sentiment |
 | Switching | CC Switch | Hot-swap Claude Code providers, MCP servers, and Skills |
 | API | DeepSeek | Cheap, directly reachable from China, and a fallback for CLIs and scripts |
@@ -96,6 +97,18 @@ Its biggest payoff is not formal emails; it is **briefing agents on nuanced task
 
 The tradeoffs are real, too. Talking out loud does not work well in a noisy open office; mixed Chinese-English technical terms or homophones still slip occasionally (so glance over code identifiers and key names before hitting enter); and the Pro tier is not cheap—use the free allowance for a week first to see if voice actually sticks in your routine.
 
+## Grok Bot
+
+While the tools above focus on writing code and reducing input friction, **Grok Bot** covers information gathering around the edges—specifically **looking up reference material, querying blog information, and scraping news updates**.
+
+Its main payoff across those three tasks is collapsing "search, open tabs, skim, and summarize" into one turn:
+
+- **Research and references**: When tracking down an unfamiliar concept, open-source project, or recent technical discussion, asking Grok Bot to pull background and leads is far faster than sifting through a dozen tabs by hand.
+- **Querying blog information**: Useful for quick reconnaissance across independent blogs—locating a post’s source, checking its main arguments, or pulling updates from a site before reading in full.
+- **Scraping news updates**: Handy for pulling recent headlines and developments around a topic into a compact digest instead of manually scrolling feeds.
+
+The same boundary applies as with any retrieval tool: it is great for triage, discovery, and aggregation, but whenever exact numbers, primary quotes, or citations are going into a published post, verify the original page rather than trusting the summary blindly.
+
 ## Codex Radar
 
 For quota windows, model regressions, and community pulse checks, I glance at [Codex Radar](https://codexradar.com/). It also keeps practical walkthroughs for higher reasoning tiers and wiring DeepSeek into Codex.
@@ -118,8 +131,9 @@ It exposes both OpenAI-compatible (`https://api.deepseek.com`) and Anthropic-com
 2. Open **Antigravity** for multi-step planning, repo-local skills, or running **Gemini 4 Neon / Carbon / Hydrogen**.
 3. Hand well-bounded, asynchronous repo tasks to **Claude Code** or the **Codex App**; check [Codex Radar](https://codexradar.com/) for quota and quality notes.
 4. Use **Typeless** whenever a task needs rich spoken context rather than a terse typed prompt, then skim key identifiers.
-5. Swap CLI backends with **CC Switch**, keeping **DeepSeek** as an inexpensive fallback.
-6. Use [Hermes](/en/blog/26-08-17-hermes/#hermes-agent) for a resident local agent with chat entry points, and [CLIProxyAPI](/en/blog/26-08-17-hermes/#cliproxyapi) only when an existing CLI subscription must act as a standard API.
+5. Hand reference lookups, blog queries, and news scraping to **Grok Bot** for quick triage and summaries.
+6. Swap CLI backends with **CC Switch**, keeping **DeepSeek** as an inexpensive fallback.
+7. Use [Hermes](/en/blog/26-08-17-hermes/#hermes-agent) for a resident local agent with chat entry points, and [CLIProxyAPI](/en/blog/26-08-17-hermes/#cliproxyapi) only when an existing CLI subscription must act as a standard API.
 
 ## Recent takeaways
 

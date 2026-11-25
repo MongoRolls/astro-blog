@@ -1,6 +1,6 @@
 ---
-title: 日常 AI 工具
-excerpt: 从 Cursor、Claude Code、Codex 到 Google Antigravity（Gemini 4 Neon 等）与 Typeless，记录当下日常开发在用的 AI 工具组合，以及这段时间用下来的一些真实心得。
+title: "日常 AI 工具栈与工作流分工"
+excerpt: 从 Cursor、Google Antigravity（Gemini 4 系列）、Claude Code、Codex 到 Typeless 与 Grok Bot，记录当前日常研发与信息检索在用的 AI 工具分工与实践心得。
 publishDate: '2026-08-13'
 updatedDate: '2026-11-25'
 author: MongoRolls
@@ -9,13 +9,13 @@ tags:
   - 工具
 seo:
   image:
-    src: '26-08-13-ai-tools/cover.webp'
-    alt: '扁平插画：代码编辑器、命令行终端、语音波形、切换开关与星芒模块相连的 AI 工具流'
-  description: 日常开发在用的 AI 工具栈与分工：Cursor、Google Antigravity 与 Gemini 4 Neon、Claude Code、Codex、Typeless、CC Switch 与 DeepSeek，附近期使用心得。
+    src: '26-08-13-ai-tools/cover-v2.webp'
+    alt: '模型盒绘风格的工作台上，机械臂围着键盘、显示器和工具'
+  description: 日常研发与信息检索在用的 AI 工具栈分工：Cursor、Antigravity（Gemini 4）、Claude Code、Codex、Typeless、Grok Bot、CC Switch 与 DeepSeek。
   pageType: article
 ---
 
-这半年写代码越来越像在「开工具组合」，而不是守着某一个编辑器死磕。最初只是拿 Cursor 补全和改几行文件，后来慢慢加上了 Claude Code、Codex，最近又把 **Google Antigravity**（和谷歌这波 Gemini 4 系列模型）以及语音输入工具 **Typeless** 接进了日常流。
+这半年写代码越来越像在「开工具组合」，而不是守着某一个编辑器死磕。最初只是拿 Cursor 补全和改几行文件，后来慢慢加上了 Claude Code、Codex，最近又把 **Google Antigravity**（和谷歌这波 Gemini 4 系列模型）、语音输入工具 **Typeless** 以及负责查资料和抓资讯的 **Grok Bot** 接进了日常流。
 
 先划清边界：AI 工具换代太快，这篇不是什么「年度终极排行」，只是截至 **2026 年 11 月** 我自己每天真的会打开的一套工作流快照，顺便记一下这段时间用下来几个比较深的体感。
 
@@ -26,6 +26,7 @@ seo:
 | CLI | Claude Code | 边界清楚、可以异步丢着跑的长任务 |
 | App | Codex | 桌面 App；旧号土耳其礼品卡约 70 多一个月，做第二视角与重活兜底 |
 | 语音输入 | [Typeless](https://www.typeless.com) | 说话直接转成整理好的文本，给 Agent 交代需求、写草稿省打字 |
+| 检索 / 资讯 | Grok Bot | 查资料、查询博客信息，以及爬取和汇总新闻资讯 |
 | 情报 | [Codex 雷达](https://codexradar.com/) | 看额度、模型智商、降智和社区体感 |
 | 切换 | CC Switch | 给 Claude Code 热切换供应商、MCP 和 Skills |
 | API | DeepSeek | 便宜、国内直连，给 CLI / 脚本兜底 |
@@ -92,6 +93,18 @@ npm install -g @anthropic-ai/claude-code
 
 缺点也要说在前面：第一，办公室人多或者环境吵的时候不太方便开口；第二，中英混排时，冷门技术词、缩写或同音词偶尔还是会识别歪（比如把「应用」听成「英语」这种小乌龙），发给 Agent 之前最好扫一眼代码标识符和关键专有名词；第三，它的付费版并不算便宜，先用免费额度试一周，确认自己真的养成了说话输入的习惯再决定要不要订阅。
 
+## Grok Bot
+
+前面几个工具主要解决写代码和输入效率，**Grok Bot** 补的是偏外围的信息获取环节——平时主要用来**查资料、查询博客信息，以及爬取和汇总新闻资讯**。
+
+它在这三个场景里最省事的地方，是把「搜索、翻网页、提炼要点」压成了一次对话：
+
+- **查资料**：遇到新概念、陌生开源项目或某条技术动态，直接丢给它拉一遍公开讨论与背景线索，比自己开十几个标签页慢慢筛快得多。
+- **查询博客信息**：平时翻独立博客、核对某篇文章的出处、观点脉络或站点动态时，顺手让它检索并拎出关键信息，适合做前置摸底。
+- **爬取新闻资讯**：需要跟踪行业动态或热点事件时，直接让它按主题抓取近期新闻并归拢成要点摘要，省掉来回刷信息流的时间。
+
+边界同样要记在心里：拿它做初筛、聚合和线索发现效率很高，但涉及准确数字、一手原文或准备写进正式文章的引用时，还是得顺着来源核对原网页，不能把汇总结果当成最终事实。
+
 ## Codex 雷达
 
 额度还剩多少、最近某家模型有没有「降智」、社区整体体感怎么样，我平时会去 [Codex 雷达](https://codexradar.com/) 瞄一眼。上面也有开高推理档位、把 DeepSeek 接到 Codex 这类现成教程，省得自己到处翻帖子。
@@ -114,8 +127,9 @@ npm install -g @anthropic-ai/claude-code
 2. 需要多步规划、用本地 skills、或者想跑 **Gemini 4 Neon / Carbon / Hydrogen**，开 **Antigravity**。
 3. 边界清晰、可异步跑完的仓库任务，丢 **Claude Code** 或 **Codex App**；状态和额度看 [Codex 雷达](https://codexradar.com/)。
 4. 需求背景长、懒得敲一大段字时，直接用 **Typeless** 语音说出来，再扫一眼专有名词。
-5. 切换 CLI 供应商用 **CC Switch**，**DeepSeek** 做便宜兜底。
-6. 本机常驻、微信当入口用 [Hermes](/blog/26-08-17-hermes/#hermes-agent)；CLI 订阅要转成标准 API 给别的客户端用，再开 [CLIProxyAPI](/blog/26-08-17-hermes/#cliproxyapi)。
+5. 查资料、查询博客信息或爬取近期新闻资讯，交给 **Grok Bot** 做初筛与要点汇总。
+6. 切换 CLI 供应商用 **CC Switch**，**DeepSeek** 做便宜兜底。
+7. 本机常驻、微信当入口用 [Hermes](/blog/26-08-17-hermes/#hermes-agent)；CLI 订阅要转成标准 API 给别的客户端用，再开 [CLIProxyAPI](/blog/26-08-17-hermes/#cliproxyapi)。
 
 ## 最近的一些心得
 
