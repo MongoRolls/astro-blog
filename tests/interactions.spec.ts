@@ -208,6 +208,7 @@ test('friends and reading page displays both message card sections without overf
   await expect(page.locator('.related-section a.card')).toHaveCount(0)
   await expect(page.locator('.post-pager-prev')).toBeVisible()
   await expect(page.locator('[data-random-post]')).toHaveAttribute('href', /^\/blog\/.+\/$/)
+  await expect(page.locator('footer a[href*="qq.com"], footer a:has-text("QQ")')).toHaveCount(0)
 })
 
 test('about page displays now updates, book and game media cards, and heading anchors without overflow', async ({ page }) => {

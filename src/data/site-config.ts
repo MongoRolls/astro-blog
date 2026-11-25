@@ -63,10 +63,6 @@ const siteConfig: SiteConfig = {
       href: 'https://github.com/MongoRolls',
     },
     {
-      text: 'QQ',
-      href: 'http://wpa.qq.com/msgrd?v=3&uin=1467513807&site=qq&menu=yes',
-    },
-    {
       text: 'RSS',
       href: '/rss.xml',
     },
