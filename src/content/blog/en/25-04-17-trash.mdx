@@ -1,5 +1,5 @@
 ---
-title: V8 garbage collection
+title: "How V8 Garbage Collection (GC) and Memory Leaks Work"
 excerpt: Starting from V8's garbage-collection mechanism, this post introduces its algorithms, timing, and optimization techniques.
 publishDate: 2025-04-17
 lang: en
@@ -10,8 +10,8 @@ tags:
   - Internals
 seo:
   image:
-    src: '25-04-17-trash/cover.webp'
-    alt: 'Minimalist flat illustration of nursery and old-space memory blocks swept by a beam preserving live nodes'
+    src: '25-04-17-trash/cover-v2.webp'
+    alt: 'A natural-history engraving shows ants carrying leaves through underground chambers'
 ---
 
 JavaScript usually runs in a browser or Node environment, and both (most browsers included) are based on the V8 engine.
