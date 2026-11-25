@@ -209,6 +209,13 @@ test('friends and reading page displays both message card sections without overf
   await expect(page.locator('.post-pager-prev')).toBeVisible()
   await expect(page.locator('[data-random-post]')).toHaveAttribute('href', /^\/blog\/.+\/$/)
   await expect(page.locator('footer a[href*="qq.com"], footer a:has-text("QQ")')).toHaveCount(0)
+
+  await page.goto('/blog/26-08-13-ai-tools/')
+  const copyButton = page.locator('.code-copy-button').first()
+  await expect(copyButton).toBeVisible()
+  await expect(copyButton).toHaveText('')
+  await expect(copyButton.locator('svg')).toHaveCount(1)
+  await expect(copyButton).toHaveAttribute('aria-label', '复制代码')
 })
 
 test('about page displays now updates, book and game media cards, and heading anchors without overflow', async ({ page }) => {

@@ -18,6 +18,10 @@ const t = useTranslations(locale)
 <script>
 let disposeCodeBlockCopy = () => {}
 
+const COPY_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>'
+const SUCCESS_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>'
+const ERROR_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>'
+
 function fallbackCopy(text: string) {
   const previouslyFocused = document.activeElement as HTMLElement | null
   const textarea = document.createElement('textarea')
@@ -49,16 +53,30 @@ async function copyText(text: string) {
   fallbackCopy(text)
 }
 
-function createCopyButton() {
-  const labels = document.querySelector<HTMLElement>('[data-code-copy-label]')?.dataset
-  const copyLabel = labels?.codeCopyLabel ?? 'Copy code'
+function setButtonState(
+  button: HTMLButtonElement,
+  state: 'idle' | 'success' | 'error',
+  label: string,
+) {
+  button.innerHTML = state === 'success'
+    ? SUCCESS_ICON
+    : state === 'error'
+      ? ERROR_ICON
+      : COPY_ICON
+  button.setAttribute('aria-label', label)
+  button.setAttribute('title', label)
+  if (state === 'idle')
+    button.removeAttribute('data-state')
+  else
+    button.dataset.state = state
+}
+
+function createCopyButton(copyLabel: string) {
   const button = document.createElement('button')
   button.type = 'button'
   button.className = 'code-copy-button'
   button.dataset.pagefindIgnore = 'all'
-  button.setAttribute('aria-label', copyLabel)
-  button.setAttribute('title', copyLabel)
-  button.textContent = copyLabel
+  setButtonState(button, 'idle', copyLabel)
   return button
 }
 
@@ -79,7 +97,7 @@ function initCodeBlockCopy() {
     const wrapper = document.createElement('div')
     wrapper.className = 'code-block-wrapper'
     pre.before(wrapper)
-    wrapper.append(pre, createCopyButton())
+    wrapper.append(pre, createCopyButton(copyLabel))
   })
 
   document.addEventListener('click', async (event) => {
@@ -98,22 +116,16 @@ function initCodeBlockCopy() {
     button.disabled = true
     try {
       await copyText(code.textContent ?? '')
-      button.textContent = copiedLabel
-      button.dataset.state = 'success'
-      button.setAttribute('aria-label', copiedLabel)
+      setButtonState(button, 'success', copiedLabel)
     }
     catch (error) {
       console.warn('代码复制失败:', error)
-      button.textContent = failedLabel
-      button.dataset.state = 'error'
-      button.setAttribute('aria-label', failedLabel)
+      setButtonState(button, 'error', failedLabel)
     }
 
     const timer = window.setTimeout(() => {
-      button.textContent = copyLabel
+      setButtonState(button, 'idle', copyLabel)
       button.disabled = false
-      button.removeAttribute('data-state')
-      button.setAttribute('aria-label', copyLabel)
       resetTimers.delete(timer)
     }, 2000)
     resetTimers.add(timer)
@@ -143,40 +155,79 @@ document.addEventListener('astro:before-swap', () => disposeCodeBlockCopy())
   :global(.code-copy-button) {
     position: absolute;
     z-index: 1;
-    top: 0.65rem;
-    right: 0.65rem;
-    min-width: 3.5rem;
-    padding: 0.35rem 0.6rem;
-    border: 1px solid rgb(255 255 255 / 0.18);
-    border-radius: 0.375rem;
-    background: rgb(39 39 42 / 0.88);
-    color: rgb(244 244 245);
-    font-family: inherit;
-    font-size: 0.75rem;
-    line-height: 1.25rem;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(var(--color-border-card) / 0.9);
+    border-radius: 0.45rem;
+    background: rgb(var(--color-bg-card) / 0.88);
+    color: rgb(var(--color-text-muted));
+    backdrop-filter: blur(6px);
     cursor: pointer;
     opacity: 0.78;
-    transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition:
+      opacity 150ms ease,
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  :global(html.dark .code-copy-button) {
+    border-color: rgb(var(--color-border-card) / 0.95);
+    background: rgb(var(--color-bg-muted) / 0.85);
+    color: rgb(var(--color-text-muted));
   }
 
   :global(.code-block-wrapper:hover .code-copy-button),
-  :global(.code-copy-button:focus-visible) {
+  :global(.code-copy-button:focus-visible),
+  :global(.code-copy-button[data-state]) {
     opacity: 1;
   }
 
+  :global(.code-copy-button:hover) {
+    color: rgb(var(--color-text-main));
+    border-color: rgb(var(--color-border-main) / 0.35);
+    background: rgb(var(--color-bg-card));
+  }
+
+  :global(html.dark .code-copy-button:hover) {
+    color: rgb(var(--color-text-main));
+    border-color: rgb(var(--color-brand) / 0.55);
+    background: rgb(var(--color-bg-muted));
+  }
+
   :global(.code-copy-button:focus-visible) {
-    outline: 2px solid rgb(96 165 250);
+    outline: 2px solid rgb(var(--color-brand));
     outline-offset: 2px;
   }
 
   :global(.code-copy-button[data-state='success']) {
-    border-color: rgb(74 222 128 / 0.6);
-    background: rgb(21 128 61 / 0.92);
+    border-color: rgb(22 163 74 / 0.45);
+    background: rgb(22 163 74 / 0.12);
+    color: rgb(21 128 61);
+  }
+
+  :global(html.dark .code-copy-button[data-state='success']) {
+    border-color: rgb(166 227 161 / 0.45);
+    background: rgb(166 227 161 / 0.16);
+    color: rgb(166 227 161);
   }
 
   :global(.code-copy-button[data-state='error']) {
-    border-color: rgb(248 113 113 / 0.65);
-    background: rgb(185 28 28 / 0.92);
+    border-color: rgb(220 38 38 / 0.45);
+    background: rgb(220 38 38 / 0.12);
+    color: rgb(185 28 28);
+  }
+
+  :global(html.dark .code-copy-button[data-state='error']) {
+    border-color: rgb(243 139 168 / 0.45);
+    background: rgb(243 139 168 / 0.16);
+    color: rgb(243 139 168);
   }
 
   :global(.code-copy-button:disabled) {
