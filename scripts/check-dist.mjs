@@ -124,6 +124,11 @@ for (const prefix of ['', 'en/']) {
   const target = `/${prefix}blog/26-08-17-hermes`
   assert.ok(html.includes(`href="${target}"`), `${pathName} 正文中的相对链接应可直接跳转`)
   assert.ok(html.includes(`data-cover="${target}/"`), `${pathName} 应包含目标文章的已配置封面`)
+  const repoCover = html.match(/<img\s[^>]*data-cover="https:\/\/github\.com\/openai\/codex"[^>]*>/)?.[0]
+  assert.ok(repoCover, `${pathName} 应包含 Codex 官方分享图`)
+  assert.match(repoCover, /data-src="\/_astro\/[^"]+\.webp"/, '外链缩略图应随站点静态发布')
+  assert.doesNotMatch(repoCover, /\ssrc=/, '首次悬停前无需加载本站缩略图')
+  assert.match(html, /class="preview-skeleton" aria-hidden="true"/)
   assert.match(html, /<article-link-previews\b/)
   assert.match(html, /role="tooltip" popover="manual" data-pagefind-ignore/)
 }
@@ -146,4 +151,6 @@ assert.ok(chineseSearch.every(item => !item.url.startsWith('/en/')), '中文搜�
 assert.ok(englishSearch.length > 0 && englishSearch.every(item => item.url.startsWith('/en/')), '英文搜索索引缺失或混入中文 URL')
 assert.match(englishRss, /<language>en<\/language>/)
 
+const autoImages = files.filter(file => path.dirname(file) === path.join(distDirectory, 'link-previews') && file.endsWith('.webp'))
+console.log(`Automatic link preview images: ${autoImages.length}`)
 console.log(`Smoke check passed: ${htmlFiles.length} HTML files, ${(totalSize / 1024 / 1024).toFixed(2)} MB`)

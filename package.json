@@ -18,10 +18,11 @@
     "check": "astro check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:smoke": "node scripts/check-dist.mjs",
+    "test:smoke": "node scripts/check-dist.mjs && node --test scripts/link-images.test.mjs",
     "verify": "pnpm lint && pnpm check && pnpm build && pnpm test:smoke && pnpm test:browser",
     "oss:sync": "node scripts/oss-sync.mjs",
     "oss:sync:dry": "node scripts/oss-sync.mjs --dry-run",
+    "link:image": "node scripts/prepare-link-images.mjs",
     "cover:prepare": "node scripts/prepare-cover.mjs",
     "cover:audit": "node scripts/audit-covers.mjs",
     "test:browser": "playwright test"
@@ -51,6 +52,7 @@
     "@tailwindcss/typography": "^0.5.20",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^3.2.1",
+    "request-filtering-agent": "^3.3.1",
     "rollup-plugin-visualizer": "^7.1.1",
     "sass-embedded": "^1.105.1"
   }

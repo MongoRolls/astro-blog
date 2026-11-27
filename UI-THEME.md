@@ -53,6 +53,8 @@
 
 文章可在 frontmatter 的 `linkPreviews` 中以外链完整 URL为键，填写 `title`、`description` 或 `image`。封面使用站内资源路径或本站 OSS 文件地址。普通 Markdown 链接的可选标题也可用作摘要。
 
+正文贴入公开链接后，开发和构建时会自动读取目标页的 Open Graph 或 Twitter 分享图，并生成由本站提供的 WebP。相同链接共用缓存；超时或没有分享图时使用文字卡。作者可在 frontmatter 指定封面，或用 `pnpm link:image <URL>` 固定某张缩略图。首次请求缩略图期间，卡片只显示灰色骨架条和目标地址；缓存命中直接显示图片，失败或超过五秒恢复文字。
+
 ### 3.3 品牌色与局部强调
 
 - `src/data/site-config.ts` 的 `themeColor` 保持 `#425bc5`；文章标题和导航签名在深色下使用 `--color-brand` 的柔和薰衣草色。

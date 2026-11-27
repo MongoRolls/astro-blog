@@ -1,8 +1,11 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import { cacheDir, outDir } from 'astro:config/server'
 import { getPostCoverSrc, ossAsset } from '../config/image'
 import { getLocaleFromPath } from '../i18n/config'
+import { automaticLinkImage } from '../utils/automatic-link-image.mjs'
 import { getPostUrl, getPublishedBlogPosts } from '../utils/data-utils'
+import { linkImageFilename } from '../utils/link-image-filename.mjs'
 import { normalizeUrl } from '../utils/link-metadata'
 
 interface Props {
@@ -28,16 +31,20 @@ for (const post of posts) {
     previews.set(path, { title, summary: seo?.description ?? excerpt ?? description, cover: getPostCoverSrc(post.data) })
   }
 }
-const linkedUrls = new Set(links.map(url => url.href))
-for (const [href, supplied] of Object.entries(Astro.props.configured ?? {})) {
-  if (!URL.canParse(href))
-    continue
-  const url = new URL(href)
-  if (linkedUrls.has(url.href) && url.origin !== base.origin && /^https?:$/.test(url.protocol))
-    previews.set(url.href, { title: supplied.title, summary: supplied.description, cover: supplied.image })
-}
+const images = import.meta.glob<string>('../assets/link-previews/*.webp', { eager: true, query: '?url&no-inline', import: 'default' })
+const configured = new Map(Object.entries(Astro.props.configured ?? {})
+  .filter(([href]) => URL.canParse(href))
+  .map(([href, value]) => [new URL(href).href, value] as const))
+const external = new Set(links.filter(url => /^https?:$/.test(url.protocol) && url.origin !== base.origin).map(url => url.href))
+await Promise.all([...external].map(async (href) => {
+  const supplied = configured.get(href)
+  const pinned = images[`../assets/link-previews/${linkImageFilename(href)}`]
+  const cover = coverSrc(supplied?.image) ?? pinned ?? await automaticLinkImage(href, { cacheDir, outDir, dev: import.meta.env.DEV })
+  if (cover || supplied)
+    previews.set(href, { title: supplied?.title, summary: supplied?.description, cover })
+}))
 
-// 封面在静态 HTML 中随文章加载。悬停时只切换可见性。
+// 本站文件按需加载，自有 OSS 封面沿用文章加载时的请求。
 function coverSrc(cover?: string) {
   if (!cover || !URL.canParse(cover, base))
     return
@@ -61,9 +68,20 @@ const covers = [...previews].map(([key, { cover }]) => ({ key, src: coverSrc(cov
     data-previews={JSON.stringify(metadata)}
   >
     {covers.map(({ key, src }) => (
-      <img class="preview-cover" data-cover={key} src={src} hidden alt="" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" />
+      <img
+        class="preview-cover"
+        data-cover={key}
+        data-src={src?.startsWith('/') ? src : undefined}
+        src={src?.startsWith('/') ? undefined : src}
+        hidden
+        alt=""
+        decoding="async"
+        fetchpriority="low"
+        referrerpolicy="no-referrer"
+      />
     ))}
     <div class="preview-copy">
+      <div class="preview-skeleton" aria-hidden="true"></div>
       <strong class="preview-title"></strong>
       <p class="preview-summary" hidden></p>
       <div class="preview-source">
@@ -116,10 +134,32 @@ const covers = [...previews].map(([key, { cover }]) => ({ key, src: coverSrc(cov
   .preview-cover {
     width: 100%;
     height: min(10.8rem, 26dvh);
-    object-fit: cover;
+    object-fit: contain;
+    background: rgb(var(--color-bg-muted));
     border-bottom: 1px solid rgb(var(--color-border-card));
   }
   .preview-copy { padding: 1rem 1.125rem; }
+  .preview-skeleton {
+    display: none;
+    width: 100%;
+    height: 0.85rem;
+    border-radius: 0.35rem;
+    background: rgb(var(--color-text-main) / 0.1);
+  }
+  [aria-busy='true'] .preview-skeleton { display: block; }
+  [aria-busy='true'] :is(.preview-title, .preview-summary) { display: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [aria-busy='true'] .preview-skeleton {
+      background: linear-gradient(100deg, rgb(var(--color-text-main) / 0.10) 30%, rgb(var(--color-text-main) / 0.05) 48%, rgb(var(--color-text-main) / 0.10) 65%);
+      background-size: 220% 100%;
+      animation: preview-loading 1.3s linear infinite;
+    }
+  }
+  @keyframes preview-loading {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+  }
   .preview-title, .preview-summary {
     display: -webkit-box;
     overflow: hidden;
