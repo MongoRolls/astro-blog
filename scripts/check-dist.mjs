@@ -118,6 +118,16 @@ assert.match(chineseHome, /hreflang="en" href="https:\/\/mongorolls\.cn\/en\/"/)
 assert.match(englishHome, /hreflang="zh-CN" href="https:\/\/mongorolls\.cn\/"/)
 assert.match(chinesePost, /hreflang="en" href="https:\/\/mongorolls\.cn\/en\/blog\/26-08-21-ai-text-watermarking\/"/)
 assert.match(englishPost, /hreflang="zh-CN" href="https:\/\/mongorolls\.cn\/blog\/26-08-21-ai-text-watermarking\/"/)
+for (const prefix of ['', 'en/']) {
+  const pathName = `${prefix}blog/26-08-13-ai-tools/index.html`
+  const html = await readFile(path.join(distDirectory, pathName), 'utf8')
+  const target = `/${prefix}blog/26-08-17-hermes`
+  assert.ok(html.includes(`href="${target}"`), `${pathName} 正文中的相对链接应可直接跳转`)
+  assert.ok(html.includes(`data-cover="${target}/"`), `${pathName} 应包含目标文章的已配置封面`)
+  assert.match(html, /<article-link-previews\b/)
+  assert.match(html, /role="tooltip" popover="manual" data-pagefind-ignore/)
+}
+
 assert.match(chinesePost, /class="toc"/)
 assert.match(englishPost, /class="toc"/)
 for (const [label, html] of [
@@ -129,6 +139,7 @@ for (const [label, html] of [
   ['friends/index.html', chineseFriends],
   ['en/friends/index.html', englishFriends],
 ]) {
+  assert.doesNotMatch(html, /<article-link-previews\b/, `非文章页面 ${label} 不应渲染链接预览`)
   assert.doesNotMatch(html, /class="toc"/, `非文章页面 ${label} 不应渲染文章目录`)
 }
 assert.ok(chineseSearch.every(item => !item.url.startsWith('/en/')), '中文搜索索引混入英文 URL')

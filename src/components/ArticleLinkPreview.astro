@@ -1,0 +1,137 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { getPostCoverSrc, ossAsset } from '../config/image'
+import { getLocaleFromPath } from '../i18n/config'
+import { getPostUrl, getPublishedBlogPosts } from '../utils/data-utils'
+import { normalizeUrl } from '../utils/link-metadata'
+
+interface Props {
+  hrefs: string[]
+  configured?: CollectionEntry<'blog'>['data']['linkPreviews']
+}
+
+const base = new URL(Astro.url.pathname, Astro.site ?? Astro.url)
+const links = Astro.props.hrefs
+  .map(href => normalizeUrl(href.trim()))
+  .filter(href => href && !href.startsWith('#') && URL.canParse(href, base))
+  .map(href => new URL(href, base))
+const paths = new Set(links.filter(url => url.origin === base.origin && /^(?:\/en)?\/blog\/[^/]+\/?$/.test(url.pathname))
+  .map(url => url.pathname.replace(/\/?$/, '/')))
+const locales = new Set([...paths].map(getLocaleFromPath))
+const posts = (await Promise.all([...locales].map(locale => getPublishedBlogPosts(locale)))).flat()
+type Preview = { title?: string, summary?: string, cover?: string }
+const previews = new Map<string, Preview>()
+for (const post of posts) {
+  const path = new URL(getPostUrl(post), base).pathname
+  if (paths.has(path)) {
+    const { title, seo, excerpt, description } = post.data
+    previews.set(path, { title, summary: seo?.description ?? excerpt ?? description, cover: getPostCoverSrc(post.data) })
+  }
+}
+const linkedUrls = new Set(links.map(url => url.href))
+for (const [href, supplied] of Object.entries(Astro.props.configured ?? {})) {
+  if (!URL.canParse(href))
+    continue
+  const url = new URL(href)
+  if (linkedUrls.has(url.href) && url.origin !== base.origin && /^https?:$/.test(url.protocol))
+    previews.set(url.href, { title: supplied.title, summary: supplied.description, cover: supplied.image })
+}
+
+// 封面在静态 HTML 中随文章加载。悬停时只切换可见性。
+function coverSrc(cover?: string) {
+  if (!cover || !URL.canParse(cover, base))
+    return
+  const url = new URL(cover, base)
+  if (url.origin === base.origin && !url.pathname.startsWith('//'))
+    return url.pathname + url.search
+  if (url.href.startsWith(`${ossAsset()}/`))
+    return url.href
+}
+const metadata = Object.fromEntries([...previews].map(([key, { title, summary }]) => [key, { title, summary }]))
+const covers = [...previews].map(([key, { cover }]) => ({ key, src: coverSrc(cover) })).filter(item => item.src)
+---
+
+<article-link-previews data-site={base.origin}>
+  <div class="article-prose max-w-none prose dark:prose-invert"><slot /></div>
+  <div
+    id="article-link-preview"
+    role="tooltip"
+    popover="manual"
+    data-pagefind-ignore
+    data-previews={JSON.stringify(metadata)}
+  >
+    {covers.map(({ key, src }) => (
+      <img class="preview-cover" data-cover={key} src={src} hidden alt="" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" />
+    ))}
+    <div class="preview-copy">
+      <strong class="preview-title"></strong>
+      <p class="preview-summary" hidden></p>
+      <div class="preview-source">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" /><ellipse cx="12" cy="12" rx="4" ry="9" /><path d="M3 12h18" />
+        </svg>
+        <span></span><b aria-hidden="true">↗</b>
+      </div>
+    </div>
+  </div>
+</article-link-previews>
+
+<script>
+  import '../scripts/article-link-previews'
+</script>
+
+<style>
+  article-link-previews { display: block; }
+
+  .article-prose :global(a[data-preview-link]),
+  .article-prose :global(:where(p, li, td, th, figcaption) > a.link:not([href^='#'])) {
+    color: rgb(var(--color-text-main));
+    background: none;
+    text-decoration: underline solid rgb(var(--color-text-main) / 0.32) 1.35px;
+    text-underline-offset: 0.2em;
+
+    &:is(:hover, :focus-visible) { text-decoration-color: rgb(var(--color-text-main)); }
+    &:focus-visible {
+      outline: 2px solid rgb(var(--color-brand));
+      outline-offset: 3px;
+    }
+  }
+
+  #article-link-preview {
+    display: none;
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: 0;
+    width: min(23rem, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-border-card));
+    border-radius: 0.9rem;
+    background: rgb(var(--color-bg-card));
+    color: rgb(var(--color-text-main));
+    box-shadow: 0 10px 32px rgb(0 0 0 / 0.13), 0 2px 6px rgb(0 0 0 / 0.06);
+  }
+  #article-link-preview:popover-open { display: block; }
+  .preview-cover {
+    width: 100%;
+    height: min(10.8rem, 26dvh);
+    object-fit: cover;
+    border-bottom: 1px solid rgb(var(--color-border-card));
+  }
+  .preview-copy { padding: 1rem 1.125rem; }
+  .preview-title, .preview-summary {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+  }
+  .preview-title { font-size: 1.0625rem; line-height: 1.4; font-weight: 600; }
+  .preview-summary { margin: 0.375rem 0 0; font-size: 0.9375rem; line-height: 1.5; color: rgb(var(--color-text-p) / 0.8); }
+  .preview-summary[hidden], .preview-cover[hidden] { display: none; }
+  .preview-source { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.85rem; font-size: 0.8125rem; color: rgb(var(--color-text-muted)); }
+  .preview-source span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preview-source svg { flex-shrink: 0; }
+  .preview-source b { margin-inline-start: auto; font-size: 1.1rem; line-height: 1; font-weight: 400; }
+</style>

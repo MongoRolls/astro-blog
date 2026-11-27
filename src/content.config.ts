@@ -38,6 +38,11 @@ const blog = defineCollection({
     route: z.string().optional(),
     draft: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
+    linkPreviews: z.record(z.string(), z.object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+      image: z.string().optional(),
+    })).optional(),
     tags: z.array(z.string()).default([]),
     keywords: z.array(z.string()).optional(),
     lang: localeSchema.default('zh-CN'),
