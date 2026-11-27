@@ -11,7 +11,7 @@ class ArticleLinkPreviews extends HTMLElement {
     const summary = card.querySelector<HTMLElement>('.preview-summary')!
     const source = card.querySelector<HTMLElement>('.preview-source span')!
     const arrow = card.querySelector<HTMLElement>('.preview-source b')!
-    const covers = card.querySelectorAll<HTMLImageElement>('[data-cover]')
+    const covers = new Map(Array.from(card.querySelectorAll<HTMLImageElement>('[data-cover]'), image => [image.dataset.cover, image]))
     const previews: Record<string, { title?: string, summary?: string }> = JSON.parse(card.dataset.previews!)
     const site = new URL(this.dataset.site!)
     const { signal } = this.events = new AbortController()
@@ -19,8 +19,47 @@ class ArticleLinkPreviews extends HTMLElement {
     let active: HTMLAnchorElement | undefined
     let timer: number | undefined
 
+    let activeCover: HTMLImageElement | undefined
+    let coverWait: AbortController | undefined
+
+    function clearCover() {
+      coverWait?.abort()
+      coverWait = undefined
+      if (activeCover)
+        activeCover.hidden = true
+      activeCover = undefined
+      card.removeAttribute('aria-busy')
+    }
+
+    function revealCover(image: HTMLImageElement) {
+      activeCover = image
+      if (image.dataset.src && !image.hasAttribute('src'))
+        image.src = image.dataset.src
+      if (image.complete) {
+        image.hidden = !image.naturalWidth
+        return
+      }
+
+      card.setAttribute('aria-busy', 'true')
+      const wait = new AbortController()
+      coverWait = wait
+      function finish(ready: boolean) {
+        if (wait.signal.aborted)
+          return
+        wait.abort()
+        card.removeAttribute('aria-busy')
+        image.hidden = !ready
+        position()
+      }
+      const timeout = window.setTimeout(finish, 5000, false)
+      wait.signal.addEventListener('abort', () => clearTimeout(timeout), { once: true })
+      image.addEventListener('load', () => finish(image.naturalWidth > 0), { signal: wait.signal })
+      image.addEventListener('error', () => finish(false), { signal: wait.signal })
+    }
+
     function close() {
       clearTimeout(timer)
+      clearCover()
       if (active) {
         const ids = active.getAttribute('aria-describedby')?.split(/\s+/).filter(id => id !== card.id)
         if (ids?.length)
@@ -69,9 +108,10 @@ class ArticleLinkPreviews extends HTMLElement {
       summary.hidden = !summary.textContent
       source.textContent = (internal ? site.host : url.host) + url.pathname.replace(/\/$/, '')
       arrow.hidden = internal
-      for (const image of covers)
-        image.hidden = image.dataset.cover !== key || (image.complete && image.naturalWidth === 0)
       active = link
+      const image = covers.get(key)
+      if (image)
+        revealCover(image)
       const description = link.getAttribute('aria-describedby')
       link.setAttribute('aria-describedby', description ? `${description} ${card.id}` : card.id)
       card.showPopover()
@@ -115,12 +155,6 @@ class ArticleLinkPreviews extends HTMLElement {
 
     card.addEventListener('pointerenter', () => clearTimeout(timer), { signal })
     card.addEventListener('pointerleave', leave, { signal })
-    for (const image of covers) {
-      image.addEventListener('error', () => {
-        image.hidden = true
-        position()
-      }, { signal })
-    }
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape')
         close()

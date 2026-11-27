@@ -3,11 +3,17 @@ import { visit } from 'unist-util-visit'
 export function remarkReplaceLinks() {
   return function (tree, file) {
     const hrefs = new Set()
+    const references = new Set()
+    const definitions = new Map()
     // 普通 Markdown 文章保留原生链接节点，MDX 继续使用 Link 组件。
     const plainBlogPost = /[/\\]content[/\\]blog[/\\].*\.md$/.test(file.path ?? '')
     visit(tree, (node, index, parent) => {
-      if (node.type === 'link' || node.type === 'definition')
+      if (node.type === 'link')
         hrefs.add(node.url)
+      if (node.type === 'linkReference')
+        references.add(node.identifier)
+      if (node.type === 'definition' && !definitions.has(node.identifier))
+        definitions.set(node.identifier, node.url)
       if (node.name === 'a' || node.name === 'Link') {
         const href = node.attributes?.find(attribute => attribute.name === 'href')?.value
         if (typeof href === 'string')
@@ -22,6 +28,10 @@ export function remarkReplaceLinks() {
       parent.children[index] = { type: 'mdxJsxTextElement', name: 'Link', attributes, children: node.children }
     })
 
+    for (const id of references) {
+      if (definitions.has(id))
+        hrefs.add(definitions.get(id))
+    }
     file.data.astro.frontmatter.articleLinkHrefs = [...hrefs]
   }
 }
