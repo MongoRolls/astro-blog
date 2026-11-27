@@ -1,44 +1,31 @@
 ---
-import {
-  getFaviconCandidates,
-  isExternalLink,
-  isValidUrl,
-  normalizeUrl,
-} from '../utils/link-metadata'
+import { getFaviconCandidates, isExternalLink, normalizeUrl } from '../utils/link-metadata'
 
 interface Props {
   href: string
+  title?: string
   external?: boolean
   showIcon?: boolean
 }
 
-const {
-  href,
-  external = true,
-  showIcon = true,
-} = Astro.props
-
-const children = await Astro.slots.render('default')
-const rawHref = (href || '').trim()
-const normalizedHref = rawHref ? normalizeUrl(rawHref) : ''
-const isSafeHref = Boolean(normalizedHref) && isValidUrl(normalizedHref) && !/^(?:javascript|data|vbscript):/i.test(normalizedHref)
-const isExt = isSafeHref ? isExternalLink(normalizedHref) : false
-const faviconCandidates = showIcon && isSafeHref && isExt ? getFaviconCandidates(normalizedHref) : []
-const [faviconHref, ...faviconFallbacks] = faviconCandidates
-const fallbackText = (children || '').toString().trim() || rawHref || '链接'
+const { href, title, external = true, showIcon = true } = Astro.props
+const normalizedHref = normalizeUrl(href?.trim())
+const base = new URL(Astro.url.pathname, Astro.site ?? Astro.url)
+const url = normalizedHref && URL.canParse(normalizedHref, base) ? new URL(normalizedHref, base) : null
+const safe = url && !['javascript:', 'data:', 'vbscript:'].includes(url.protocol)
+const externalWeb = url && /^https?:$/.test(url.protocol) && url.origin !== base.origin
+const openInNewTab = external && (isExternalLink(normalizedHref) || externalWeb)
+const [faviconHref, ...fallbacks] = showIcon && externalWeb ? getFaviconCandidates(url.href) : []
 ---
 
-{!isSafeHref
+{safe
   ? (
-    <span class="link__text link__text--plain">{fallbackText}</span>
-  )
-  : (
     <a
       href={normalizedHref}
       class="link"
-      target={external && isExt ? '_blank' : undefined}
-      rel={external && isExt ? 'noopener noreferrer' : undefined}
-      title={fallbackText}
+      target={openInNewTab ? '_blank' : undefined}
+      rel={openInNewTab ? 'noopener noreferrer' : undefined}
+      data-preview-description={title}
     >
       {faviconHref && (
         <img
@@ -49,80 +36,17 @@ const fallbackText = (children || '').toString().trim() || rawHref || '链接'
           decoding="async"
           referrerpolicy="no-referrer"
           aria-hidden="true"
-          data-fallbacks={faviconFallbacks.join('|')}
+          data-fallbacks={fallbacks.join('|')}
           onerror="const next=(this.dataset.fallbacks||'').split('|').filter(Boolean);if(next.length){this.src=next.shift();this.dataset.fallbacks=next.join('|')}else{this.remove()}"
         />
-      )}
-      <span class="link__text"><slot>{fallbackText}</slot></span>
+      )}<slot>{href}</slot>
     </a>
-  )}
+  )
+  : <span><slot>{href}</slot></span>}
 
 <style>
-  /* 行高需与 tailwind.config.cjs 中的 p/div/li 保持一致以对齐基线 */
-  .link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: var(--link-fg, inherit);
-    transition: background-color 0.15s ease;
-    border-radius: 0.25rem;
-    margin: 0 !important;
-    line-height: 1.5;
-    text-decoration: none;
-    vertical-align: bottom;
-    padding: 0rem 0.38rem !important;
-  }
-
-  .link:hover {
-    background-color: var(--link-bg-hover, rgba(55, 53, 47, 0.08));
-  }
-
-  .link:before {content: none !important;}
-  .link:after {content: none !important;}
-
-  .link:active {
-    background-color: var(--link-bg-active, rgba(55, 53, 47, 0.12));
-  }
-
   .link__icon {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    max-width: 1rem !important;
-    max-height: 1rem !important;
-    flex-shrink: 0;
-    align-self: center;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 0.15rem;
-    object-fit: contain;
-    vertical-align: middle;
-  }
-
-  .link__text {
-    color: inherit;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1.25;
-  }
-
-  .link__text--plain {
-    display: inline-block;
-  }
-
-  :global(html.dark) .link {
-    color: var(--link-fg, rgba(230, 230, 227, 0.95));
-  }
-
-  :global(html.dark) .link:hover {
-    background-color: var(--link-bg-hover, rgba(255, 255, 255, 0.12));
-  }
-
-  :global(html.dark) .link:active {
-    background-color: var(--link-bg-active, rgba(255, 255, 255, 0.18));
+    margin-inline-end: 0.25em !important;
+    vertical-align: -0.14em;
   }
 </style>
