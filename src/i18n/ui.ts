@@ -37,6 +37,7 @@ const messages = {
     post: {
       published: '发布于',
       updated: '更新于',
+      draft: '草稿',
       author: '作者',
       minutesRead: '分钟阅读',
       readPost: '阅读全文',
@@ -98,6 +99,7 @@ const messages = {
     post: {
       published: 'Published',
       updated: 'Updated',
+      draft: 'Draft',
       author: 'Author',
       minutesRead: 'min read',
       readPost: 'Read post',

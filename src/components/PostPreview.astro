@@ -70,6 +70,7 @@ const formattedWords = formatWordCount(readingStats.words)
 
     <div class="feed-date">
       <FormattedDate date={publishDate} locale={locale} />
+      {post.data.draft && <span class="draft-badge">{t.post.draft}</span>}
     </div>
 
     {uniqueTags.length > 0 && (
@@ -162,6 +163,10 @@ const formattedWords = formatWordCount(readingStats.words)
 
   .feed-date {
     margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.5;

@@ -72,17 +72,34 @@ export function sortItemsByDateDesc(itemA: CollectionEntry<'blog'>, itemB: Colle
   return new Date(itemB.data.publishDate).getTime() - new Date(itemA.data.publishDate).getTime()
 }
 
-export function isPublishedPost(post: CollectionEntry<'blog'>, now = new Date()) {
+export function shouldIncludeDrafts() {
+  return import.meta.env.DEV
+}
+
+export function isPublishedPost(
+  post: CollectionEntry<'blog'>,
+  now = new Date(),
+  includeDrafts = shouldIncludeDrafts(),
+) {
+  if (includeDrafts)
+    return true
   return !post.data.draft && post.data.publishDate.getTime() <= now.getTime()
 }
 
-export async function getPublishedBlogPosts(locale: Locale = defaultLocale, now = new Date()) {
-  const posts = await getCollection('blog', post => isPublishedPost(post, now) && post.data.lang === locale)
+export async function getPublishedBlogPosts(
+  locale: Locale = defaultLocale,
+  now = new Date(),
+  includeDrafts = shouldIncludeDrafts(),
+) {
+  const posts = await getCollection('blog', post => isPublishedPost(post, now, includeDrafts) && post.data.lang === locale)
   return posts.sort(sortItemsByDateDesc)
 }
 
-export async function getPublishedPages(locale: Locale = defaultLocale) {
-  return getCollection('pages', page => !page.data.draft && page.data.lang === locale)
+export async function getPublishedPages(
+  locale: Locale = defaultLocale,
+  includeDrafts = shouldIncludeDrafts(),
+) {
+  return getCollection('pages', page => (includeDrafts || !page.data.draft) && page.data.lang === locale)
 }
 
 function entryBasename(id: string) {

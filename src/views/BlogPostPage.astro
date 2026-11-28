@@ -76,7 +76,10 @@ const { minutesRead } = remarkPluginFrontmatter;
                 )}
                 <h1 data-pagefind-meta="title" class="text-[1.75rem] leading-snug [overflow-wrap:anywhere] font-serif text-brand font-medium sm:text-5xl sm:leading-tight">{title}</h1>
                 <div class="mt-4 text-sm leading-relaxed space-y-1">
-                    <div class="text-base">{t.post.published}: <FormattedDate date={publishDate} locale={locale} /></div>
+                    <div class="text-base flex flex-wrap items-center gap-2">
+                        <span>{t.post.published}: <FormattedDate date={publishDate} locale={locale} /></span>
+                        {post.data.draft && <span class="draft-badge">{t.post.draft}</span>}
+                    </div>
                     {
                         updatedDate && (
                             <>
@@ -137,6 +140,7 @@ const { minutesRead } = remarkPluginFrontmatter;
                                         <span class="related-bullet" aria-hidden="true"></span>
                                         <div class="related-entry">
                                             <a class="related-title" href={getPostUrl(related)}>{related.data.title}</a>
+                                            {related.data.draft && <span class="draft-badge related-draft-badge">{t.post.draft}</span>}
                                             {relatedTags.length > 0 && (
                                                 <span class="related-tags">
                                                     {relatedTags.map(tag => (
@@ -311,6 +315,10 @@ const { minutesRead } = remarkPluginFrontmatter;
 
   .related-tags {
     display: inline;
+  }
+
+  .related-draft-badge {
+    margin-right: 0.28rem;
   }
 
   .related-tag {

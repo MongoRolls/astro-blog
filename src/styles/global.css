@@ -163,6 +163,27 @@
     color: rgb(var(--color-text-muted));
   }
 
+  .draft-badge {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: 0.06em;
+    padding: 0.06rem 0.42rem;
+    border-radius: 0.3rem;
+    border: 1px dashed rgb(217 119 6 / 0.45);
+    background-color: rgb(245 158 11 / 0.12);
+    color: rgb(180 83 9);
+    font-size: 0.74rem;
+    line-height: 1.45;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  html.dark .draft-badge {
+    border-color: rgb(250 179 135 / 0.45);
+    background-color: rgb(250 179 135 / 0.14);
+    color: rgb(250 179 135);
+  }
+
   /* Markdown 正文排版定制（替代旧 tailwind.config.cjs typography 扩展） */
   .prose :where(a):not(:where(.not-prose, .not-prose *)) {
     color: rgb(var(--color-text-main) / 0.86);

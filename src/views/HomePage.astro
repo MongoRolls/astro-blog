@@ -7,11 +7,13 @@ import TechStack from '../components/TechStack.astro'
 import { getHeroImageSrc } from '../config/image'
 import { getSiteConfig } from '../data/site-config'
 import { defaultLocale, localizedPath } from '../i18n/config'
+import { useTranslations } from '../i18n/ui'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPostUrl, getPublishedBlogPosts } from '../utils/data-utils'
 
 type Props = { locale?: Locale }
 const { locale = defaultLocale } = Astro.props
+const t = useTranslations(locale)
 const siteConfig = getSiteConfig(locale)
 const posts = await getPublishedBlogPosts(locale)
 const randomPostUrls = posts.map(getPostUrl)
@@ -98,7 +100,10 @@ const heroData = {
                         <span class="post-date italic font-serif text-muted">
                             <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
                         </span>
-                        <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
+                        <span class="post-title-cell">
+                            <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
+                            {post.data.draft && <span class="draft-badge post-draft-badge">{t.post.draft}</span>}
+                        </span>
                     </li>
                 )
             })}
@@ -172,6 +177,14 @@ const heroData = {
 
     .post-date {
         white-space: nowrap;
+    }
+
+    .post-title-cell {
+        min-width: 0;
+    }
+
+    .post-draft-badge {
+        margin-left: 0.4rem;
     }
 
     .hero-content-grid {
