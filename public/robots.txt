@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /pagefind/
 Disallow: /search-index.json
+Disallow: /en/search-index.json
 
 Sitemap: https://mongorolls.cn/sitemap-index.xml

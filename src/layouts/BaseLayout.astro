@@ -37,18 +37,34 @@ const hasTableOfContents = isBlogPostPath
     <head>
         <BaseHead {...head} locale={locale} alternateUrls={alternateUrls} />
         <script is:inline>
-        // 初始化主题 - 确保在页面加载前应用正确的主题类，避免闪烁
-        // 使用 is:inline 确保此脚本立即执行而不被 Astro 处理
-        const savedTheme = localStorage.getItem('theme')
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        const isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+        // 初始化主题 - 确保首次渲染与 Astro ClientRouter 软导航切换前后均保持一致，避免闪烁或掉回浅色
+        (() => {
+          const resolveDark = () => {
+            try {
+              const savedTheme = localStorage.getItem('theme')
+              if (savedTheme === 'dark')
+                return true
+              if (savedTheme === 'light')
+                return false
+            }
+            catch {}
+            return Boolean(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          }
 
-        if (isDark) {
-          document.documentElement.classList.add('dark')
-        }
-        else {
-          document.documentElement.classList.remove('dark')
-        }
+          const applyTheme = (doc = document) => {
+            doc.documentElement.classList.toggle('dark', resolveDark())
+          }
+
+          applyTheme()
+
+          if (!window.__blogThemeSwapBound) {
+            window.__blogThemeSwapBound = true
+            document.addEventListener('astro:before-swap', (event) => {
+              if (event.newDocument)
+                applyTheme(event.newDocument)
+            })
+          }
+        })()
         </script>
         <ClientRouter />
     </head>

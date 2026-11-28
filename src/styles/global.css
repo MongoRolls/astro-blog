@@ -1,20 +1,49 @@
-@config "../../tailwind.config.cjs";
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter Variable", "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: "Newsreader Variable", "Newsreader", "Source Han Serif SC", "Noto Serif SC", Georgia, ui-serif, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Fira Code", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+  --color-primary-950: #082f49;
+}
+
+@theme inline {
+  --text-color-main: rgb(var(--color-text-main));
+  --text-color-muted: rgb(var(--color-text-muted));
+  --text-color-brand: rgb(var(--color-brand));
+  --background-color-main: rgb(var(--color-bg-main));
+  --background-color-muted: rgb(var(--color-bg-muted));
+  --background-color-card: rgb(var(--color-bg-card));
+  --border-color-main: rgb(var(--color-border-main));
+  --border-color-card: rgb(var(--color-border-card));
+}
 
 @layer base {
   :root {
     /* 正文最大宽度，明暗主题保持一致 */
     --content-width: 674px;
 
-    /* 主题色 - 使用CSS变量便于全局控制和暗色模式适配 */
-    --color-primary: 14, 165, 233; /* sky-500 */
-    --color-primary-dark: 56, 189, 248; /* sky-400 用于暗色模式 */
+    /* 主题色 - 统一使用空格分隔的 RGB 三元组，便于配合 rgb(var(...) / alpha) */
+    --color-primary: 14 165 233; /* sky-500 */
+    --color-primary-dark: 56 189 248; /* sky-400 用于暗色模式 */
     --color-brand: 66 91 197;
-    --color-secondary: 236, 72, 153; /* pink-500 */
+    --color-secondary: 236 72 153; /* pink-500 */
 
     /* 文本颜色 */
     --color-text-main: 23 23 23; /* #171717 主要文本 */
-    /* --color-text-p: 103 103 103; 段落文本 */
     --color-text-p: 32 35 40; /* #202328 段落文本 */
     --color-text-muted: 107 114 128; /* gray-500 次要文本 */
 
@@ -51,7 +80,7 @@
     --color-primary-dark: 180 190 254;
     --color-primary-glow: 180 190 254;
     --color-brand: 180 190 254;
-    --color-secondary: 203, 166, 247;
+    --color-secondary: 203 166 247;
     --color-border-main: 108 112 134;
     --color-border-card: 69 71 90;
     --card-shadow: 0 8px 24px rgb(17 17 27 / 0.25);
@@ -132,6 +161,217 @@
     font-size: 0.875rem;
     line-height: 1.6;
     color: rgb(var(--color-text-muted));
+  }
+
+  /* Markdown 正文排版定制（替代旧 tailwind.config.cjs typography 扩展） */
+  .prose :where(a):not(:where(.not-prose, .not-prose *)) {
+    color: rgb(var(--color-text-main) / 0.86);
+    text-decoration: underline;
+    text-decoration-thickness: 1.35px;
+    text-decoration-color: rgb(var(--color-text-main) / 0.28);
+    text-underline-offset: 0.2em;
+    transition: color 0.2s ease, background-color 0.2s ease, text-decoration-color 0.2s ease;
+  }
+
+  .prose :where(a):not(:where(.not-prose, .not-prose *)):hover {
+    color: rgb(var(--color-text-main));
+    background-color: rgb(var(--color-bg-muted) / 0.5);
+    text-decoration-color: rgb(var(--color-text-main) / 0.5);
+  }
+
+  .prose :where(p, li):not(:where(.not-prose, .not-prose *)) {
+    font-family: var(--font-sans);
+    color: rgb(var(--color-text-p));
+    font-weight: 400;
+    font-size: 1.02rem;
+    letter-spacing: 0.01rem;
+    line-height: 1.5rem;
+    margin-top: 0.85em;
+    margin-bottom: 0.85em;
+  }
+
+  .prose :where(strong):not(:where(.not-prose, .not-prose *)) {
+    color: rgb(var(--color-text-main) / 0.95);
+    font-weight: 700;
+  }
+
+  .prose :where(em):not(:where(.not-prose, .not-prose *)) {
+    color: rgb(var(--color-text-main) / 0.9);
+  }
+
+  .prose :where(code:not(pre code)):not(:where(.not-prose, .not-prose *)) {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    font-weight: 500;
+    background-color: rgba(237, 237, 235, 0.9);
+    color: #111827;
+    border-radius: 0.3rem;
+    padding: 0.08em 0.4em;
+    margin: 0 0.18em;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    position: relative;
+  }
+
+  .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::before,
+  .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::after {
+    content: none !important;
+  }
+
+  .prose :where(pre):not(:where(.not-prose, .not-prose *)) {
+    border-radius: 0.6rem;
+    padding: 1rem;
+    box-shadow: none;
+    margin: 1.4rem 0;
+    overflow: auto;
+    max-height: 75vh;
+    border: 1px solid rgb(var(--color-border-main) / 0.12);
+    background-color: rgb(var(--color-bg-muted) / 0.9);
+    line-height: 1.6;
+  }
+
+  .prose :where(pre code):not(:where(.not-prose, .not-prose *)) {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+    font-weight: 500;
+  }
+
+  .prose :where(h1, h2, h3):not(:where(.not-prose, .not-prose *)) {
+    display: block;
+    font-family: var(--font-serif);
+    color: rgb(var(--color-text-main) / 0.95);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .prose :where(h1):not(:where(.not-prose, .not-prose *)) {
+    font-weight: 700;
+    font-size: 2.35rem;
+    margin-top: 1.5em;
+    margin-bottom: 0.95em;
+  }
+
+  .prose :where(h2):not(:where(.not-prose, .not-prose *)) {
+    font-weight: 650;
+    font-size: 1.85rem;
+    margin-top: 1.4em;
+    margin-bottom: 0.85em;
+  }
+
+  .prose :where(h3):not(:where(.not-prose, .not-prose *)) {
+    font-weight: 650;
+    font-size: 1.45rem;
+    margin-top: 1.2em;
+    margin-bottom: 0.75em;
+  }
+
+  .prose :where(summary):not(:where(.not-prose, .not-prose *)) {
+    cursor: pointer;
+    color: var(--color-blue-500);
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .prose :where(summary):not(:where(.not-prose, .not-prose *)):hover {
+    color: var(--color-purple-400);
+  }
+
+  .prose :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
+    padding-left: 1.2em;
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+  }
+
+  .prose :where(li > ul, li > ol):not(:where(.not-prose, .not-prose *)) {
+    margin-top: 0.35em;
+    margin-bottom: 0.35em;
+  }
+
+  .prose :where(table):not(:where(.not-prose, .not-prose *)) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.96em;
+    line-height: 1.6;
+    box-shadow: none;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-border-main) / 0.16);
+  }
+
+  .prose :where(thead):not(:where(.not-prose, .not-prose *)) {
+    background-color: rgb(var(--color-bg-muted) / 0.6);
+    border-bottom: 1px solid rgb(var(--color-border-main) / 0.2);
+  }
+
+  .prose :where(thead th):not(:where(.not-prose, .not-prose *)) {
+    font-weight: 700;
+    padding: 0.75rem 0.95rem;
+    text-align: left;
+    color: rgb(var(--color-text-main) / 0.95);
+    vertical-align: middle;
+    font-size: 0.98em;
+    letter-spacing: 0.02em;
+    border-right: 1px solid rgb(var(--color-border-main) / 0.16);
+  }
+
+  .prose :where(thead th:first-child):not(:where(.not-prose, .not-prose *)) {
+    padding-left: 1.05rem;
+  }
+
+  .prose :where(thead th:last-child):not(:where(.not-prose, .not-prose *)) {
+    border-right: none;
+  }
+
+  .prose :where(tbody tr):not(:where(.not-prose, .not-prose *)) {
+    border-bottom: 1px solid rgb(var(--color-border-main) / 0.16);
+  }
+
+  .prose :where(tbody tr:nth-child(even)):not(:where(.not-prose, .not-prose *)) {
+    background-color: rgb(var(--color-bg-muted) / 0.18);
+  }
+
+  .prose :where(tbody tr:last-child):not(:where(.not-prose, .not-prose *)) {
+    border-bottom: none;
+  }
+
+  .prose :where(tbody tr):not(:where(.not-prose, .not-prose *)):hover {
+    background-color: rgb(var(--color-bg-muted) / 0.22);
+  }
+
+  .prose :where(tbody td):not(:where(.not-prose, .not-prose *)) {
+    padding: 0.75rem 0.95rem;
+    vertical-align: top;
+    color: rgb(var(--color-text-main) / 0.9);
+    font-size: 0.96em;
+    border-right: 1px solid rgb(var(--color-border-main) / 0.16);
+  }
+
+  .prose :where(tbody td:first-child):not(:where(.not-prose, .not-prose *)) {
+    padding-left: 1.05rem;
+    font-weight: 520;
+  }
+
+  .prose :where(tbody td:last-child):not(:where(.not-prose, .not-prose *)) {
+    border-right: none;
+  }
+
+  .prose :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: rgb(var(--color-text-main) / 0.9);
+    border-left: 3px solid rgb(var(--color-border-main) / 0.35);
+    padding: 0.95rem 1.1rem;
+    background-color: rgb(var(--color-bg-muted) / 0.42);
+    margin: 1.2rem 0;
+  }
+
+  .prose :where(blockquote p):not(:where(.not-prose, .not-prose *)) {
+    font-family: inherit;
+    font-weight: inherit;
+    color: inherit;
   }
 }
 
@@ -242,8 +482,10 @@ main :where(h2[id], h3[id]) {
   border-radius: 2px;
 }
 
-@supports (text-autospace: normal) {  
-  :root {    text-autospace: normal;  }
+@supports (text-autospace: normal) {
+  :root {
+    text-autospace: normal;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -258,8 +500,6 @@ main :where(h2[id], h3[id]) {
 }
 
 /* Semantic accents also cover titles outside the Markdown typography wrapper. */
-.text-brand { color: rgb(var(--color-brand)); }
-.text-muted { color: rgb(var(--color-text-muted)); }
 html.dark ::selection { background: rgb(180 190 254 / 0.25); color: rgb(var(--color-text-main)); }
 html.dark .prose { --tw-prose-invert-bullets: rgb(var(--color-text-muted)); --tw-prose-invert-hr: rgb(var(--color-border-card)); }
 html.dark .prose a { color: rgb(var(--color-primary)); text-decoration-color: rgb(var(--color-primary) / 0.4); }

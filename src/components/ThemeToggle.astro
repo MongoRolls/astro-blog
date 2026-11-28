@@ -41,12 +41,19 @@ function initializeThemeToggle() {
   button?.addEventListener('click', () => {
     const isDark = !document.documentElement.classList.contains('dark')
     applyTheme(isDark)
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+    try {
+      localStorage.setItem('theme', isDark ? 'dark' : 'light')
+    }
+    catch {}
   }, { signal: controller.signal })
 
   colorScheme.addEventListener('change', (event) => {
-    if (localStorage.getItem('theme') === null)
-      applyTheme(event.matches)
+    try {
+      if (localStorage.getItem('theme') !== null)
+        return
+    }
+    catch {}
+    applyTheme(event.matches)
   }, { signal: controller.signal })
 
   disposeThemeToggle = () => controller.abort()

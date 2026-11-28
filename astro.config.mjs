@@ -9,7 +9,7 @@ import { remarkAlert } from 'remark-github-blockquote-alert'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { pagefindDevPlugin } from './scripts/pagefind-dev-plugin.mjs'
 import siteConfig from './src/data/site-config'
-import { remarkReadingTime } from './src/utils/remark-reading-time.mjs'
+import { remarkReadingTime } from './src/utils/remark-reading-time'
 import { remarkReplaceLinks } from './src/utils/remark-replace-links.js'
 
 const shouldAnalyzeBundle = process.env.ANALYZE === 'true'
@@ -57,7 +57,7 @@ export default defineConfig({
         defaultLocale: 'zh-CN',
         locales: {
           'zh-CN': 'zh-CN',
-          'en': 'en-US',
+          'en': 'en',
         },
       },
       filter: (page) => {

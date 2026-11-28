@@ -1,39 +1,14 @@
 ---
 import type { CollectionEntry } from 'astro:content'
 import type { Locale } from '../i18n/config'
-import getReadingTime from 'reading-time'
 import { COVER_HEIGHT, COVER_WIDTH, getPostCoverImage } from '../config/image'
 import { defaultLocale } from '../i18n/config'
 import { useTranslations } from '../i18n/ui'
 import { getPostUrl } from '../utils/data-utils'
+import { getReadingStats, stripInlineMarkdown } from '../utils/reading-stats'
 import FormattedDate from './FormattedDate.astro'
 
 type Props = { post: CollectionEntry<'blog'>, class?: string, headingLevel?: 'h2' | 'h3', locale?: Locale }
-
-function stripInlineMarkdown(text: string) {
-  return text
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/~~([^~]+)~~/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function cleanBodyForStats(body = '') {
-  return stripInlineMarkdown(
-    body
-      .replace(/\{\/\*[\s\S]*?\*\/\}/g, ' ')
-      .replace(/<!--[\s\S]*?-->/g, ' ')
-      .replace(/^[ \t]*(?:import|export)[ \t][^\n]*$/gm, ' ')
-      .replace(/```[\s\S]*?```/g, ' ')
-      .replace(/^#{1,6}\s+/gm, '')
-      .replace(/^>\s?/gm, ''),
-  )
-}
 
 function extractFirstParagraph(body = '', maxLength = 180) {
   const withoutComments = body
@@ -82,8 +57,8 @@ const postUrl = getPostUrl(post)
 const coverImage = getPostCoverImage(post.data, title)
 const uniqueTags = [...new Set(tags.map(tag => tag.trim()).filter(Boolean))]
 const summary = excerpt?.trim() || description?.trim() || extractFirstParagraph(post.body)
-const readingStats = getReadingTime(cleanBodyForStats(post.body))
-const minutesRead = Math.max(1, Math.ceil(readingStats.minutes))
+const readingStats = getReadingStats(post.body)
+const minutesRead = readingStats.minutesRead
 const formattedWords = formatWordCount(readingStats.words)
 ---
 

@@ -251,3 +251,78 @@ test('about page displays now updates, book and game media cards, and heading an
     }
   }
 })
+
+test('dark mode persists across ClientRouter navigations, language switches, and reload', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.goto('/')
+  await page.evaluate(() => Object.assign(window, { themeNavMarker: true }))
+
+  await expect(page.locator('html')).not.toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+
+  await page.locator('#theme-toggle').click()
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(30, 30, 46)')
+
+  // Soft navigate to blog feed, then article detail, then switch locale
+  await page.locator('nav .nav-link[href="/blog/"]').click()
+  await expect(page).toHaveURL(/\/blog\/$/)
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(30, 30, 46)')
+
+  await page.locator('.feed-title-link').first().click()
+  await expect(page).toHaveURL(/\/blog\/.+\/$/)
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+
+  await page.locator('a[hreflang]').click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+  expect(await page.evaluate(() => (window as Window & { themeNavMarker?: boolean }).themeNavMarker)).toBe(true)
+
+  // Hard reload still preserves dark theme
+  await page.reload()
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+
+  // Toggle back to light and verify soft nav keeps light theme
+  await page.locator('#theme-toggle').click()
+  await expect(page.locator('html')).not.toHaveClass(/\bdark\b/)
+  await page.locator('nav .nav-link[href="/en/post/"]').click()
+  await expect(page).toHaveURL(/\/en\/post\/$/)
+  await expect(page.locator('html')).not.toHaveClass(/\bdark\b/)
+})
+
+test('fonts, hero dimensions, and reading-time consistency match expectations', async ({ page }) => {
+  await page.goto('/')
+
+  const heroImg = page.locator('img.hero-image')
+  await expect(heroImg).toHaveAttribute('width', '1600')
+  await expect(heroImg).toHaveAttribute('height', '901')
+
+  const bodyFont = await page.locator('body').evaluate(el => getComputedStyle(el).fontFamily)
+  const headingFont = await page.locator('h1').first().evaluate(el => getComputedStyle(el).fontFamily)
+  expect(bodyFont).toContain('Inter Variable')
+  expect(headingFont).toContain('Newsreader Variable')
+
+  // Verify reading time matches between /blog/ preview card and article detail page
+  await page.goto('/blog/')
+  const targetCard = page.locator('article.post-feed-item', { has: page.locator('a[href="/blog/26-02-25-typescript/"]') })
+  const feedStatsText = await targetCard.locator('.feed-stats').textContent()
+  const feedMinutes = feedStatsText?.match(/(\d+)\s*分钟/)?.[1]
+  expect(feedMinutes).toBeTruthy()
+
+  await page.goto('/blog/26-02-25-typescript/')
+  const detailText = await page.locator('article header').textContent()
+  const detailMinutes = detailText?.match(/(\d+)\s*分钟阅读/)?.[1]
+  expect(detailMinutes).toBe(feedMinutes)
+
+  // Verify Tailwind v4 prose typography rules (headings, blockquote serif, Shiki code monospace)
+  await page.goto('/style/')
+  const proseHeadingFont = await page.locator('.prose h2').first().evaluate(el => getComputedStyle(el).fontFamily)
+  const proseParagraphFont = await page.locator('.prose > p').first().evaluate(el => getComputedStyle(el).fontFamily)
+  const proseBlockquoteFont = await page.locator('.prose blockquote p').first().evaluate(el => getComputedStyle(el).fontFamily)
+  const proseCodeTokenFont = await page.locator('.prose pre code span').first().evaluate(el => getComputedStyle(el).fontFamily)
+  expect(proseHeadingFont).toContain('Newsreader Variable')
+  expect(proseParagraphFont).toContain('Inter Variable')
+  expect(proseBlockquoteFont).toContain('Newsreader Variable')
+  expect(proseCodeTokenFont).toContain('Fira Code')
+})

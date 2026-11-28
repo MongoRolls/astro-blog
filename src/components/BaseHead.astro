@@ -4,9 +4,9 @@ import { getSiteConfig } from '../data/site-config'
 import { defaultLocale, localeInfo, localizedPath } from '../i18n/config'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/newsreader'
-import '@fontsource/fira-code/400.css'
-import '@fontsource/fira-code/500.css'
-import '@fontsource/fira-code/600.css'
+import '@fontsource/fira-code/latin-400.css'
+import '@fontsource/fira-code/latin-500.css'
+import '@fontsource/fira-code/latin-600.css'
 import 'remark-github-blockquote-alert/alert.css'
 import '../styles/global.css'
 
@@ -117,7 +117,8 @@ function toJsonLd(data: unknown) {
 <meta name="generator" content={Astro.generator} />
 {robots && <meta name="robots" content={robots} />}
 
-<!-- DNS Prefetch -->
+<!-- Resource Hints -->
+<link rel="preconnect" href="https://mongorolls-images.oss-cn-shenzhen.aliyuncs.com" crossorigin />
 <link rel="dns-prefetch" href="//mongorolls-images.oss-cn-shenzhen.aliyuncs.com" />
 
 <!-- Low Priority Global Metadata -->

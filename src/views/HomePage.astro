@@ -59,8 +59,8 @@ const heroData = {
                       loading="eager"
                       fetchpriority="high"
                       decoding="async"
-                      width="10530"
-                      height="5924"
+                      width={heroCover.width}
+                      height={heroCover.height}
                     />
                 </div>
                 <div class="hero-actions w-full flex flex-col md:flex-row gap-4 justify-start">
@@ -95,7 +95,7 @@ const heroData = {
             {posts.slice(0, 8).map((post) => {
                 return (
                     <li class="post-row">
-                        <span class="post-date italic font-serif text-gray-500">
+                        <span class="post-date italic font-serif text-muted">
                             <FormattedDate format="iso" date={post.data.publishDate} locale={locale} />
                         </span>
                         <a class="post-link" href={getPostUrl(post)}><span class="post-link-text">{post.data.title}</span></a>
@@ -109,7 +109,7 @@ const heroData = {
     </section>
 </BaseLayout>
 
-<style lang="scss">
+<style>
     .read-more-link {
         text-decoration: underline;
         text-decoration-color: transparent;
@@ -140,10 +140,8 @@ const heroData = {
 
     .hero-title {
         font-size: 1.8rem;
-        // font-family: serif;
         font-weight: 600;
         margin: 0 0 24px 0;
-        // color: rgb(var(--color-text-main));
         line-height: 1.2;
     }
 

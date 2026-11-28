@@ -7,7 +7,7 @@ const localeSchema = z.enum(['zh-CN', 'en'])
 
 const seoImageCreditSchema = z.object({
   author: z.string(),
-  url: z.string().url().optional(),
+  url: z.url().optional(),
 })
 
 const seoSchema = z.object({

@@ -21,7 +21,7 @@
 | 依赖、运行环境与命令 | `package.json`、`pnpm-lock.yaml`、`.nvmrc`；使用 pnpm，不用 npm/yarn 改写锁文件 |
 | 内容与 frontmatter | `src/content.config.ts`；发布、草稿和语言行为同时核对 `src/utils/data-utils.ts` 与相关页面查询 |
 | 路由、语言和站点数据 | `src/pages/`、`src/data/site-config.ts`；不要从旧文档推断路由或内容字段 |
-| UI、主题与交互 | `UI-THEME.md`、`src/styles/global.css`、`tailwind.config.cjs` 及相关组件；以源码为最终依据 |
+| UI、主题与交互 | `UI-THEME.md`、`src/styles/global.css` 及相关组件；以源码为最终依据 |
 | 页面骨架和元数据 | `src/layouts/BaseLayout.astro`、`src/components/BaseHead.astro` |
 | 构建期内容处理 | `astro.config.mjs`、`src/utils/remark-*`；不能仅凭运行时引用判断代码是否无用 |
 | 图片与 OSS | `src/config/env.ts`、`src/config/image.ts`、`scripts/oss-sync.mjs` 及下方约束 |

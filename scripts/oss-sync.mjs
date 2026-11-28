@@ -88,6 +88,7 @@ async function verifyDestinations(uploads) {
 
 async function collectLocalUploads() {
   return [
+    ...await collectDirectoryUploads(path.join(rootDirectory, 'public/about'), ['about']),
     ...await collectDirectoryUploads(path.join(rootDirectory, 'public/cover-images'), ['cover-images']),
     ...await collectDirectoryUploads(path.join(rootDirectory, 'public/friends'), ['friends']),
     ...await collectDirectoryUploads(path.join(rootDirectory, 'public/tech'), ['tech']),

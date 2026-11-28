@@ -1,6 +1,6 @@
 # UI 主题规范
 
-本文是当前博客 UI 的维护参考，内容从 `src/styles/global.css`、`tailwind.config.cjs`、`src/layouts/BaseLayout.astro`、`src/components/` 与页面样式提炼。源码仍是最终事实来源；当实现改变时，应同步更新本文。
+本文是当前博客 UI 的维护参考，内容从 `src/styles/global.css`、`src/layouts/BaseLayout.astro`、`src/components/` 与页面样式提炼。源码仍是最终事实来源；当实现改变时，应同步更新本文。
 
 ## 1. 视觉方向
 
@@ -13,9 +13,8 @@
 出现冲突时按以下顺序判断：
 
 1. 组件或页面中实际生效的局部样式。
-2. `src/styles/global.css` 的语义 CSS 变量与基础规则。
-3. `tailwind.config.cjs` 的主题映射和 Typography 配置。
-4. 本文档。
+2. `src/styles/global.css` 的 Tailwind v4 `@theme` / `@custom-variant` 映射、语义 CSS 变量与 Typography 规则。
+3. 本文档。
 
 当前实现存在多套蓝色表达，不应将它们误认为一个令牌：站点品牌/浏览器主题色使用 `#425bc5`，Tailwind `primary` 色阶是 Sky，暗色 CSS 主色变量为 `137 180 250`。
 
@@ -35,11 +34,11 @@
 | `--color-bg-card` | `255 255 255` | `24 24 37` |
 | `--color-border-main` | `23 23 23` | `108 112 134` |
 | `--color-border-card` | `209 213 219` | `69 71 90` |
-| `--color-primary` | `14, 165, 233` | `137 180 250` |
-| `--color-primary-dark` | `56, 189, 248` | `180 190 254` |
+| `--color-primary` | `14 165 233` | `137 180 250` |
+| `--color-primary-dark` | `56 189 248` | `180 190 254` |
 | `--color-primary-glow` | 未定义 | `180 190 254` |
 
-`--color-secondary` 浅色为 `236, 72, 153`，深色为 `203, 166, 247`。`--color-brand`（浅色 `66 91 197` / 深色 `180 190 254`）用于标题、签名与交互高亮。
+`--color-secondary` 浅色为 `236 72 153`，深色为 `203 166 247`（所有 RGB 令牌统一使用空格分隔三元组）。`--color-brand`（浅色 `66 91 197` / 深色 `180 190 254`）用于标题、签名与交互高亮。
 
 ### 3.2 链接令牌
 
@@ -64,13 +63,13 @@
 
 ## 4. 字体与排版
 
-字体在 `BaseHead.astro` 中本地引入：Inter Variable、Newsreader Variable，以及 Fira Code 的 `400/500/600` 字重。
+字体在 `BaseHead.astro` 中本地引入：Inter Variable、Newsreader Variable，以及 Fira Code 的 `latin` 子集 `400/500/600` 字重；字体栈通过 `src/styles/global.css` 的 `@theme` 令牌（`--font-sans` / `--font-serif` / `--font-mono`）统一提供。
 
 | 用途 | 字体栈 |
 | --- | --- |
-| 正文 / UI | `Inter`, `Noto Sans SC`, `PingFang SC`, `Microsoft YaHei`, `sans-serif`，再回退到 Tailwind 默认 sans |
-| 标题 / 编辑感元素 | `Newsreader`, `Source Han Serif SC`, `Noto Serif SC`, `Georgia`, `serif`，再回退到默认 serif |
-| 代码 | `Fira Code`, `JetBrains Mono`，再回退到默认 mono |
+| 正文 / UI | `Inter Variable`, `Inter`, `Noto Sans SC`, `PingFang SC`, `Microsoft YaHei`，再回退到系统无衬线字体 |
+| 标题 / 编辑感元素 | `Newsreader Variable`, `Newsreader`, `Source Han Serif SC`, `Noto Serif SC`, `Georgia`，再回退到系统衬线字体 |
+| 代码 | `Fira Code`, `JetBrains Mono`，再回退到系统等宽字体 |
 
 基础约定：
 
@@ -136,7 +135,7 @@
 
 ### 内容排版
 
-- Markdown 容器使用 `prose dark:prose-invert max-w-none`，基础定制规则集中在 `tailwind.config.cjs`，小屏排版覆盖在 `src/styles/global.css`。
+- Markdown 容器使用 `prose dark:prose-invert max-w-none`，基础定制与小屏排版覆盖均集中在 `src/styles/global.css`。
 - `pre` 使用 muted 背景、`0.6rem` 圆角、`1rem` 内边距、最大高度 `75vh`。
 - 引用块使用衬线斜体、`3px` 左边框和 muted 半透明背景。
 - 表格使用细分隔线、交替行背景与行悬停反馈；标题行权重 `700`。
@@ -164,7 +163,7 @@
 ## 10. 维护规则
 
 - 优先写语义变量或复用已有组件，不在新组件中复制近似色值、宽度和阴影。
-- 若新增通用令牌，同时补齐浅色与深色值，并在 Tailwind 映射需要时同步 `tailwind.config.cjs`。
+- 若新增通用令牌，同时补齐浅色与深色值，并在需要 Tailwind 工具类映射时同步 `src/styles/global.css` 的 `@theme` / `@theme inline`。
 - 修改 Typography 时检查文章页、普通静态页、表格、引用、行内代码与代码块。
 - 修改主容器宽度时同时检查导航、页脚、正文、文章目录和搜索弹层。
 - 修改主题初始化时验证首次加载无闪烁、系统主题变化、手动选择持久化和 Astro 页面切换。
